@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MyConnection" >
+    <item android:id="@+id/test_action"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/test_text" />
+    <item android:id="@+id/clear_action"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/clear_text" />
+</menu>
