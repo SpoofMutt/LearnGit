@@ -37,7 +37,7 @@ TimeChangeRule *tcr;        //pointer to the time change rule, use to get TZ abb
 // 1 action byte
 // command byte, status 1 byte , string...
 //               status 2 byte   ....
-// 4 byte crc
+// 4 byte crc - not used right now.
 
 // Action Byte
 #define COMMAND     10
@@ -66,8 +66,6 @@ void setup(void)
 {
   Serial.begin(9600);
   Serial.println(F("Garage Here!\n")); 
-
-Serial.println(crc_data((unsigned char *)"HELLO",5), HEX);
 
   Serial.println(F("\nInitialising the CC3000 ..."));
   if (!cc3000.begin()) {
@@ -129,8 +127,8 @@ Serial.println(crc_data((unsigned char *)"HELLO",5), HEX);
   setSyncProvider(getServerTime);
   setSyncInterval(24*60*60);
   while(timeStatus() == timeNotSet) {
-    Serial.println("Waiting 15 secs to try again.");
-    delay(15000L);
+    Serial.println("Waiting 10 secs to try again.");
+    delay(10000L);
     now();
   }
   Serial.println(F("Listening..."));
@@ -168,9 +166,10 @@ void loop(void) {
      // Check if there is data available to read.
      if (client.available() > 0) {
        // Read a byte and write it to all clients.
-       char data[20];
+       char data[80];
        int size_read = client.read(data,80,0);
-       server.write((uint8_t *)&data[0],size_read);
+       Serial.println(size_read);
+       server.write((uint8_t *)&data[2],size_read-6);
      }
   }
 }
