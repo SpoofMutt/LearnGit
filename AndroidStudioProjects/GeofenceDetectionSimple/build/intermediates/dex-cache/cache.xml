@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<pre-dex-items>
+
+    <item
+        dex="J:\AndroidStudioProjects\GeofenceDetectionSimple\app\build\intermediates\pre-dexed\debug\classes-688fc6d4523624152312f7a59b57f00d65c8fc65.jar"
+        jar="J:\AndroidStudioProjects\GeofenceDetectionSimple\app\build\intermediates\exploded-aar\com.google.android.gms\play-services\4.4.52\classes.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="3dfdf1db5ce5ea2999a5dcde8c8e650b02660059"/>
+    <item
+        dex="J:\AndroidStudioProjects\GeofenceDetectionSimple\app\build\intermediates\pre-dexed\debug\classes-e16bf8c2df95af6436787dffd77dd935855c00e2.jar"
+        jar="J:\AndroidStudioProjects\GeofenceDetectionSimple\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\19.1.0\classes.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="3499ceba05ca1f6037c6a2fad73df8f636224a28"/>
+    <item
+        dex="J:\AndroidStudioProjects\GeofenceDetectionSimple\app\build\intermediates\pre-dexed\debug\support-v4-19.1.0-358edec0dacf32d5a9162ee05f7bf67ac8835aa4.jar"
+        jar="E:\Program Files (x86)\Android\android-studio\sdk\extras\android\m2repository\com\android\support\support-v4\19.1.0\support-v4-19.1.0.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67"/>
+
+</pre-dex-items>
