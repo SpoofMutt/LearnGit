@@ -41,12 +41,16 @@ TimeChangeRule *tcr;        //pointer to the time change rule, use to get TZ abb
 
 // Action Byte
 #define COMMAND     10
+#define COMMANDREPLY 45
 #define STATUSREQ   21
+#define STATUSREPLY 33
 #define STRING      16
 
 // Status Byte1
-#define DOOR_CLOSED 0
-#define DOOR_OPENED 1
+#define DOOR_CLOSED  0
+#define DOOR_OPENED  1
+#define DOOR_OPENING 2
+#define DOOR_CLOSING 3
 
 // Status Byte2
 #define LIGHT_OFF   0
@@ -55,6 +59,10 @@ TimeChangeRule *tcr;        //pointer to the time change rule, use to get TZ abb
 // Command Byte
 #define OPEN_DOOR   0
 #define CLOSE_DOOR  1
+
+#define TIME_TO_OPEN 30 // Seconds
+unsigned long time_of_last_door_command = 0;
+uint8_t       last_door_command;
 
 const unsigned long
   connectTimeout  = 15L * 1000L, // Max time to wait for server connection
@@ -127,8 +135,8 @@ void setup(void)
   setSyncProvider(getServerTime);
   setSyncInterval(24*60*60);
   while(timeStatus() == timeNotSet) {
-    Serial.println("Waiting 10 secs to try again.");
-    delay(10000L);
+    Serial.println("Waiting 5 secs to try again.");
+    delay(5000L);
     now();
   }
   Serial.println(F("Listening..."));
@@ -138,16 +146,6 @@ void setup(void)
 // To reduce load on NTP servers, time is polled once per roughly 24 hour period.
 // Otherwise use millis() to estimate time since last query.  Plenty accurate.
 void loop(void) {
-
-//  while(timeStatus() == timeNotSet) {            // Time's up?
-//    unsigned long t  = getServerTime(); // Query time server
-//    if(t) {                       // Success?
-//      setTime(t);
-//    } else {
-//      Serial.println("Waiting 15 secs to try again.");
-//      delay(15000L);
-//    }
-//  }
 
   utc = now();
   if(utc-lastPolledTime > 15) {
@@ -166,10 +164,64 @@ void loop(void) {
      // Check if there is data available to read.
      if (client.available() > 0) {
        // Read a byte and write it to all clients.
-       char data[80];
+       uint8_t data[80];
        int size_read = client.read(data,80,0);
-       Serial.println(size_read);
-       server.write((uint8_t *)&data[2],size_read-6);
+       if(size_read > 5 && size_read == data[0]) {
+         Serial.println(size_read);
+         if(data[1] == STRING) {
+           server.write(data,size_read);
+         } else if(data[1] == COMMAND) {
+           if(time_of_last_door_command + TIME_TO_OPEN < now()) {
+             data[0] = 6;
+             data[1] = COMMANDREPLY;
+             if(data[2] == OPEN_DOOR) {
+               data[2] = DOOR_OPENING;
+             } else if(data[2] == CLOSE_DOOR) {
+               data[2] = DOOR_CLOSING;
+             }
+             server.write(data,6);
+             time_of_last_door_command = now();
+             last_door_command = data[2];
+           } else {
+             if(last_door_command == data[2]) {
+               data[0] = 6;
+               data[1] = COMMANDREPLY;
+               if(last_door_command == OPEN_DOOR) {
+                 data[2] = DOOR_OPENING;
+               } else {
+                 data[2] = DOOR_CLOSING;
+               }
+               server.write(data,6);
+             } else {
+               int time_to_wait = (TIME_TO_OPEN + time_of_last_door_command) - now();
+               data[0] = 6;
+               data[1] = COMMANDREPLY;
+               if(last_door_command == OPEN_DOOR) {
+                 data[2] = DOOR_OPENING;
+               } else {
+                 data[2] = DOOR_CLOSING;
+               }
+               server.write(data,6);
+             }
+           }
+         } else if(data[1] == STATUSREQ) {
+           data[0] = 8;
+           data[1] = STATUSREPLY;
+           data[2] = 5;
+           data[3] = 6;
+           data[4] = 1;
+           data[5] = 2;
+           data[6] = 3;
+           data[7] = 4;
+           server.write(data,8);
+         }
+       } else {
+         Serial.print("Bad Read: ");
+         Serial.print(size_read);
+         Serial.print(" vs ");
+         Serial.println(data[0]);
+         server.write("Bad Read");
+       }
      }
   }
 }
