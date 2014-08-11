@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:ns1="urn:oasis:names:tc:xliff:document:1.2">
 
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
     <eat-comment />
 
     <attr name="actionBarDivider" format="reference" />
@@ -78,7 +78,7 @@
     <color name="abc_search_url_text_normal">#7fa87f</color>
     <color name="abc_search_url_text_pressed">@android:color/black</color>
     <color name="abc_search_url_text_selected">@android:color/black</color>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/common_colors.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/common_colors.xml -->
     <eat-comment />
 
     <color name="common_action_bar_splitter">#d2d2d2</color>
@@ -91,7 +91,7 @@
     <color name="common_signin_btn_light_text_disabled">#FFAAAAAA</color>
     <color name="common_signin_btn_light_text_focused">#FF737373</color>
     <color name="common_signin_btn_light_text_pressed">@android:color/white</color>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/wallet_colors.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/wallet_colors.xml -->
     <eat-comment />
 
     <color name="wallet_bright_foreground_disabled_holo_light">#ffb2b2b2</color>
@@ -107,7 +107,7 @@
     <color name="wallet_hint_foreground_holo_light">#808080</color>
     <color name="wallet_holo_blue_light">#ff33b5e5</color>
     <color name="wallet_link_text_light">#0000ee</color>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
     <eat-comment />
 
     <declare-styleable name="ActionBar">
@@ -235,7 +235,7 @@
         -->
         <attr name="expandActivityOverflowButtonDrawable" format="reference" />
     </declare-styleable>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/admob_ads_attrs.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/admob_ads_attrs.xml -->
     <eat-comment />
 
     <declare-styleable name="AdsAttrs">
@@ -257,7 +257,7 @@
         <!-- The ad unit ID. -->
         <attr name="adUnitId" format="string" />
     </declare-styleable>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
     <eat-comment />
 
     <declare-styleable name="CompatTextView">
@@ -279,7 +279,7 @@
         <!-- Size of padding on either end of a divider. -->
         <attr name="dividerPadding" format="dimension" />
     </declare-styleable>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/maps_attrs.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/maps_attrs.xml -->
     <eat-comment />
 
     <declare-styleable name="MapAttrs">
@@ -304,7 +304,7 @@
         <attr name="useViewLifecycle" format="boolean" />
         <attr name="zOrderOnTop" format="boolean" />
     </declare-styleable>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
     <eat-comment />
 
     <declare-styleable name="MenuGroup">
@@ -574,7 +574,7 @@
         -->
         <attr name="android:focusable" />
     </declare-styleable>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/wallet_attrs.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/wallet_attrs.xml -->
     <eat-comment />
 
     <declare-styleable name="WalletFragmentOptions">
@@ -648,7 +648,7 @@
             <enum name="monochrome" value="2" />
         </attr>
     </declare-styleable>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
     <eat-comment />
 
     <dimen name="abc_action_bar_default_height">48dip</dimen>
@@ -673,7 +673,7 @@
     <item name="dialog_fixed_height_minor" type="dimen">100%</item>
     <item name="dialog_fixed_width_major" type="dimen">320dp</item>
     <item name="dialog_fixed_width_minor" type="dimen">320dp</item>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/dimens.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/dimens.xml -->
     <eat-comment />
 
     <dimen name="margin_huge">64dp</dimen>
@@ -681,7 +681,7 @@
     <dimen name="margin_medium">16dp</dimen>
     <dimen name="margin_small">8dp</dimen>
     <dimen name="margin_tiny">4dp</dimen>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
     <eat-comment />
 
     <item name="action_bar_activity_content" type="id"/>
@@ -692,11 +692,11 @@
     <item name="progress_horizontal" type="id"/>
 
     <integer name="abc_max_action_buttons">2</integer>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/version.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/version.xml -->
     <eat-comment />
 
     <integer name="google_play_services_version">4452000</integer>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
     <eat-comment />
 
     <string name="abc_action_bar_home_description">Navigate home</string>
@@ -712,20 +712,20 @@
     <string name="abc_searchview_description_voice">Voice search</string>
     <string name="abc_shareactionprovider_share_with">Share with</string>
     <string name="abc_shareactionprovider_share_with_application">Share with %s</string>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/strings.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/strings.xml -->
     <eat-comment />
 
     <string name="add_geofences_already_requested_error">        Can\'t add geofences, previous request hasn\'t finished.</string>
     <string name="add_geofences_result_failure">        Add Geofences: Failure, error code %1$d GeofenceRequestIds=%2$s</string>
     <string name="add_geofences_result_success">        Add Geofences: Success GeofenceRequestIds=%1$s</string>
     <string name="app_name">Geofence Detection</string>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/common_strings.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/common_strings.xml -->
     <eat-comment />
 
     <string name="common_google_play_services_enable_button" msgid="2523291102206661146">Enable Google Play services</string>
     <string name="common_google_play_services_enable_text" msgid="227660514972886228">This app won\'t work unless you enable Google Play services.</string>
     <string name="common_google_play_services_enable_title" msgid="5122002158466380389">Enable Google Play services</string>
-    <string name="common_google_play_services_error_notification_requested_by_msg">Requested by <ns1:g id="app_name">%1$s</ns1:g></string>
+    <string name="common_google_play_services_error_notification_requested_by_msg">Requested by  <ns1:g id="app_name">%1$s</ns1:g></string>
     <string name="common_google_play_services_install_button" msgid="7153882981874058840">Get Google Play services</string>
     <string name="common_google_play_services_install_text_phone" msgid="2122112764540849864">This app won\'t run without Google Play services, which are missing from your phone.</string>
     <string name="common_google_play_services_install_text_tablet" msgid="7351599665250191022">This app won\'t run without Google Play services, which are missing from your tablet.</string>
@@ -747,11 +747,11 @@
     <string name="common_google_play_services_update_title" msgid="1788179980625863495">Update Google Play services</string>
     <string name="common_signin_button_text">Sign in</string>
     <string name="common_signin_button_text_long">Sign in with Google</string>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/strings.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/strings.xml -->
     <eat-comment />
 
     <string name="connected">Client connected</string>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/lib_strings.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/lib_strings.xml -->
     <eat-comment />
 
     <string name="connection_error_code">Connection failure error code: %1$d</string>
@@ -768,11 +768,12 @@
     <string name="connection_error_outdated">Google Play services is out of date</string>
     <string name="connection_error_sign_in_required">The user is not signed in</string>
     <string name="connection_error_unknown">An unknown error occurred</string>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/strings.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/strings.xml -->
     <eat-comment />
 
     <string name="connection_failed">Connection failed</string>
     <string name="disconnected">Client disconnected</string>
+    <string name="fencearea">Area:</string>
     <string name="geofence1">Geofence 1</string>
     <string name="geofence2">Geofence 2</string>
     <string name="geofence_input_error_latitude_invalid">        Invalid latitude(s). Must be in the range -90 to 90 degrees</string>
@@ -784,7 +785,7 @@
     <string name="geofence_transition_exited">Exited</string>
     <string name="geofence_transition_invalid_type">        Geofence transition error. Invalid type %1$d in geofences %2$s</string>
     <string name="geofence_transition_notification_text">        Click notification to return to app</string>
-    <string name="geofence_transition_notification_title">        %1$s geofence(s) %2$s</string>
+    <string name="geofence_transition_notification_title">        %1$s %2$s</string>
     <string name="geofence_transition_unknown">Unknown transition</string>
     <string name="invalid_action">Invalid action received. See error log for details.</string>
     <string name="invalid_action_detail">Invalid action %1$s received.</string>
@@ -820,11 +821,11 @@
     <string name="unregister_geofence">Remove geofences</string>
     <string name="unregister_geofence1">Remove geofence 1</string>
     <string name="unregister_geofence2">Remove geofence 2</string>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/wallet_strings.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/wallet_strings.xml -->
     <eat-comment />
 
     <string name="wallet_buy_button_place_holder" translation_description="Text on a button that allows a user to make a payment with Google Wallet [CHAR LIMIT=30]">Buy with Google</string>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
     <eat-comment />
 
     <style name="TextAppearance.AppCompat.Base.CompactMenu.Dialog" parent="android:TextAppearance.Medium">
@@ -1076,11 +1077,11 @@
     </style>
 
     <style name="Theme.AppCompat.Light.DialogWhenLarge" parent="Theme.Base.AppCompat.Light.DialogWhenLarge" />
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/styles.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/styles.xml -->
     <eat-comment />
 
     <style name="Theme.Base" parent="android:Theme.Light" />
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
     <eat-comment />
 
     <style name="Theme.Base.AppCompat" parent="Theme.Base">
@@ -1250,11 +1251,11 @@
     <style name="Theme.Base.AppCompat.Light.DialogWhenLarge" parent="Theme.Base.AppCompat.Light" />
 
     <style name="Theme.Base.Light" parent="android:Theme.Light" />
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/styles.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/styles.xml -->
     <eat-comment />
 
     <style name="Theme.Sample" parent="Theme.Base" />
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/wallet_styles.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/res/values/wallet_styles.xml -->
     <eat-comment />
 
     <style name="WalletFragmentDefaultButtonTextAppearance">
@@ -1292,11 +1293,11 @@
         <item name="maskedWalletDetailsLogoTextColor">@color/wallet_bright_foreground_holo_dark</item>
         <item name="maskedWalletDetailsLogoImageType">classic</item>
     </style>
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/styles.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/styles.xml -->
     <eat-comment />
 
     <style name="Widget" />
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/19.1.0/res/values/values.xml -->
     <eat-comment />
 
     <style name="Widget.AppCompat.ActionBar" parent="Widget.AppCompat.Base.ActionBar" />
@@ -1590,7 +1591,7 @@
     <style name="Widget.AppCompat.ProgressBar.Horizontal" parent="Widget.AppCompat.Base.ProgressBar.Horizontal" />
 
     <style name="Widget.AppCompat.Spinner.DropDown.ActionBar" parent="Widget.AppCompat.Base.Spinner" />
-    <!-- From: file:/J:/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/styles.xml -->
+    <!-- From: file:/C:/Users/Kent.Lasley/Desktop/LearnGit/LearnGit/AndroidStudioProjects/GeofenceDetectionSimple/app/src/main/res/values/styles.xml -->
     <eat-comment />
 
     <style name="Widget.SampleOutput">

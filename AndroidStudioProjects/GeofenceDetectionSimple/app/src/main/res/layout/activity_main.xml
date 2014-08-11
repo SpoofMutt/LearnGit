@@ -38,12 +38,42 @@
             android:id="@+id/lat_lng"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_alignBaseline="@+id/label_lat_lng"
             android:layout_marginLeft="10dp"
             android:layout_toRightOf="@+id/label_lat_lng"
             android:textIsSelectable="true"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:layout_alignParentEnd="true" />
+
+        <TextView
+            android:id="@+id/label_fencearea"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="false"
+            android:layout_alignParentTop="false"
+            android:text="@string/fencearea"
+            android:textSize="20sp"
+            android:layout_below="@+id/label_lat_lng"
+            android:layout_alignRight="@+id/label_lat_lng"
+            android:layout_alignLeft="@+id/label_lat_lng" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text=""
+            android:id="@+id/fencearea"
+            android:layout_below="@+id/lat_lng"
+            android:layout_alignRight="@+id/lat_lng"
+            android:layout_alignLeft="@+id/lat_lng" />
+
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="600dp"
+            android:id="@+id/Activity"
+            android:choiceMode="none"
+            android:fastScrollAlwaysVisible="false"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/fencearea" />
 
         <!-- Geofence 2 -->
         <!-- Register and unregister geofences buttons. -->

@@ -2,16 +2,16 @@
 <merger version="2" >
 
     <dataSet config="4.4.52" >
-        <source path="J:\AndroidStudioProjects\GeofenceDetectionSimple\app\build\intermediates\exploded-aar\com.google.android.gms\play-services\4.4.52\assets" />
+        <source path="C:\Users\Kent.Lasley\Desktop\LearnGit\LearnGit\AndroidStudioProjects\GeofenceDetectionSimple\app\build\intermediates\exploded-aar\com.google.android.gms\play-services\4.4.52\assets" />
     </dataSet>
     <dataSet config="19.1.0" >
-        <source path="J:\AndroidStudioProjects\GeofenceDetectionSimple\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\19.1.0\assets" />
+        <source path="C:\Users\Kent.Lasley\Desktop\LearnGit\LearnGit\AndroidStudioProjects\GeofenceDetectionSimple\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\19.1.0\assets" />
     </dataSet>
     <dataSet config="main" >
-        <source path="J:\AndroidStudioProjects\GeofenceDetectionSimple\app\src\main\assets" />
+        <source path="C:\Users\Kent.Lasley\Desktop\LearnGit\LearnGit\AndroidStudioProjects\GeofenceDetectionSimple\app\src\main\assets" />
     </dataSet>
     <dataSet config="debug" >
-        <source path="J:\AndroidStudioProjects\GeofenceDetectionSimple\app\src\debug\assets" />
+        <source path="C:\Users\Kent.Lasley\Desktop\LearnGit\LearnGit\AndroidStudioProjects\GeofenceDetectionSimple\app\src\debug\assets" />
     </dataSet>
 
 </merger>

@@ -64,6 +64,7 @@ public class SimpleGeofence {
         return new Geofence.Builder()
                        .setRequestId(getId())
                        .setTransitionTypes(mTransitionType)
+                       .setNotificationResponsiveness(0)
                        .setCircularRegion(
                                getLatitude(),
                                getLongitude(),

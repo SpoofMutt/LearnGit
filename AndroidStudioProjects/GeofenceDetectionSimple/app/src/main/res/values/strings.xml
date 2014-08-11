@@ -66,7 +66,7 @@
         Click notification to return to app
     </string>
     <string name="geofence_transition_notification_title">
-        %1$s geofence(s) %2$s
+        %1$s %2$s
     </string>
     <string name="geofence_transition_unknown">Unknown transition</string>
     <string name="invalid_action">Invalid action received. See error log for details.</string>
@@ -116,4 +116,5 @@
 
     <!-- Labels -->
     <string name="latlng">Lat/Long:</string>
+    <string name="fencearea">Area:</string>
 </resources>

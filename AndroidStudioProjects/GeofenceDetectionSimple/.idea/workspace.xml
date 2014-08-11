@@ -54,17 +54,27 @@
       <file leaf-file-name="MainActivity.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/MainActivity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.68994415" vertical-offset="4758" max-vertical-offset="7098">
-              <caret line="202" column="35" selection-start-line="202" selection-start-column="35" selection-end-line="202" selection-end-column="35" />
+            <state vertical-scroll-proportion="0.38449848" vertical-offset="4014" max-vertical-offset="5015">
+              <caret line="251" column="32" selection-start-line="251" selection-start-column="32" selection-end-line="251" selection-end-column="32" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#5340#5373#0" expanded="true" />
-                <element signature="e#5459#5521#0" expanded="true" />
-                <element signature="e#7051#7100#0" expanded="true" />
-                <element signature="e#8289#8335#0" expanded="true" />
-                <element signature="e#9193#9242#0" expanded="true" />
-                <element signature="e#9285#9308#0" expanded="true" />
+                <element signature="e#5620#5653#0" expanded="true" />
+                <element signature="e#5739#5801#0" expanded="true" />
+                <element signature="e#7331#7380#0" expanded="true" />
+                <element signature="e#8791#8837#0" expanded="true" />
+                <element signature="e#9825#9874#0" expanded="true" />
+                <element signature="e#9917#9940#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="SimpleGeofence.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/SimpleGeofence.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="935">
+              <caret line="66" column="54" selection-start-line="66" selection-start-column="54" selection-end-line="66" selection-end-column="54" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -72,7 +82,7 @@
       <file leaf-file-name="AndroidManifest.xml" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/AndroidManifest.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="358" max-vertical-offset="1625">
+            <state vertical-scroll-proportion="0.0" vertical-offset="935" max-vertical-offset="1105">
               <caret line="55" column="0" selection-start-line="55" selection-start-column="0" selection-end-line="55" selection-end-column="0" />
               <folding />
             </state>
@@ -82,21 +92,50 @@
       <file leaf-file-name="ReceiveTransitionsIntentService.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/ReceiveTransitionsIntentService.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="450" max-vertical-offset="2200">
-              <caret line="41" column="68" selection-start-line="41" selection-start-column="68" selection-end-line="41" selection-end-column="68" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="184" max-vertical-offset="1819">
+              <caret line="51" column="47" selection-start-line="51" selection-start-column="47" selection-end-line="51" selection-end-column="47" />
               <folding>
-                <element signature="imports" expanded="true" />
                 <element signature="e#1183#1249#0" expanded="true" />
-                <element signature="e#2516#2704#0" expanded="true" />
-                <element signature="e#2906#3070#0" expanded="true" />
-                <element signature="e#3158#3222#0" expanded="true" />
-                <element signature="method#sendNotification#0;class#ReceiveTransitionsIntentService#0" expanded="false" />
-                <element signature="e#3918#4028#0" expanded="true" />
-                <element signature="e#4061#4118#0" expanded="true" />
-                <element signature="e#4537#4584#0" expanded="true" />
-                <element signature="e#4661#4707#0" expanded="true" />
-                <element signature="e#4753#4800#0" expanded="true" />
+                <element signature="e#2684#2836#0" expanded="true" />
+                <element signature="e#3595#3783#0" expanded="true" />
+                <element signature="e#3985#4149#0" expanded="true" />
+                <element signature="e#4217#4281#0" expanded="true" />
+                <element signature="e#4977#5087#0" expanded="true" />
+                <element signature="e#5120#5177#0" expanded="true" />
+                <element signature="e#5596#5643#0" expanded="true" />
+                <element signature="e#5720#5766#0" expanded="true" />
+                <element signature="e#5812#5859#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="GeofenceUtils.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/GeofenceUtils.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="799">
+              <caret line="31" column="109" selection-start-line="31" selection-start-column="109" selection-end-line="31" selection-end-column="109" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Geofence.class" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/classes.jar!/com/google/android/gms/location/Geofence.class">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-4.08" vertical-offset="0" max-vertical-offset="782">
+              <caret line="7" column="8" selection-start-line="7" selection-start-column="8" selection-end-line="7" selection-end-column="8" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="strings.xml" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-10.214286" vertical-offset="870" max-vertical-offset="2142">
+              <caret line="68" column="13" selection-start-line="68" selection-start-column="13" selection-end-line="68" selection-end-column="13" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -104,9 +143,23 @@
       <file leaf-file-name="GeofenceRemover.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/GeofenceRemover.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="4000">
-              <caret line="173" column="0" selection-start-line="173" selection-start-column="0" selection-end-line="173" selection-end-column="0" />
-              <folding />
+            <state vertical-scroll-proportion="0.0" vertical-offset="1187" max-vertical-offset="2720">
+              <caret line="105" column="51" selection-start-line="105" selection-start-column="51" selection-end-line="105" selection-end-column="51" />
+              <folding>
+                <element signature="e#3746#3806#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="GeofenceRequester.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/GeofenceRequester.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="1153" max-vertical-offset="2533">
+              <caret line="90" column="51" selection-start-line="90" selection-start-column="51" selection-end-line="90" selection-end-column="51" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -930,7 +983,7 @@
     </option>
     <option name="modificationStamps">
       <map>
-        <entry key="$PROJECT_DIR$" value="4222590574721" />
+        <entry key="$PROJECT_DIR$" value="4223320761130" />
       </map>
     </option>
     <option name="projectBuildClasspath">
@@ -1193,24 +1246,24 @@
     <option name="changedFiles">
       <list>
         <option value="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
         <option value="$PROJECT_DIR$/app/src/main/res/menu/menu.xml" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/SimpleGeofenceStore.java" />
-        <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/SimpleGeofence.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/GeofenceUtils.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/GeofenceRemover.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/GeofenceRequester.java" />
-        <option value="$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/MainActivity.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/SimpleGeofence.java" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/GeofenceUtils.java" />
         <option value="$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/ReceiveTransitionsIntentService.java" />
+        <option value="$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/res/values/strings.xml" />
+        <option value="$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/MainActivity.java" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="-8" />
     <option name="y" value="-8" />
-    <option name="width" value="2576" />
-    <option name="height" value="1456" />
+    <option name="width" value="1936" />
+    <option name="height" value="1176" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -1269,8 +1322,8 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
       <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -1441,6 +1494,40 @@
               <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GeofenceDetection2_good" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="GeofenceDetectionSimple" />
+              <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="geofence" />
+              <option name="myItemType" value="com.android.tools.idea.gradle.projectView.AndroidPsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="MainActivity" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ClassTreeNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
     </panes>
@@ -1461,7 +1548,7 @@
     <property name="recentsLimit" value="5" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_SERIALS" value="24debe35" />
-    <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_AVD" value="AVD_for_Nexus_4_by_Google" />
+    <property name="ANDROID_EXTENDED_DEVICE_CHOOSER_AVD" value="AVD_for_10_1_WXGA_Tablet" />
     <property name="LayoutCode.rearrangeEntriesJava" value="false" />
     <property name="FullScreen" value="false" />
   </component>
@@ -1623,6 +1710,11 @@
     </configuration>
   </component>
   <component name="ShelveChangesManager" show_recycled="false" />
+  <component name="SliceManager">
+    <option name="analysisUIOptions">
+      <AnalysisUIOptions />
+    </option>
+  </component>
   <component name="SvnConfiguration">
     <configuration>C:\Users\Kent\AppData\Roaming\Subversion</configuration>
   </component>
@@ -1635,41 +1727,41 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="2576" height="1456" extended-state="6" />
-    <editor active="false" />
+    <frame x="-8" y="-8" width="1936" height="1176" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="18" side_tool="false" content_ui="tabs" />
-      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32592025" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Amazon EC2" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Tool Output" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39417177" sideWeight="0.3734375" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Preview" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3297546" sideWeight="0.5" order="16" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32898772" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="13" side_tool="false" content_ui="tabs" />
-      <window_info id="Android" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32917467" sideWeight="0.5" order="15" side_tool="false" content_ui="tabs" />
-      <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="17" side_tool="true" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.327454" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39417177" sideWeight="0.6265625" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
-      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Amazon EC2" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Tool Output" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
-      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Atlassian " active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="14" side_tool="false" content_ui="tabs" />
       <window_info id="ASM" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39417177" sideWeight="0.6265625" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="18" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3253359" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="TCPMON" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Preview" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3297546" sideWeight="0.5" order="16" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32821497" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="13" side_tool="false" content_ui="tabs" />
+      <window_info id="Android" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32917467" sideWeight="0.5" order="15" side_tool="false" content_ui="tabs" />
+      <window_info id="Gradle Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="17" side_tool="true" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32725528" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
@@ -1754,9 +1846,21 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/GeofenceRemover.java">
       <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="2941" max-vertical-offset="3179">
+          <caret line="173" column="0" selection-start-line="173" selection-start-column="0" selection-end-line="173" selection-end-column="0" />
+          <folding>
+            <element signature="e#3746#3806#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/GeofenceRemover.java">
+      <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="8450" max-vertical-offset="9975">
           <caret line="338" column="36" selection-start-line="338" selection-start-column="14" selection-end-line="338" selection-end-column="36" />
-          <folding />
+          <folding>
+            <element signature="e#3746#3806#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1776,12 +1880,12 @@
           <caret line="972" column="0" selection-start-line="972" selection-start-column="0" selection-end-line="972" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#5340#5373#0" expanded="true" />
-            <element signature="e#5459#5521#0" expanded="true" />
-            <element signature="e#7051#7100#0" expanded="true" />
-            <element signature="e#8289#8335#0" expanded="true" />
-            <element signature="e#9193#9242#0" expanded="true" />
-            <element signature="e#9285#9308#0" expanded="true" />
+            <element signature="e#5620#5653#0" expanded="true" />
+            <element signature="e#5739#5801#0" expanded="true" />
+            <element signature="e#7331#7380#0" expanded="true" />
+            <element signature="e#8791#8837#0" expanded="true" />
+            <element signature="e#9825#9874#0" expanded="true" />
+            <element signature="e#9917#9940#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1790,9 +1894,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="19000" max-vertical-offset="21050">
           <caret line="760" column="0" selection-start-line="760" selection-start-column="0" selection-end-line="760" selection-end-column="0" />
-          <folding>
-            <element signature="e#27571#27572#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1825,17 +1926,16 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="2275" max-vertical-offset="4550">
           <caret line="91" column="81" selection-start-line="91" selection-start-column="71" selection-end-line="91" selection-end-column="81" />
           <folding>
-            <element signature="imports" expanded="true" />
             <element signature="e#1183#1249#0" expanded="true" />
-            <element signature="e#2516#2704#0" expanded="true" />
-            <element signature="e#2906#3070#0" expanded="true" />
-            <element signature="e#3158#3222#0" expanded="true" />
-            <element signature="method#sendNotification#0;class#ReceiveTransitionsIntentService#0" expanded="false" />
-            <element signature="e#3918#4028#0" expanded="true" />
-            <element signature="e#4061#4118#0" expanded="true" />
-            <element signature="e#4537#4584#0" expanded="true" />
-            <element signature="e#4661#4707#0" expanded="true" />
-            <element signature="e#4753#4800#0" expanded="true" />
+            <element signature="e#2684#2836#0" expanded="true" />
+            <element signature="e#3595#3783#0" expanded="true" />
+            <element signature="e#3985#4149#0" expanded="true" />
+            <element signature="e#4217#4281#0" expanded="true" />
+            <element signature="e#4977#5087#0" expanded="true" />
+            <element signature="e#5120#5177#0" expanded="true" />
+            <element signature="e#5596#5643#0" expanded="true" />
+            <element signature="e#5720#5766#0" expanded="true" />
+            <element signature="e#5812#5859#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1860,7 +1960,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="8450" max-vertical-offset="9975">
           <caret line="338" column="36" selection-start-line="338" selection-start-column="14" selection-end-line="338" selection-end-column="36" />
-          <folding />
+          <folding>
+            <element signature="e#3746#3806#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1880,12 +1982,12 @@
           <caret line="362" column="7" selection-start-line="362" selection-start-column="7" selection-end-line="362" selection-end-column="7" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#5340#5373#0" expanded="true" />
-            <element signature="e#5459#5521#0" expanded="true" />
-            <element signature="e#7051#7100#0" expanded="true" />
-            <element signature="e#8289#8335#0" expanded="true" />
-            <element signature="e#9193#9242#0" expanded="true" />
-            <element signature="e#9285#9308#0" expanded="true" />
+            <element signature="e#5620#5653#0" expanded="true" />
+            <element signature="e#5739#5801#0" expanded="true" />
+            <element signature="e#7331#7380#0" expanded="true" />
+            <element signature="e#8791#8837#0" expanded="true" />
+            <element signature="e#9825#9874#0" expanded="true" />
+            <element signature="e#9917#9940#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1911,17 +2013,16 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="700" max-vertical-offset="4450">
           <caret line="28" column="42" selection-start-line="28" selection-start-column="11" selection-end-line="28" selection-end-column="42" />
           <folding>
-            <element signature="imports" expanded="true" />
             <element signature="e#1183#1249#0" expanded="true" />
-            <element signature="e#2516#2704#0" expanded="true" />
-            <element signature="e#2906#3070#0" expanded="true" />
-            <element signature="e#3158#3222#0" expanded="true" />
-            <element signature="method#sendNotification#0;class#ReceiveTransitionsIntentService#0" expanded="false" />
-            <element signature="e#3918#4028#0" expanded="true" />
-            <element signature="e#4061#4118#0" expanded="true" />
-            <element signature="e#4537#4584#0" expanded="true" />
-            <element signature="e#4661#4707#0" expanded="true" />
-            <element signature="e#4753#4800#0" expanded="true" />
+            <element signature="e#2684#2836#0" expanded="true" />
+            <element signature="e#3595#3783#0" expanded="true" />
+            <element signature="e#3985#4149#0" expanded="true" />
+            <element signature="e#4217#4281#0" expanded="true" />
+            <element signature="e#4977#5087#0" expanded="true" />
+            <element signature="e#5120#5177#0" expanded="true" />
+            <element signature="e#5596#5643#0" expanded="true" />
+            <element signature="e#5720#5766#0" expanded="true" />
+            <element signature="e#5812#5859#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1938,7 +2039,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="825" max-vertical-offset="9975">
           <caret line="33" column="13" selection-start-line="33" selection-start-column="13" selection-end-line="33" selection-end-column="13" />
-          <folding />
+          <folding>
+            <element signature="e#3746#3806#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1958,12 +2061,12 @@
           <caret line="561" column="45" selection-start-line="561" selection-start-column="45" selection-end-line="561" selection-end-column="45" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#5340#5373#0" expanded="true" />
-            <element signature="e#5459#5521#0" expanded="true" />
-            <element signature="e#7051#7100#0" expanded="true" />
-            <element signature="e#8289#8335#0" expanded="true" />
-            <element signature="e#9193#9242#0" expanded="true" />
-            <element signature="e#9285#9308#0" expanded="true" />
+            <element signature="e#5620#5653#0" expanded="true" />
+            <element signature="e#5739#5801#0" expanded="true" />
+            <element signature="e#7331#7380#0" expanded="true" />
+            <element signature="e#8791#8837#0" expanded="true" />
+            <element signature="e#9825#9874#0" expanded="true" />
+            <element signature="e#9917#9940#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1981,17 +2084,16 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="884" max-vertical-offset="3026">
           <caret line="52" column="36" selection-start-line="52" selection-start-column="36" selection-end-line="52" selection-end-column="36" />
           <folding>
-            <element signature="imports" expanded="true" />
             <element signature="e#1183#1249#0" expanded="true" />
-            <element signature="e#2516#2704#0" expanded="true" />
-            <element signature="e#2906#3070#0" expanded="true" />
-            <element signature="e#3158#3222#0" expanded="true" />
-            <element signature="method#sendNotification#0;class#ReceiveTransitionsIntentService#0" expanded="false" />
-            <element signature="e#3918#4028#0" expanded="true" />
-            <element signature="e#4061#4118#0" expanded="true" />
-            <element signature="e#4537#4584#0" expanded="true" />
-            <element signature="e#4661#4707#0" expanded="true" />
-            <element signature="e#4753#4800#0" expanded="true" />
+            <element signature="e#2684#2836#0" expanded="true" />
+            <element signature="e#3595#3783#0" expanded="true" />
+            <element signature="e#3985#4149#0" expanded="true" />
+            <element signature="e#4217#4281#0" expanded="true" />
+            <element signature="e#4977#5087#0" expanded="true" />
+            <element signature="e#5120#5177#0" expanded="true" />
+            <element signature="e#5596#5643#0" expanded="true" />
+            <element signature="e#5720#5766#0" expanded="true" />
+            <element signature="e#5812#5859#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2000,7 +2102,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="561" max-vertical-offset="6783">
           <caret line="33" column="13" selection-start-line="33" selection-start-column="13" selection-end-line="33" selection-end-column="13" />
-          <folding />
+          <folding>
+            <element signature="e#3746#3806#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -2027,12 +2131,12 @@
           <caret line="901" column="74" selection-start-line="901" selection-start-column="74" selection-end-line="901" selection-end-column="74" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#5340#5373#0" expanded="true" />
-            <element signature="e#5459#5521#0" expanded="true" />
-            <element signature="e#7051#7100#0" expanded="true" />
-            <element signature="e#8289#8335#0" expanded="true" />
-            <element signature="e#9193#9242#0" expanded="true" />
-            <element signature="e#9285#9308#0" expanded="true" />
+            <element signature="e#5620#5653#0" expanded="true" />
+            <element signature="e#5739#5801#0" expanded="true" />
+            <element signature="e#7331#7380#0" expanded="true" />
+            <element signature="e#8791#8837#0" expanded="true" />
+            <element signature="e#9825#9874#0" expanded="true" />
+            <element signature="e#9917#9940#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2050,17 +2154,16 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="1360" max-vertical-offset="2754">
           <caret line="96" column="38" selection-start-line="96" selection-start-column="38" selection-end-line="96" selection-end-column="38" />
           <folding>
-            <element signature="imports" expanded="true" />
             <element signature="e#1183#1249#0" expanded="true" />
-            <element signature="e#2516#2704#0" expanded="true" />
-            <element signature="e#2906#3070#0" expanded="true" />
-            <element signature="e#3158#3222#0" expanded="true" />
-            <element signature="method#sendNotification#0;class#ReceiveTransitionsIntentService#0" expanded="false" />
-            <element signature="e#3918#4028#0" expanded="true" />
-            <element signature="e#4061#4118#0" expanded="true" />
-            <element signature="e#4537#4584#0" expanded="true" />
-            <element signature="e#4661#4707#0" expanded="true" />
-            <element signature="e#4753#4800#0" expanded="true" />
+            <element signature="e#2684#2836#0" expanded="true" />
+            <element signature="e#3595#3783#0" expanded="true" />
+            <element signature="e#3985#4149#0" expanded="true" />
+            <element signature="e#4217#4281#0" expanded="true" />
+            <element signature="e#4977#5087#0" expanded="true" />
+            <element signature="e#5120#5177#0" expanded="true" />
+            <element signature="e#5596#5643#0" expanded="true" />
+            <element signature="e#5720#5766#0" expanded="true" />
+            <element signature="e#5812#5859#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -2069,7 +2172,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="561" max-vertical-offset="6783">
           <caret line="33" column="13" selection-start-line="33" selection-start-column="13" selection-end-line="33" selection-end-column="13" />
-          <folding />
+          <folding>
+            <element signature="e#3746#3806#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -2137,9 +2242,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="1.625" vertical-offset="16110" max-vertical-offset="19375">
           <caret line="760" column="0" selection-start-line="760" selection-start-column="0" selection-end-line="760" selection-end-column="0" />
-          <folding>
-            <element signature="e#27571#27572#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -2159,107 +2261,110 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/SimpleGeofence.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.43559098" vertical-offset="597" max-vertical-offset="1350">
-          <caret line="63" column="24" selection-start-line="63" selection-start-column="19" selection-end-line="63" selection-end-column="27" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml">
-      <provider editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="4349" max-vertical-offset="5600">
-          <caret line="41" column="42" selection-start-line="41" selection-start-column="42" selection-end-line="41" selection-end-column="42" />
-          <folding />
-        </state>
-      </provider>
-      <provider selected="true" editor-type-id="android-designer">
-        <state />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/LocationServiceErrorMessages.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-1.3944223" vertical-offset="1275" max-vertical-offset="2075">
           <caret line="25" column="13" selection-start-line="25" selection-start-column="13" selection-end-line="25" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/SimpleGeofence.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="935">
+          <caret line="66" column="54" selection-start-line="66" selection-start-column="54" selection-end-line="66" selection-end-column="54" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/classes.jar!/com/google/android/gms/location/Geofence.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-4.08" vertical-offset="0" max-vertical-offset="782">
+          <caret line="7" column="8" selection-start-line="7" selection-start-column="8" selection-end-line="7" selection-end-column="8" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/GeofenceUtils.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.564409" vertical-offset="0" max-vertical-offset="1150">
-          <caret line="32" column="53" selection-start-line="32" selection-start-column="31" selection-end-line="32" selection-end-column="57" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.249668" vertical-offset="2313" max-vertical-offset="3125">
-          <caret line="85" column="42" selection-start-line="85" selection-start-column="42" selection-end-line="85" selection-end-column="42" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/GeofenceRequester.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.4608234" vertical-offset="1247" max-vertical-offset="3725">
-          <caret line="36" column="38" selection-start-line="36" selection-start-column="38" selection-end-line="36" selection-end-column="38" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/com.google.android.gms/play-services/4.4.52/classes.jar!/com/google/android/gms/location/Geofence.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.03434066" vertical-offset="150" max-vertical-offset="1150">
-          <caret line="8" column="8" selection-start-line="8" selection-start-column="8" selection-end-line="8" selection-end-column="8" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="799">
+          <caret line="31" column="109" selection-start-line="31" selection-start-column="109" selection-end-line="31" selection-end-column="109" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/GeofenceRemover.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="3160" max-vertical-offset="4000">
-          <caret line="173" column="0" selection-start-line="173" selection-start-column="0" selection-end-line="173" selection-end-column="0" />
-          <folding />
+        <state vertical-scroll-proportion="0.0" vertical-offset="1187" max-vertical-offset="2720">
+          <caret line="105" column="51" selection-start-line="105" selection-start-column="51" selection-end-line="105" selection-end-column="51" />
+          <folding>
+            <element signature="e#3746#3806#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/GeofenceRequester.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1153" max-vertical-offset="2533">
+          <caret line="90" column="51" selection-start-line="90" selection-start-column="51" selection-end-line="90" selection-end-column="51" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/ReceiveTransitionsIntentService.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2200">
-          <caret line="41" column="68" selection-start-line="41" selection-start-column="68" selection-end-line="41" selection-end-column="68" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="184" max-vertical-offset="1819">
+          <caret line="51" column="47" selection-start-line="51" selection-start-column="47" selection-end-line="51" selection-end-column="47" />
           <folding>
-            <element signature="imports" expanded="true" />
             <element signature="e#1183#1249#0" expanded="true" />
-            <element signature="e#2516#2704#0" expanded="true" />
-            <element signature="e#2906#3070#0" expanded="true" />
-            <element signature="e#3158#3222#0" expanded="true" />
-            <element signature="method#sendNotification#0;class#ReceiveTransitionsIntentService#0" expanded="false" />
-            <element signature="e#3918#4028#0" expanded="true" />
-            <element signature="e#4061#4118#0" expanded="true" />
-            <element signature="e#4537#4584#0" expanded="true" />
-            <element signature="e#4661#4707#0" expanded="true" />
-            <element signature="e#4753#4800#0" expanded="true" />
+            <element signature="e#2684#2836#0" expanded="true" />
+            <element signature="e#3595#3783#0" expanded="true" />
+            <element signature="e#3985#4149#0" expanded="true" />
+            <element signature="e#4217#4281#0" expanded="true" />
+            <element signature="e#4977#5087#0" expanded="true" />
+            <element signature="e#5120#5177#0" expanded="true" />
+            <element signature="e#5596#5643#0" expanded="true" />
+            <element signature="e#5720#5766#0" expanded="true" />
+            <element signature="e#5812#5859#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/values/strings.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-10.214286" vertical-offset="870" max-vertical-offset="2142">
+          <caret line="68" column="13" selection-start-line="68" selection-start-column="13" selection-end-line="68" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app/src/main/res/layout/activity_main.xml">
+      <provider selected="true" editor-type-id="android-designer">
+        <state />
+      </provider>
+      <provider editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="206" max-vertical-offset="1530">
+          <caret line="71" column="37" selection-start-line="71" selection-start-column="26" selection-end-line="71" selection-end-column="37" />
+          <folding>
+            <element signature="e#1307#1323#0" expanded="true" />
+            <element signature="e#2040#2059#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app/src/main/java/com/example/android/geofence/MainActivity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.68994415" vertical-offset="4758" max-vertical-offset="7098">
-          <caret line="202" column="35" selection-start-line="202" selection-start-column="35" selection-end-line="202" selection-end-column="35" />
+        <state vertical-scroll-proportion="0.38449848" vertical-offset="4014" max-vertical-offset="5015">
+          <caret line="251" column="32" selection-start-line="251" selection-start-column="32" selection-end-line="251" selection-end-column="32" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#5340#5373#0" expanded="true" />
-            <element signature="e#5459#5521#0" expanded="true" />
-            <element signature="e#7051#7100#0" expanded="true" />
-            <element signature="e#8289#8335#0" expanded="true" />
-            <element signature="e#9193#9242#0" expanded="true" />
-            <element signature="e#9285#9308#0" expanded="true" />
+            <element signature="e#5620#5653#0" expanded="true" />
+            <element signature="e#5739#5801#0" expanded="true" />
+            <element signature="e#7331#7380#0" expanded="true" />
+            <element signature="e#8791#8837#0" expanded="true" />
+            <element signature="e#9825#9874#0" expanded="true" />
+            <element signature="e#9917#9940#0" expanded="true" />
           </folding>
         </state>
       </provider>

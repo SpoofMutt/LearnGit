@@ -14,8 +14,11 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.text.format.Time;
 
 import com.example.android.geofence.GeofenceUtils.REMOVE_TYPE;
 import com.example.android.geofence.GeofenceUtils.REQUEST_TYPE;
@@ -34,8 +37,6 @@ public class MainActivity extends FragmentActivity implements
         GooglePlayServicesClient.OnConnectionFailedListener {
 
     private final static int  CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-    private static final long GEOFENCE_EXPIRATION_IN_HOURS          = 12;
-//    private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS   =  GEOFENCE_EXPIRATION_IN_HOURS * DateUtils.HOUR_IN_MILLIS;
     private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS   =  Geofence.NEVER_EXPIRE;
     // Store the current request
     private REQUEST_TYPE mRequestType;
@@ -46,6 +47,7 @@ public class MainActivity extends FragmentActivity implements
     // Store a list of geofences to add
     List<Geofence> mCurrentGeofences;
     List<SimpleGeofence> mUIGeofence;
+    List<String>   mAreaVisits;
 
     // Add handlers
     private GeofenceRequester mGeofenceRequester;
@@ -56,6 +58,8 @@ public class MainActivity extends FragmentActivity implements
     private IntentFilter mIntentFilter;
 
     private LocationClient mLocationClient;
+
+    private ArrayAdapter<String> adapter;
 
     @Override
     public void onConnected(Bundle dataBundle) {
@@ -96,12 +100,14 @@ public class MainActivity extends FragmentActivity implements
         mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCES_ADDED);
         mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCES_REMOVED);
         mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCE_ERROR);
-        mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCE_TRANSITION);
+        mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCE_ENTER);
+        mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCE_EXIT);
         // All Location Services sample apps use this category
         mIntentFilter.addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES);
 
         mUIGeofence = new ArrayList<SimpleGeofence>();
         mCurrentGeofences = new ArrayList<Geofence>();
+        mAreaVisits = new ArrayList<String>();
 
         // Instantiate a Geofence requester/Removers
         mGeofenceRequester = new GeofenceRequester(this);
@@ -111,7 +117,9 @@ public class MainActivity extends FragmentActivity implements
 
         // Attach to the main UI
         setContentView(R.layout.activity_main);
-
+        ListView list = (ListView) findViewById(R.id.Activity);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mAreaVisits);
+        list.setAdapter(adapter);
     }
 
     @Override
@@ -189,10 +197,12 @@ public class MainActivity extends FragmentActivity implements
             return;
         }
 
-        mUIGeofence.add(new SimpleGeofence("LOWER_APPROACH", 38.930283d, -104.726803d, 9.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
-        mUIGeofence.add(new SimpleGeofence("LOWER_ENTRY",    38.931272d, -104.726207d, 9.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
-        mUIGeofence.add(new SimpleGeofence("UPPER_APPROACH", 38.931581d, -104.724137d, 9.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
-        mUIGeofence.add(new SimpleGeofence("UPPER_ENTRY",    38.932173d, -104.724576d, 9.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
+        mUIGeofence.add(new SimpleGeofence("LOWER_APPROACH", 38.931398d, -104.726289d, 30.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
+        mUIGeofence.add(new SimpleGeofence("LOWER_ENTRY",    38.93018d,  -104.726657d, 20.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
+        mUIGeofence.add(new SimpleGeofence("UPPER_APPROACH", 38.931847d, -104.724304d, 20.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT)); //
+        mUIGeofence.add(new SimpleGeofence("UPPER_ENTRY",    38.93224d,  -104.72464d,  30.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
+        mUIGeofence.add(new SimpleGeofence("DRIVEWAY",  38.93050064216459d, -104.72520038836058d, 10.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT|Geofence.GEOFENCE_TRANSITION_ENTER));
+
 
         mCurrentGeofences.clear();
         for (SimpleGeofence element : mUIGeofence) {
@@ -216,8 +226,10 @@ public class MainActivity extends FragmentActivity implements
                          ||
                         TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCES_REMOVED)) {
                 handleGeofenceStatus(context, intent);
-            } else if (TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCE_TRANSITION)) {
-                handleGeofenceTransition(context, intent);
+            } else if (TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCE_ENTER)) {
+                handleGeofenceEnter(context, intent);
+            } else if (TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCE_EXIT)) {
+                handleGeofenceExit(context, intent);
             } else {
                 Log.e(GeofenceUtils.APPTAG, getString(R.string.invalid_action_detail, action));
                 Toast.makeText(context, R.string.invalid_action, Toast.LENGTH_LONG).show();
@@ -229,8 +241,18 @@ public class MainActivity extends FragmentActivity implements
             Log.d(GeofenceUtils.APPTAG, action);
         }
 
-        private void handleGeofenceTransition(Context context, Intent intent) {
-            String action = String.format("Transition() %s", intent.getStringExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS));
+        private void handleGeofenceEnter(Context context, Intent intent) {
+            String action = String.format("Enter() %s", intent.getStringExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS));
+            Log.d(GeofenceUtils.APPTAG, action);
+            getLocation();
+        }
+
+        private void handleGeofenceExit(Context context, Intent intent) {
+            String action = String.format("Exit() %s", intent.getStringExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS));
+            Time tmp = new Time();
+            tmp.setToNow();
+            String msg = tmp.format("%T ") + ": " + intent.getStringExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS);
+            adapter.insert(msg,0);
             Log.d(GeofenceUtils.APPTAG, action);
             getLocation();
         }

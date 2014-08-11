@@ -37,10 +37,29 @@ public class ReceiveTransitionsIntentService extends IntentService {
             LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
         } else {
             int transition = LocationClient.getGeofenceTransition(intent);
-            if ((transition == Geofence.GEOFENCE_TRANSITION_ENTER)
-                  ||
-                (transition == Geofence.GEOFENCE_TRANSITION_EXIT)) {
-//                if(transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+            if (transition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+                List<Geofence> geofences = LocationClient.getTriggeringGeofences(intent);
+                String[] geofenceIds = new String[geofences.size()];
+                for (int index = 0; index < geofences.size(); index++) {
+                    geofenceIds[index] = geofences.get(index).getRequestId();
+                }
+                String ids = TextUtils.join(GeofenceUtils.GEOFENCE_ID_DELIMITER, geofenceIds);
+                String transitionType = getTransitionString(transition);
+
+                broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_ENTER)
+                        .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, getString(
+                                R.string.geofence_transition_notification_title,
+                                transitionType,
+                                ids));
+                LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
+
+//                sendNotification(transitionType, ids);
+
+                Log.d(GeofenceUtils.APPTAG, getString(
+                        R.string.geofence_transition_notification_title,
+                        transitionType,
+                        ids));
+            } else if (transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
                     List<Geofence> geofences = LocationClient.getTriggeringGeofences(intent);
                     String[] geofenceIds = new String[geofences.size()];
                     for (int index = 0; index < geofences.size(); index++) {
@@ -49,7 +68,7 @@ public class ReceiveTransitionsIntentService extends IntentService {
                     String ids = TextUtils.join(GeofenceUtils.GEOFENCE_ID_DELIMITER, geofenceIds);
                     String transitionType = getTransitionString(transition);
 
-                    broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_TRANSITION)
+                    broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_EXIT)
                             .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, getString(
                                     R.string.geofence_transition_notification_title,
                                     transitionType,
@@ -62,7 +81,6 @@ public class ReceiveTransitionsIntentService extends IntentService {
                             R.string.geofence_transition_notification_title,
                             transitionType,
                             ids));
-  //              }
             } else {
                 Log.e(GeofenceUtils.APPTAG, getString(R.string.geofence_transition_invalid_type, transition));
             }

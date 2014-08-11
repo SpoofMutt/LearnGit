@@ -30,7 +30,8 @@ public final class GeofenceUtils {
     public static final String ACTION_GEOFENCES_ADDED = "com.example.android.geofence.ACTION_GEOFENCES_ADDED";
     public static final String ACTION_GEOFENCES_REMOVED = "com.example.android.geofence.ACTION_GEOFENCES_DELETED";
     public static final String ACTION_GEOFENCE_ERROR = "com.example.android.geofence.ACTION_GEOFENCES_ERROR";
-    public static final String ACTION_GEOFENCE_TRANSITION = "com.example.android.geofence.ACTION_GEOFENCE_TRANSITION";
+    public static final String ACTION_GEOFENCE_ENTER = "com.example.android.geofence.ACTION_GEOFENCE_ENTER";
+    public static final String ACTION_GEOFENCE_EXIT = "com.example.android.geofence.ACTION_GEOFENCE_EXIT";
     public static final String ACTION_GEOFENCE_TRANSITION_ERROR = "com.example.android.geofence.ACTION_GEOFENCE_TRANSITION_ERROR";
 
     public static final String CATEGORY_LOCATION_SERVICES = "com.example.android.geofence.CATEGORY_LOCATION_SERVICES";
