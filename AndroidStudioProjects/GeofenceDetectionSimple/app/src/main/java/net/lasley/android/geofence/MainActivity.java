@@ -1,4 +1,4 @@
-package com.example.android.geofence;
+package net.lasley.android.geofence;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -7,7 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
@@ -20,15 +22,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.text.format.Time;
 
-import com.example.android.geofence.GeofenceUtils.REMOVE_TYPE;
-import com.example.android.geofence.GeofenceUtils.REQUEST_TYPE;
+import net.lasley.android.geofence.GeofenceUtils.REMOVE_TYPE;
+import net.lasley.android.geofence.GeofenceUtils.REQUEST_TYPE;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,9 +73,17 @@ public class MainActivity extends FragmentActivity implements
 
     private ArrayAdapter<String> adapter;
 
+    private Socket Garagesocket;
+    private static final int GARAGE_PORT = 55555;
+    private static final String SERVER_HOSTNAME = "lasley.mynetgear.com";
+
+    private GoogleMap map;
+
     @Override
     public void onConnected(Bundle dataBundle) {
         Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+        Location mCurrentLocation = mLocationClient.getLastLocation();
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), 17));
         AddGeoFencing();
     }
 
@@ -116,10 +136,13 @@ public class MainActivity extends FragmentActivity implements
 //        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, mIntentFilter);
 
         // Attach to the main UI
-        setContentView(R.layout.activity_main);
-        ListView list = (ListView) findViewById(R.id.Activity);
+        setContentView(net.lasley.android.geofence.R.layout.activity_main);
+        ListView list = (ListView) findViewById(net.lasley.android.geofence.R.id.Activity);
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mAreaVisits);
         list.setAdapter(adapter);
+
+        map = ((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
+        map.setMyLocationEnabled(true);
     }
 
     @Override
@@ -140,10 +163,10 @@ public class MainActivity extends FragmentActivity implements
                         }
                         break;
                     default:
-                        Log.d(GeofenceUtils.APPTAG, getString(R.string.no_resolution));
+                        Log.d(GeofenceUtils.APPTAG, getString(net.lasley.android.geofence.R.string.no_resolution));
                 }
             default:
-                Log.d(GeofenceUtils.APPTAG, getString(R.string.unknown_activity_request_code, requestCode));
+                Log.d(GeofenceUtils.APPTAG, getString(net.lasley.android.geofence.R.string.unknown_activity_request_code, requestCode));
                 break;
         }
     }
@@ -187,7 +210,7 @@ public class MainActivity extends FragmentActivity implements
         try {
             mGeofenceRemover.removeGeofencesByIntent(mGeofenceRequester.getRequestPendingIntent());
         } catch (UnsupportedOperationException e) {
-            Toast.makeText(this, R.string.remove_geofences_already_requested_error,Toast.LENGTH_LONG).show();
+            Toast.makeText(this, net.lasley.android.geofence.R.string.remove_geofences_already_requested_error,Toast.LENGTH_LONG).show();
         }
     }
 
@@ -212,7 +235,7 @@ public class MainActivity extends FragmentActivity implements
         try {
             mGeofenceRequester.addGeofences(mCurrentGeofences);
         } catch (UnsupportedOperationException e) {
-            Toast.makeText(this, R.string.add_geofences_already_requested_error, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, net.lasley.android.geofence.R.string.add_geofences_already_requested_error, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -231,8 +254,8 @@ public class MainActivity extends FragmentActivity implements
             } else if (TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCE_EXIT)) {
                 handleGeofenceExit(context, intent);
             } else {
-                Log.e(GeofenceUtils.APPTAG, getString(R.string.invalid_action_detail, action));
-                Toast.makeText(context, R.string.invalid_action, Toast.LENGTH_LONG).show();
+                Log.e(GeofenceUtils.APPTAG, getString(net.lasley.android.geofence.R.string.invalid_action_detail, action));
+                Toast.makeText(context, net.lasley.android.geofence.R.string.invalid_action, Toast.LENGTH_LONG).show();
             }
         }
 
@@ -285,9 +308,24 @@ public class MainActivity extends FragmentActivity implements
     public void getLocation() {
         if (servicesConnected()) {
             Location currentLocation = mLocationClient.getLastLocation();
-            ((TextView) (findViewById(R.id.lat_lng))).setText(GeofenceUtils.getLatLng(this, currentLocation));
+            ((TextView) (findViewById(net.lasley.android.geofence.R.id.lat_lng))).setText(GeofenceUtils.getLatLng(this, currentLocation));
         }
     }
 
+/*
+    class ClientThread implements Runnable {
+        @Override
+        public void run() {
+            try {
+                InetAddress serverAddr = InetAddress.getByName(SERVER_HOSTNAME);
+                Garagesocket = new Socket(serverAddr, GARAGE_PORT);
+            } catch (UnknownHostException e1) {
+                e1.printStackTrace();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        }
+    }
+*/
 
 }

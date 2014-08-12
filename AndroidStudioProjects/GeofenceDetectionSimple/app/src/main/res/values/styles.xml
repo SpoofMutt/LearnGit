@@ -17,11 +17,12 @@
 <resources>
 
     <!-- Activity themes -->
-
+    <style name="AppBaseTheme" parent="android:Theme.Light" />
     <style name="Theme.Base" parent="android:Theme.Light" />
-
-    <style name="Theme.Sample" parent="Theme.Base" />
-
+    <style name="Theme.Sample" parent="android:Theme.Light" />
+    <style name="mapView">
+        <item name="android:gravity">center</item>
+    </style>
     <!-- Widget styling -->
 
     <style name="Widget" />

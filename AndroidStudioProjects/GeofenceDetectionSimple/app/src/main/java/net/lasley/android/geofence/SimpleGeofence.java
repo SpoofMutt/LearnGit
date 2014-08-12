@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.geofence;
+package net.lasley.android.geofence;
 
 import com.google.android.gms.location.Geofence;
 

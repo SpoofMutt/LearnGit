@@ -1,4 +1,4 @@
-package com.example.android.geofence;
+package net.lasley.android.geofence;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
@@ -29,7 +29,7 @@ public class ReceiveTransitionsIntentService extends IntentService {
             int errorCode = LocationClient.getErrorCode(intent);
             String errorMessage = LocationServiceErrorMessages.getErrorString(this, errorCode);
             Log.e(GeofenceUtils.APPTAG,
-                    getString(R.string.geofence_transition_error_detail, errorMessage)
+                    getString(net.lasley.android.geofence.R.string.geofence_transition_error_detail, errorMessage)
             );
             broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_ERROR)
                     .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, errorMessage);
@@ -48,7 +48,7 @@ public class ReceiveTransitionsIntentService extends IntentService {
 
                 broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_ENTER)
                         .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, getString(
-                                R.string.geofence_transition_notification_title,
+                                net.lasley.android.geofence.R.string.geofence_transition_notification_title,
                                 transitionType,
                                 ids));
                 LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
@@ -56,7 +56,7 @@ public class ReceiveTransitionsIntentService extends IntentService {
 //                sendNotification(transitionType, ids);
 
                 Log.d(GeofenceUtils.APPTAG, getString(
-                        R.string.geofence_transition_notification_title,
+                        net.lasley.android.geofence.R.string.geofence_transition_notification_title,
                         transitionType,
                         ids));
             } else if (transition == Geofence.GEOFENCE_TRANSITION_EXIT) {
@@ -70,7 +70,7 @@ public class ReceiveTransitionsIntentService extends IntentService {
 
                     broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_EXIT)
                             .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, getString(
-                                    R.string.geofence_transition_notification_title,
+                                    net.lasley.android.geofence.R.string.geofence_transition_notification_title,
                                     transitionType,
                                     ids));
                     LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
@@ -78,11 +78,11 @@ public class ReceiveTransitionsIntentService extends IntentService {
 //                sendNotification(transitionType, ids);
 
                     Log.d(GeofenceUtils.APPTAG, getString(
-                            R.string.geofence_transition_notification_title,
+                            net.lasley.android.geofence.R.string.geofence_transition_notification_title,
                             transitionType,
                             ids));
             } else {
-                Log.e(GeofenceUtils.APPTAG, getString(R.string.geofence_transition_invalid_type, transition));
+                Log.e(GeofenceUtils.APPTAG, getString(net.lasley.android.geofence.R.string.geofence_transition_invalid_type, transition));
             }
         }
     }
@@ -94,11 +94,11 @@ public class ReceiveTransitionsIntentService extends IntentService {
         stackBuilder.addNextIntent(notificationIntent);
         PendingIntent notificationPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        builder.setSmallIcon(R.drawable.ic_notification)
+        builder.setSmallIcon(net.lasley.android.geofence.R.drawable.ic_notification)
                .setContentTitle(
-                       getString(R.string.geofence_transition_notification_title,
+                       getString(net.lasley.android.geofence.R.string.geofence_transition_notification_title,
                                transitionType, ids))
-               .setContentText(getString(R.string.geofence_transition_notification_text))
+               .setContentText(getString(net.lasley.android.geofence.R.string.geofence_transition_notification_text))
                .setContentIntent(notificationPendingIntent);
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(0, builder.build());
@@ -107,11 +107,11 @@ public class ReceiveTransitionsIntentService extends IntentService {
     private String getTransitionString(int transitionType) {
         switch (transitionType) {
             case Geofence.GEOFENCE_TRANSITION_ENTER:
-                return getString(R.string.geofence_transition_entered);
+                return getString(net.lasley.android.geofence.R.string.geofence_transition_entered);
             case Geofence.GEOFENCE_TRANSITION_EXIT:
-                return getString(R.string.geofence_transition_exited);
+                return getString(net.lasley.android.geofence.R.string.geofence_transition_exited);
             default:
-                return getString(R.string.geofence_transition_unknown);
+                return getString(net.lasley.android.geofence.R.string.geofence_transition_unknown);
         }
     }
 }
