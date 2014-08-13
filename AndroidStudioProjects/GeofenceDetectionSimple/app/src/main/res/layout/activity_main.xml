@@ -74,6 +74,7 @@
             android:fastScrollAlwaysVisible="false"
             android:layout_below="@+id/fencearea" />
 
+<!--
         <fragment
             xmlns:map="http://schemas.android.com/apk/res-auto"
             android:layout_width="wrap_content"
@@ -86,21 +87,8 @@
             map:uiCompass="true"
             map:uiZoomControls="true"
             tools:layout="@layout/activity_main" />
+-->
 
-        <!--        <com.google.android.maps.MapView
-                    xmlns:map="http://schemas.android.com/apk/res-auto"
-                    android:id="@+id/map_view"
-                    android:layout_width="fill_parent"
-                    android:layout_height="300dp"
-                    android:clickable="true"
-                    android:enabled="true"
-                    android:layout_below="@+id/Activity"
-                    map:mapType="normal"
-                    style="@style/mapView"
-                    map:uiCompass="true"
-                    map:uiZoomControls="true"
-                    android:apiKey="AIzaSyAooDjOMANYSqjBFwKcwMQk23Q2vSHc1a0" />
-         -->
         <!-- Geofence 2 -->
         <!-- Register and unregister geofences buttons. -->
 

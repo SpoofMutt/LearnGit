@@ -77,13 +77,13 @@ public class MainActivity extends FragmentActivity implements
     private static final int GARAGE_PORT = 55555;
     private static final String SERVER_HOSTNAME = "lasley.mynetgear.com";
 
-    private GoogleMap map;
+//    private GoogleMap map;
 
     @Override
     public void onConnected(Bundle dataBundle) {
         Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
         Location mCurrentLocation = mLocationClient.getLastLocation();
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), 17));
+        // map.animateCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), 17));
         AddGeoFencing();
     }
 
@@ -141,8 +141,12 @@ public class MainActivity extends FragmentActivity implements
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mAreaVisits);
         list.setAdapter(adapter);
 
+/*
         map = ((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
         map.setMyLocationEnabled(true);
+*/
+        new Thread(new ClientThread()).start();
+
     }
 
     @Override
@@ -312,7 +316,6 @@ public class MainActivity extends FragmentActivity implements
         }
     }
 
-/*
     class ClientThread implements Runnable {
         @Override
         public void run() {
@@ -326,6 +329,5 @@ public class MainActivity extends FragmentActivity implements
             }
         }
     }
-*/
 
 }
