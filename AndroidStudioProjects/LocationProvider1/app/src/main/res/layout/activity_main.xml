@@ -124,7 +124,8 @@
             android:layout_height="wrap_content"
             android:layout_alignBaseline="@+id/pause_entry_label"
             android:layout_toRightOf="@+id/pause_entry_label"
-            android:inputType="number" />
+            android:inputType="number"
+            android:text="1" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -153,7 +154,8 @@
             android:layout_height="wrap_content"
             android:layout_alignBaseline="@+id/send_interval_label"
             android:layout_toRightOf="@+id/send_interval_label"
-            android:inputType="number" />
+            android:inputType="number"
+            android:text="1" />
     </RelativeLayout>
 
     <!--
