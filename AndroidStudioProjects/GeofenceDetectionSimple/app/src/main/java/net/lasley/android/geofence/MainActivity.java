@@ -145,10 +145,13 @@ public class MainActivity extends FragmentActivity implements
         map = ((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
         map.setMyLocationEnabled(true);
 */
-        new Thread(new ClientThread()).start();
-
     }
 
+    public void sendMessage() {
+        InetAddress serverAddr = InetAddress.getByName(SERVER_HOSTNAME);
+        Garagesocket = new Socket(serverAddr, GARAGE_PORT);
+    }
+    
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         switch (requestCode) {
@@ -319,20 +322,6 @@ public class MainActivity extends FragmentActivity implements
         if (servicesConnected()) {
             Location currentLocation = mLocationClient.getLastLocation();
             ((TextView) (findViewById(net.lasley.android.geofence.R.id.lat_lng))).setText(GeofenceUtils.getLatLng(this, currentLocation));
-        }
-    }
-
-    class ClientThread implements Runnable {
-        @Override
-        public void run() {
-            try {
-                InetAddress serverAddr = InetAddress.getByName(SERVER_HOSTNAME);
-                Garagesocket = new Socket(serverAddr, GARAGE_PORT);
-            } catch (UnknownHostException e1) {
-                e1.printStackTrace();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
         }
     }
 
