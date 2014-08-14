@@ -17,12 +17,14 @@ my $DOOR_CLOSED  = 0;
 my $DOOR_OPENED  = 1;
 my $DOOR_OPENING = 2;
 my $DOOR_CLOSING = 3;
+my $DOOR_BUSY    = 4;
 
 my $LIGHT_OFF   = 0;
 my $LIGHT_ON    = 1;
 
 my $OPEN_DOOR   = 0;
 my $CLOSE_DOOR  = 1;
+my $TOGGLE_DOOR = 2;
 
 my $sfx = chr(1).chr(2).chr(3).chr(4);
 my @reqs = (chr(19).chr(1).chr($STRING)."Hello world!".$sfx,

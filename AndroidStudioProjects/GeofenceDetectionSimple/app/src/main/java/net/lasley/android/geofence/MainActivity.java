@@ -14,8 +14,10 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -37,8 +39,15 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+
+import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
+import static android.text.format.DateUtils.FORMAT_SHOW_TIME;
+import static android.text.format.DateUtils.formatDateTime;
 
 public class MainActivity extends FragmentActivity implements
         GooglePlayServicesClient.ConnectionCallbacks,
@@ -65,24 +74,42 @@ public class MainActivity extends FragmentActivity implements
     private static final int GARAGE_PORT = 55555;
     private static final String SERVER_HOSTNAME = "lasley.mynetgear.com";
 
+    private static final int LENGTH_V1_NDX         = 0;
+    private static final int VERSION_V1_NDX        = 1;
+    private static final int MSG_VERSION           = 0x01;
+    private static final int ACTION_V1_NDX         = 2;
+    private static final int COMMAND_V1_NDX        = 3;
+    private static final int COMMAND_REPLY_V1_NDX  = 3;
+    private static final int STR_START_V1_NDX      = 3;
+    private static final int STATUS_DOOR_V1_NDX    = 3;
+    private static final int STATUS_LIGHT_V1_NDX   = 4;
+
+// Version 1 Lengths
+    private static final int COMMAND_LENGTH_V1         = 8;
+    private static final int COMMAND_REPLY_LENGTH_V1   = 8;
+    private static final int STATUS_REQUEST_LENGTH_V1  = 7;
+    private static final int STATUS_REPLY_LENGTH_V1    = 9;
+
     private static final byte VERSION = 1;
 
-    private static final byte STRING = 16;
-    private static final byte COMMAND = 10;
+    private static final byte STRING       = 16;
+    private static final byte COMMAND      = 10;
     private static final byte COMMANDREPLY = 45;
-    private static final byte STATUSREQ = 21;
-    private static final byte STATUSREPLY = 33;
+    private static final byte STATUSREQ    = 21;
+    private static final byte STATUSREPLY  = 33;
 
-    private static final byte DOOR_CLOSED = 0;
-    private static final byte DOOR_OPEN = 1;
+    private static final byte DOOR_CLOSED  = 0;
+    private static final byte DOOR_OPEN    = 1;
     private static final byte DOOR_OPENING = 2;
     private static final byte DOOR_CLOSING = 3;
+    private static final byte DOOR_BUSY    = 4;
 
     private static final byte LIGHT_OFF = 0;
-    private static final byte LIGHT_ON = 1;
+    private static final byte LIGHT_ON  = 1;
 
-    private static final byte OPEN_DOOR = 0;
-    private static final byte CLOSE_DOOR = 1;
+    private static final byte OPEN_DOOR   = 0;
+    private static final byte CLOSE_DOOR  = 1;
+    private static final byte TOGGLE_DOOR = 2;
 
     @Override
     public void onConnected(Bundle dataBundle) {
@@ -271,36 +298,61 @@ public class MainActivity extends FragmentActivity implements
         new AsyncGarage().execute(msg);
     }
 
+    public void RefreshState(View view) {
+        sendStatusRequest();
+    }
+
     protected void decodeReply(byte[] reply) {
         StringBuilder sb = new StringBuilder();
         sb.append("Length: ");
-        sb.append(Byte.toString(reply[0]));
+        sb.append(Byte.toString(reply[LENGTH_V1_NDX]));
         Log.d("decodeReply", sb.toString());
         sb = new StringBuilder("Version: ");
-        sb.append(Byte.toString(reply[1]));
+        sb.append(Byte.toString(reply[VERSION_V1_NDX]));
         Log.d("decodeReply", sb.toString());
         sb = new StringBuilder("Action: ");
-        if (reply[2] == STATUSREPLY) {
+        if (reply[ACTION_V1_NDX] == COMMANDREPLY) {
+            sb.append("CommandReply");
+            Log.d("decodeReply", sb.toString());
+            TextView t = (TextView)findViewById(R.id.DoorStatus);
+            sb = new StringBuilder("Action: ");
+            if(reply[COMMAND_REPLY_V1_NDX] == DOOR_OPENING) {
+                sb.append("Door Opening");
+                t.setText("Opening");
+            } else if(reply[COMMAND_REPLY_V1_NDX] == DOOR_OPENING) {
+                sb.append("Door Closing");
+                t.setText("Closing");
+            } else if(reply[COMMAND_REPLY_V1_NDX] == DOOR_BUSY) {
+                sb.append("Door Busy");
+                t.setText("Busy");
+            }
+            Log.d("decodeReply", sb.toString());
+        } else if (reply[ACTION_V1_NDX] == STATUSREPLY) {
+            Calendar rightNow = Calendar.getInstance();
+            String date = formatDateTime (getApplicationContext(),rightNow.getTimeInMillis(),FORMAT_SHOW_DATE|FORMAT_SHOW_TIME);
+            TextView t = (TextView)findViewById(R.id.TimeChecked);
+            t.setText("Refreshed: " + date);
+
             sb.append("StatusReply");
             Log.d("decodeReply", sb.toString());
             sb = new StringBuilder("Door: ");
-            sb.append(Byte.toString(reply[3]));
+            sb.append(Byte.toString(reply[STATUS_DOOR_V1_NDX]));
             Log.d("decodeReply", sb.toString());
-            TextView t = (TextView)findViewById(R.id.DoorStatus);
-            if(reply[3] == DOOR_OPEN) {
+            t = (TextView)findViewById(R.id.DoorStatus);
+            if(reply[STATUS_DOOR_V1_NDX] == DOOR_OPEN) {
                 t.setText("Open");
-            } else if(reply[3] == DOOR_CLOSED) {
+            } else if(reply[STATUS_DOOR_V1_NDX] == DOOR_CLOSED) {
                 t.setText("Closed");
-            } else if(reply[3] == DOOR_CLOSED) {
+            } else if(reply[STATUS_DOOR_V1_NDX] == DOOR_BUSY) {
                 t.setText("Busy");
             }
             sb = new StringBuilder("Light: ");
-            sb.append(Byte.toString(reply[4]));
+            sb.append(Byte.toString(reply[STATUS_LIGHT_V1_NDX]));
             Log.d("decodeReply", sb.toString());
             t = (TextView)findViewById(R.id.LightStatus);
-            if(reply[4] == LIGHT_ON) {
+            if(reply[STATUS_LIGHT_V1_NDX] == LIGHT_ON) {
                 t.setText("On");
-            } else if(reply[4] == LIGHT_OFF) {
+            } else if(reply[STATUS_LIGHT_V1_NDX] == LIGHT_OFF) {
                 t.setText("Off");
             }
         }

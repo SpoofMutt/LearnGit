@@ -149,7 +149,10 @@
                     android:id="@+id/RefreshStatus"
                     android:layout_column="2"
                     android:layout_weight="1"
-                    android:layout_gravity="center_vertical" />
+                    android:layout_gravity="center_vertical"
+                    android:clickable="true"
+                    android:enabled="true"
+                    android:onClick="RefreshState"/>
 
             </TableRow>
 
@@ -183,7 +186,8 @@
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:id="@+id/TimeChecked"
                     android:layout_column="2"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:textSize="8dp"/>
 
             </TableRow>
 
