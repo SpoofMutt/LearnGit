@@ -10,6 +10,7 @@
 //#include "crc.h";
 
 //#define ENABLE_NTP 1
+#define EMULATOR_MODE 1
 
 int lightPin = 0;  //define a pin for Photo resistor
 
@@ -93,6 +94,7 @@ TimeChangeRule *tcr;        //pointer to the time change rule, use to get TZ abb
 #define DOOR_OPEN    1
 #define DOOR_OPENING 2
 #define DOOR_CLOSING 3
+#define DOOR_BUSY    4
 
 // Status Byte2
 #define LIGHT_OFF   0
@@ -104,14 +106,18 @@ TimeChangeRule *tcr;        //pointer to the time change rule, use to get TZ abb
 
 #define TIME_TO_OPEN 30 // Seconds
 unsigned long time_of_last_door_command = 0;
-uint8_t       last_door_command;
+uint8_t       last_door_command = CLOSE_DOOR;
 uint8_t       data[80];
 
 float inMsec;
 
-const unsigned long
-  connectTimeout  = 15L * 1000L, // Max time to wait for server connection
-  responseTimeout = 15L * 1000L; // Max time to wait for data from server
+#ifdef EMULATOR_MODE
+int door_state  = DOOR_CLOSED;
+int light_state = LIGHT_OFF;
+#endif
+
+const unsigned long responseTimeout = 5L * 1000L; // Max time to wait for data from server
+const unsigned long connectTimeout  = 5L * 1000L; // Max time to wait for server connection
 
 void setup(void)
 {
@@ -237,42 +243,34 @@ void loop(void) {
 
              inMsec = ultrasonic.convert(ultrasonic.timing(), Ultrasonic::IN);
              int doorState = (inMsec > 0.0) ? DOOR_OPEN : DOOR_CLOSED ; // Any range means its closed.
-
+#ifdef EMULATOR_MODE
+             doorState = door_state;
+#endif         
              if(data[COMMAND_V1_NDX] == OPEN_DOOR && doorState == DOOR_CLOSED) { // Open door
+               time_of_last_door_command = now();
+               last_door_command = data[COMMAND_V1_NDX];
                data[COMMAND_REPLY_V1_NDX] = DOOR_OPENING;
                sendData();
-               time_of_last_door_command = now();
                ActivateGarageDoor();
+#ifdef EMULATOR_MODE
+               door_state = DOOR_OPEN;
+               light_state= LIGHT_ON;
+#endif         
              } else if(data[COMMAND_V1_NDX] == CLOSE_DOOR && doorState == DOOR_OPEN) { // Close door.
+               time_of_last_door_command = now();
+               last_door_command = data[COMMAND_V1_NDX];
                data[COMMAND_REPLY_V1_NDX] = DOOR_CLOSING;
                sendData();
-               time_of_last_door_command = now();
                ActivateGarageDoor();
+#ifdef EMULATOR_MODE
+               door_state = DOOR_CLOSED;
+               light_state= LIGHT_OFF;
+#endif         
              } else { // Already there. Just give status.
                 sendStatusReply();
 	     }
-             last_door_command = data[COMMAND_V1_NDX];
-           } else {                                             // Door state changing state. Must wait.
-             if(last_door_command == data[COMMAND_V1_NDX]) {    // Already commanded.
-               COMMAND_REPLY_LENGTH_V1;
-               data[ACTION_V1_NDX] = COMMANDREPLY;
-               if(last_door_command == OPEN_DOOR) {
-                 data[COMMAND_REPLY_V1_NDX] = DOOR_OPENING;
-               } else {
-                 data[COMMAND_REPLY_V1_NDX] = DOOR_CLOSING;
-               }
-               sendData();
-             } else {                                           // Conflicting command.
-               int time_to_wait = (TIME_TO_OPEN + time_of_last_door_command) - now();
-               COMMAND_REPLY_LENGTH_V1;
-               data[ACTION_V1_NDX] = COMMANDREPLY;
-               if(last_door_command == OPEN_DOOR) {
-                 data[COMMAND_REPLY_V1_NDX] = DOOR_OPENING;
-               } else {
-                 data[COMMAND_REPLY_V1_NDX] = DOOR_CLOSING;
-               }
-               sendData();
-             }
+           } else {
+             sendStatusReply();
            }
          } else if(data[ACTION_V1_NDX] == STATUSREQ) {    // Status Request
            Serial.println("STATUSREQ");
@@ -304,11 +302,23 @@ void sendStatusReply() {
    STATUS_REPLY_LENGTH_V1;
    data[ACTION_V1_NDX] = STATUSREPLY;
 
+#ifdef EMULATOR_MODE
+   if(time_of_last_door_command + TIME_TO_OPEN > now()) {
+     data[STATUS_DOOR_V1_NDX] = DOOR_BUSY;
+   } else {
+     data[STATUS_DOOR_V1_NDX] = door_state;
+   }
+   data[STATUS_LIGHT_V1_NDX] = light_state;
+#else
    inMsec = ultrasonic.convert(ultrasonic.timing(), Ultrasonic::IN);
-   data[STATUS_DOOR_V1_NDX] = (inMsec > 0.0) ? DOOR_OPEN : DOOR_CLOSED ; // Any range means its closed.
-
+   if(time_of_last_door_command + TIME_TO_OPEN > now()) {
+     data[STATUS_DOOR_V1_NDX] = DOOR_BUSY;
+   } else {
+     data[STATUS_DOOR_V1_NDX] = (inMsec > 0.0) ? DOOR_OPEN : DOOR_CLOSED ; // Any range means its closed.
+   }
    int led = analogRead(lightPin);
    data[STATUS_LIGHT_V1_NDX] = (led < 50) ? LIGHT_OFF : LIGHT_ON;  // Range 0 - ~500
+#endif         
 
    sendData();
 }
@@ -328,28 +338,38 @@ void sendData() {
      Serial.print("Order: ");
      if(data[COMMAND_V1_NDX] == OPEN_DOOR) {
        Serial.println("OPEN_DOOR");
-     } else {
+     } else if(data[COMMAND_V1_NDX] == CLOSE_DOOR){
        Serial.println("CLOSE_DOOR");
+     } else {
+       Serial.println("DOOR_ORDER_UNKNOWN");
      }
    } else if(data[ACTION_V1_NDX] == COMMANDREPLY) {
      Serial.println("COMMANDREPLY");
      Serial.print("Reply: ");
      if(data[COMMAND_REPLY_V1_NDX] == DOOR_OPENING) {
        Serial.println("DOOR_OPENING");
+     } else if(data[COMMAND_REPLY_V1_NDX] == DOOR_CLOSING) {
+       Serial.println("DOOR_CLOSING");
      } else {
-       Serial.println("DOOR_CLOSINGING");
+       Serial.println("DOOR_REPLY_UNKNOWN");
      }
    } else if(data[ACTION_V1_NDX] == STATUSREPLY) {
      Serial.println("STATUSREPLY");
      if(data[STATUS_DOOR_V1_NDX] == DOOR_OPEN) {
        Serial.println("DOOR_OPEN");
-     } else {
+     } else if(data[STATUS_DOOR_V1_NDX] == DOOR_CLOSED){
        Serial.println("DOOR_CLOSED");
+     } else if(data[STATUS_DOOR_V1_NDX] == DOOR_BUSY){
+       Serial.println("DOOR_BUSY");
+     } else {
+       Serial.println("DOOR_STATUS_UNKNOWN");
      }
      if(data[STATUS_LIGHT_V1_NDX] == LIGHT_ON) {
        Serial.println("LIGHT_ON");
-     } else {
+     } else if(data[STATUS_LIGHT_V1_NDX] == LIGHT_OFF) {
        Serial.println("LIGHT_OFF");
+     } else {
+       Serial.println("LIGHT_STATUS_UNKNOWN");
      }
    }
    Serial.println("===================================");
@@ -451,7 +471,7 @@ unsigned long getServerTime(void) {
   Serial.print(F("Locating time server..."));
 
   // Hostname to IP lookup; use NTP pool (rotates through servers)
-  if(cc3000.getHostByName("pool.ntp.org", &ip)) {
+  if(cc3000.getHostByName("0.pool.ntp.org", &ip)) {
     static const char PROGMEM
       timeReqA[] = { 227,  0,  6, 236 },
       timeReqB[] = {  49, 78, 49,  52 };
@@ -478,15 +498,14 @@ unsigned long getServerTime(void) {
       int count = 1;
       while((!client.available()) &&
             ((millis() - startTime) < responseTimeout)) {
-           if((millis() - startTime) > 5000*count) {
               count++;
-              Serial.print("Client availibility is ");
-              Serial.print(client.available()); Serial.println();
-              Serial.print("Elapsed time is: ");
-              Serial.print((millis()-startTime)); Serial.println();
-              Serial.print("Timeout is     : ");
-              Serial.print(responseTimeout); Serial.println();
-            }
+        Serial.print("Client availibility is ");
+        Serial.print(client.available()); Serial.println();
+        Serial.print("Elapsed time is: ");
+        Serial.print((millis()-startTime)); Serial.println();
+        Serial.print("Timeout is     : ");
+        Serial.print(responseTimeout); Serial.println();
+        delay(100);
       }
       if(client.available()) {
         client.read(buf, sizeof(buf));
@@ -522,9 +541,11 @@ void ActivateGarageDoor()
 {
   Serial.println(F("Door activated."));
   
+#ifndef EMULATOR_MODE
   digitalWrite(LED_DOOR_OPEN, HIGH);   // set the LED on
   digitalWrite(RELAY_PIN, HIGH);  // Open door.
   delay(DOOR_ACTIVATION_PERIOD);              
   digitalWrite(LED_DOOR_OPEN, LOW);    // set the LED off
   digitalWrite(RELAY_PIN, LOW);  // Door will continue to open by itself.
+#endif
 }

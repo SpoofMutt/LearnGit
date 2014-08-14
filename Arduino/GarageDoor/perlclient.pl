@@ -25,10 +25,19 @@ my $OPEN_DOOR   = 0;
 my $CLOSE_DOOR  = 1;
 
 my $sfx = chr(1).chr(2).chr(3).chr(4);
-my $req1 = chr(19).chr(1).chr($STRING)."Hello world!".$sfx;
-my $req2 = chr(8).chr(1).chr($COMMAND).chr($CLOSE_DOOR).$sfx;
-my $req3 = chr(7).chr(1).chr($STATUSREQ).$sfx;
-my $req4 = chr(8).chr(1).chr($COMMAND).chr($OPEN_DOOR).$sfx;
+my @reqs = (chr(19).chr(1).chr($STRING)."Hello world!".$sfx,
+            chr(8).chr(1).chr($COMMAND).chr($CLOSE_DOOR).$sfx,
+            chr(7).chr(1).chr($STATUSREQ).$sfx,
+            chr(8).chr(1).chr($COMMAND).chr($OPEN_DOOR).$sfx,
+            chr(7).chr(1).chr($STATUSREQ).$sfx,
+            chr(7).chr(1).chr($STATUSREQ).$sfx,
+            chr(7).chr(1).chr($STATUSREQ).$sfx,
+            chr(7).chr(1).chr($STATUSREQ).$sfx,
+            chr(8).chr(1).chr($COMMAND).chr($OPEN_DOOR).$sfx,
+            chr(7).chr(1).chr($STATUSREQ).$sfx,
+            chr(7).chr(1).chr($STATUSREQ).$sfx,
+            chr(7).chr(1).chr($STATUSREQ).$sfx,
+            chr(8).chr(1).chr($COMMAND).chr($CLOSE_DOOR).$sfx);
  
 # create a connecting socket
 my $socket = new IO::Socket::INET (
@@ -40,7 +49,7 @@ die "cannot connect to the server $!\n" unless $socket;
 print "connected to the server\n";
  $, = ", ";
 # data to send to a server
-foreach my $req ($req1, $req2, $req3, $req4) {
+foreach my $req (@reqs) {
 	my $size = $socket->send($req);
 	print "\n";
 	print ord(substr( $req,2,1))."_".ord(substr( $req,3,1)).": \t";
