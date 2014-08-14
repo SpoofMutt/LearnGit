@@ -7,40 +7,36 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.text.format.Time;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.text.format.Time;
-
-import net.lasley.android.geofence.GeofenceUtils.REMOVE_TYPE;
-import net.lasley.android.geofence.GeofenceUtils.REQUEST_TYPE;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
+
+import net.lasley.android.geofence.GeofenceUtils.REMOVE_TYPE;
+import net.lasley.android.geofence.GeofenceUtils.REQUEST_TYPE;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,36 +44,45 @@ public class MainActivity extends FragmentActivity implements
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener {
 
-    private final static int  CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-    private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS   =  Geofence.NEVER_EXPIRE;
-    // Store the current request
-    private REQUEST_TYPE mRequestType;
-
-    // Store the current type of removal
-    private REMOVE_TYPE mRemoveType;
-
+    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+    private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = Geofence.NEVER_EXPIRE;
     // Store a list of geofences to add
     List<Geofence> mCurrentGeofences;
     List<SimpleGeofence> mUIGeofence;
-    List<String>   mAreaVisits;
-
+    List<String> mAreaVisits;
+    // Store the current request
+    private REQUEST_TYPE mRequestType;
+    // Store the current type of removal
+    private REMOVE_TYPE mRemoveType;
     // Add handlers
     private GeofenceRequester mGeofenceRequester;
     private GeofenceRemover mGeofenceRemover;
-
     private GeofenceSampleReceiver mBroadcastReceiver;
-
     private IntentFilter mIntentFilter;
-
     private LocationClient mLocationClient;
-
     private ArrayAdapter<String> adapter;
-
-    private Socket Garagesocket;
+//    private GoogleMap map;
     private static final int GARAGE_PORT = 55555;
     private static final String SERVER_HOSTNAME = "lasley.mynetgear.com";
 
-//    private GoogleMap map;
+    private static final byte VERSION = 1;
+
+    private static final byte STRING = 16;
+    private static final byte COMMAND = 10;
+    private static final byte COMMANDREPLY = 45;
+    private static final byte STATUSREQ = 21;
+    private static final byte STATUSREPLY = 33;
+
+    private static final byte DOOR_CLOSED = 0;
+    private static final byte DOOR_OPEN = 1;
+    private static final byte DOOR_OPENING = 2;
+    private static final byte DOOR_CLOSING = 3;
+
+    private static final byte LIGHT_OFF = 0;
+    private static final byte LIGHT_ON = 1;
+
+    private static final byte OPEN_DOOR = 0;
+    private static final byte CLOSE_DOOR = 1;
 
     @Override
     public void onConnected(Bundle dataBundle) {
@@ -133,7 +138,6 @@ public class MainActivity extends FragmentActivity implements
         mGeofenceRequester = new GeofenceRequester(this);
         mGeofenceRemover = new GeofenceRemover(this);
 
-//        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, mIntentFilter);
 
         // Attach to the main UI
         setContentView(net.lasley.android.geofence.R.layout.activity_main);
@@ -145,13 +149,9 @@ public class MainActivity extends FragmentActivity implements
         map = ((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
         map.setMyLocationEnabled(true);
 */
+        sendStatusRequest();
     }
 
-    public void sendMessage() {
-        InetAddress serverAddr = InetAddress.getByName(SERVER_HOSTNAME);
-        Garagesocket = new Socket(serverAddr, GARAGE_PORT);
-    }
-    
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         switch (requestCode) {
@@ -217,7 +217,7 @@ public class MainActivity extends FragmentActivity implements
         try {
             mGeofenceRemover.removeGeofencesByIntent(mGeofenceRequester.getRequestPendingIntent());
         } catch (UnsupportedOperationException e) {
-            Toast.makeText(this, net.lasley.android.geofence.R.string.remove_geofences_already_requested_error,Toast.LENGTH_LONG).show();
+            Toast.makeText(this, net.lasley.android.geofence.R.string.remove_geofences_already_requested_error, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -229,15 +229,15 @@ public class MainActivity extends FragmentActivity implements
 
         mUIGeofence.add(new SimpleGeofence("LOWER_APPROACH", 38.931323d, -104.726197d, 30.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
         // 1/3 Lower Entry
-        mUIGeofence.add(new SimpleGeofence("LOWER_ENTRY",    38.930366d, -104.726935d, 20.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
+        mUIGeofence.add(new SimpleGeofence("LOWER_ENTRY", 38.930366d, -104.726935d, 20.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
         // 1/2 Lower Entry
         //mUIGeofence.add(new SimpleGeofence("LOWER_ENTRY",    38.930106d,  -104.72671d, 20.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
         mUIGeofence.add(new SimpleGeofence("UPPER_APPROACH", 38.932177d, -104.724792d, 20.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT)); //
         // 1/3 Upper Entry
-        mUIGeofence.add(new SimpleGeofence("UPPER_ENTRY",    38.931571d,  -104.724192d,  30.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
+        mUIGeofence.add(new SimpleGeofence("UPPER_ENTRY", 38.931571d, -104.724192d, 30.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
         // 1/2 Upper Entry
         //mUIGeofence.add(new SimpleGeofence("UPPER_ENTRY",    38.931185d,  -104.724138d,  30.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
-        mUIGeofence.add(new SimpleGeofence("DRIVEWAY",       38.930474d,  -104.725154d, 10.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT|Geofence.GEOFENCE_TRANSITION_ENTER));
+        mUIGeofence.add(new SimpleGeofence("DRIVEWAY", 38.930474d, -104.725154d, 10.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT | Geofence.GEOFENCE_TRANSITION_ENTER));
 
 
         mCurrentGeofences.clear();
@@ -252,15 +252,144 @@ public class MainActivity extends FragmentActivity implements
         }
     }
 
+    public void getLocation() {
+        if (servicesConnected()) {
+            Location currentLocation = mLocationClient.getLastLocation();
+            ((TextView) (findViewById(net.lasley.android.geofence.R.id.lat_lng))).setText(GeofenceUtils.getLatLng(this, currentLocation));
+        }
+    }
+
+    protected void sendStatusRequest() {
+        byte[] msg = new byte[7];
+        msg[0] = 7;
+        msg[1] = 1;
+        msg[2] = STATUSREQ;
+        msg[3] = 1;
+        msg[4] = 2;
+        msg[5] = 3;
+        msg[6] = 4;
+        new AsyncGarage().execute(msg);
+    }
+
+    protected void decodeReply(byte[] reply) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Length: ");
+        sb.append(Byte.toString(reply[0]));
+        Log.d("decodeReply", sb.toString());
+        sb = new StringBuilder("Version: ");
+        sb.append(Byte.toString(reply[1]));
+        Log.d("decodeReply", sb.toString());
+        sb = new StringBuilder("Action: ");
+        if (reply[2] == STATUSREPLY) {
+            sb.append("StatusReply");
+            Log.d("decodeReply", sb.toString());
+            sb = new StringBuilder("Door: ");
+            sb.append(Byte.toString(reply[3]));
+            Log.d("decodeReply", sb.toString());
+            TextView t = (TextView)findViewById(R.id.DoorStatus);
+            if(reply[3] == DOOR_OPEN) {
+                t.setText("Open");
+            } else if(reply[3] == DOOR_CLOSED) {
+                t.setText("Closed");
+            } else if(reply[3] == DOOR_CLOSED) {
+                t.setText("Busy");
+            }
+            sb = new StringBuilder("Light: ");
+            sb.append(Byte.toString(reply[4]));
+            Log.d("decodeReply", sb.toString());
+            t = (TextView)findViewById(R.id.LightStatus);
+            if(reply[4] == LIGHT_ON) {
+                t.setText("On");
+            } else if(reply[4] == LIGHT_OFF) {
+                t.setText("Off");
+            }
+        }
+    }
+
+    private class AsyncGarage extends AsyncTask<byte[], Void, byte[]> {
+
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected byte[] doInBackground(byte[] ... outbuffers) {
+            Socket nsocket = new Socket();   //Network Socket
+            byte[] tempdata = new byte[20];
+
+            boolean result = false;
+            try {
+                Log.i("SendDataToNetwork", "Creating socket");
+                SocketAddress sockaddr = new InetSocketAddress(SERVER_HOSTNAME, GARAGE_PORT);
+                nsocket = new Socket();
+                nsocket.connect(sockaddr, 5000); //10 second connection timeout
+                if (nsocket.isConnected()) {
+                    InputStream nis = nsocket.getInputStream(); //Network Input Stream
+                    OutputStream nos = nsocket.getOutputStream(); //Network Output Stream
+
+                    nos.write(outbuffers[0]);
+
+                    byte[] buffer = new byte[4096];
+                    int read = nis.read(buffer, 0, 4096); //This is blocking
+                    tempdata = new byte[read];
+                    System.arraycopy(buffer, 0, tempdata, 0, read);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.i("SendDataToNetwork", "IOException");
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.i("SendDataToNetwork", "Exception");
+            } finally {
+                try {
+                    nsocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                Log.i("SendDataToNetwork", "Finished");
+            }
+            return tempdata;
+        }
+
+        @Override
+        protected void onPostExecute(byte[] result) {
+            super.onPostExecute(result);
+            decodeReply(result);
+        }
+
+    }
+
+    public static class ErrorDialogFragment extends DialogFragment {
+        private Dialog mDialog;
+
+        public ErrorDialogFragment() {
+            super();
+            mDialog = null;
+        }
+
+        public void setDialog(Dialog dialog) {
+            mDialog = dialog;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            return mDialog;
+        }
+    }
+
     public class GeofenceSampleReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCE_ERROR)) {
                 handleGeofenceError(context, intent);
-            } else if ( TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCES_ADDED)
-                         ||
-                        TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCES_REMOVED)) {
+            } else if (TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCES_ADDED)
+                    ||
+                    TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCES_REMOVED)) {
                 handleGeofenceStatus(context, intent);
             } else if (TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCE_ENTER)) {
                 handleGeofenceEnter(context, intent);
@@ -288,7 +417,7 @@ public class MainActivity extends FragmentActivity implements
             Time tmp = new Time();
             tmp.setToNow();
             String msg = tmp.format("%T ") + ": " + intent.getStringExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS);
-            adapter.insert(msg,0);
+            adapter.insert(msg, 0);
             Log.d(GeofenceUtils.APPTAG, action);
             getLocation();
         }
@@ -299,30 +428,4 @@ public class MainActivity extends FragmentActivity implements
             Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
         }
     }
-
-    public static class ErrorDialogFragment extends DialogFragment {
-        private Dialog mDialog;
-
-        public ErrorDialogFragment() {
-            super();
-            mDialog = null;
-        }
-
-        public void setDialog(Dialog dialog) {
-            mDialog = dialog;
-        }
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            return mDialog;
-        }
-    }
-
-    public void getLocation() {
-        if (servicesConnected()) {
-            Location currentLocation = mLocationClient.getLastLocation();
-            ((TextView) (findViewById(net.lasley.android.geofence.R.id.lat_lng))).setText(GeofenceUtils.getLatLng(this, currentLocation));
-        }
-    }
-
 }
