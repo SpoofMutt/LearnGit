@@ -224,11 +224,17 @@ public class MainActivity extends FragmentActivity implements
             return;
         }
 
-        mUIGeofence.add(new SimpleGeofence("LOWER_APPROACH", 38.931398d, -104.726289d, 30.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
-        mUIGeofence.add(new SimpleGeofence("LOWER_ENTRY",    38.93018d,  -104.726657d, 20.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
-        mUIGeofence.add(new SimpleGeofence("UPPER_APPROACH", 38.931847d, -104.724304d, 20.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT)); //
-        mUIGeofence.add(new SimpleGeofence("UPPER_ENTRY",    38.93224d,  -104.72464d,  30.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
-        mUIGeofence.add(new SimpleGeofence("DRIVEWAY",  38.93050064216459d, -104.72520038836058d, 10.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT|Geofence.GEOFENCE_TRANSITION_ENTER));
+        mUIGeofence.add(new SimpleGeofence("LOWER_APPROACH", 38.931323d, -104.726197d, 30.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
+        // 1/3 Lower Entry
+        mUIGeofence.add(new SimpleGeofence("LOWER_ENTRY",    38.930366d, -104.726935d, 20.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
+        // 1/2 Lower Entry
+        //mUIGeofence.add(new SimpleGeofence("LOWER_ENTRY",    38.930106d,  -104.72671d, 20.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
+        mUIGeofence.add(new SimpleGeofence("UPPER_APPROACH", 38.932177d, -104.724792d, 20.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT)); //
+        // 1/3 Upper Entry
+        mUIGeofence.add(new SimpleGeofence("UPPER_ENTRY",    38.931571d,  -104.724192d,  30.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
+        // 1/2 Upper Entry
+        //mUIGeofence.add(new SimpleGeofence("UPPER_ENTRY",    38.931185d,  -104.724138d,  30.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
+        mUIGeofence.add(new SimpleGeofence("DRIVEWAY",       38.930474d,  -104.725154d, 10.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT|Geofence.GEOFENCE_TRANSITION_ENTER));
 
 
         mCurrentGeofences.clear();

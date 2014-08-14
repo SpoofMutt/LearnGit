@@ -34,10 +34,27 @@ TimeChangeRule *tcr;        //pointer to the time change rule, use to get TZ abb
 
 // Command Data
 // 1 byte length
+// 1 byte Version = 0x01
 // 1 action byte
 // command byte, status 1 byte , string...
 //               status 2 byte   ....
 // 4 byte crc - not used right now.
+
+#define LENGTH_V1_NDX  0
+#define VERSION_V1_NDX 1
+#define VERSION        data[VERSION_V1_NDX] = 0x01
+#define ACTION_V1_NDX  2
+#define COMMAND_V1_NDX 3
+#define COMMAND_REPLY_V1_NDX 3
+#define STR_START_V1_NDX 3
+#define STATUS1_V1_NDX 3
+#define STATUS2_V1_NDX 4
+
+// Version 1 Lengths
+#define COMMAND_LENGTH_V1 data[LENGTH_V1_NDX]         = 8
+#define COMMAND_REPLY_LENGTH_V1 data[LENGTH_V1_NDX]   = 8
+#define STATUS_REQUEST_LENGTH_V1  data[LENGTH_V1_NDX] = 7
+#define STATUS_REPLY_LENGTH_V1  data[LENGTH_V1_NDX]   = 9
 
 // Action Byte
 #define COMMAND     10
@@ -166,65 +183,102 @@ void loop(void) {
        // Read a byte and write it to all clients.
        uint8_t data[80];
        int size_read = client.read(data,80,0);
-       if(size_read > 5 && size_read == data[0]) {
+
+       if(size_read == data[LENGTH_V1_NDX]) {
          Serial.println(size_read);
-         if(data[1] == STRING) {
-           server.write(data,size_read);
-         } else if(data[1] == COMMAND) {
+         if(data[ACTION_V1_NDX] == STRING) {
+           VERSION;
+           data[data[LENGTH_V1_NDX]-4] = 1;           // Bogus CRC
+           data[data[LENGTH_V1_NDX]-3] = 2;
+           data[data[LENGTH_V1_NDX]-2] = 3;
+           data[data[LENGTH_V1_NDX]-1] = 4;
+           server.write(data,data[LENGTH_V1_NDX]);   // Just echo string.
+         } else if(data[ACTION_V1_NDX] == COMMAND) { // Door command.
            if(time_of_last_door_command + TIME_TO_OPEN < now()) {
-             data[0] = 6;
-             data[1] = COMMANDREPLY;
-             if(data[2] == OPEN_DOOR) {
-               data[2] = DOOR_OPENING;
-             } else if(data[2] == CLOSE_DOOR) {
-               data[2] = DOOR_CLOSING;
+             COMMAND_REPLY_LENGTH_V1;
+             VERSION;
+             data[ACTION_V1_NDX] = COMMANDREPLY;
+             if(data[COMMAND_V1_NDX] == OPEN_DOOR) {
+               data[COMMAND_REPLY_V1_NDX] = DOOR_OPENING;
+             } else if(data[COMMAND_V1_NDX] == CLOSE_DOOR) {
+               data[COMMAND_REPLY_V1_NDX] = DOOR_CLOSING;
              }
-             server.write(data,6);
+             data[data[LENGTH_V1_NDX]-4] = 1;           // Bogus CRC
+             data[data[LENGTH_V1_NDX]-3] = 2;
+             data[data[LENGTH_V1_NDX]-2] = 3;
+             data[data[LENGTH_V1_NDX]-1] = 4;
+             server.write(data,data[data[LENGTH_V1_NDX]]); // Send reply
              time_of_last_door_command = now();
-             last_door_command = data[2];
+             last_door_command = data[COMMAND_V1_NDX];
            } else {
-             if(last_door_command == data[2]) {
-               data[0] = 6;
-               data[1] = COMMANDREPLY;
+             if(last_door_command == data[COMMAND_V1_NDX]) {
+               COMMAND_REPLY_LENGTH_V1;
+               data[ACTION_V1_NDX] = COMMANDREPLY;
                if(last_door_command == OPEN_DOOR) {
-                 data[2] = DOOR_OPENING;
+                 data[COMMAND_REPLY_V1_NDX] = DOOR_OPENING;
                } else {
-                 data[2] = DOOR_CLOSING;
+                 data[COMMAND_REPLY_V1_NDX] = DOOR_CLOSING;
                }
-               server.write(data,6);
+               data[data[LENGTH_V1_NDX]-4] = 1;           // Bogus CRC
+               data[data[LENGTH_V1_NDX]-3] = 2;
+               data[data[LENGTH_V1_NDX]-2] = 3;
+               data[data[LENGTH_V1_NDX]-1] = 4;
+               server.write(data,data[LENGTH_V1_NDX]);
              } else {
                int time_to_wait = (TIME_TO_OPEN + time_of_last_door_command) - now();
-               data[0] = 6;
-               data[1] = COMMANDREPLY;
+               COMMAND_REPLY_LENGTH_V1;
+               data[ACTION_V1_NDX] = COMMANDREPLY;
                if(last_door_command == OPEN_DOOR) {
-                 data[2] = DOOR_OPENING;
+                 data[COMMAND_REPLY_V1_NDX] = DOOR_OPENING;
                } else {
-                 data[2] = DOOR_CLOSING;
+                 data[COMMAND_REPLY_V1_NDX] = DOOR_CLOSING;
                }
-               server.write(data,6);
+               data[data[LENGTH_V1_NDX]-4] = 1;           // Bogus CRC
+               data[data[LENGTH_V1_NDX]-3] = 2;
+               data[data[LENGTH_V1_NDX]-2] = 3;
+               data[data[LENGTH_V1_NDX]-1] = 4;
+               server.write(data,data[LENGTH_V1_NDX]);
              }
            }
-         } else if(data[1] == STATUSREQ) {
-           data[0] = 8;
-           data[1] = STATUSREPLY;
-           data[2] = 5;
-           data[3] = 6;
-           data[4] = 1;
-           data[5] = 2;
-           data[6] = 3;
-           data[7] = 4;
-           server.write(data,8);
+         } else if(data[ACTION_V1_NDX] == STATUSREQ) {
+           STATUS_REPLY_LENGTH_V1;
+           data[ACTION_V1_NDX] = STATUSREPLY;
+           data[STATUS1_V1_NDX] = 5; // Bogus data
+           data[STATUS2_V1_NDX] = 6;
+           data[data[LENGTH_V1_NDX]-4] = 1;           // Bogus CRC
+           data[data[LENGTH_V1_NDX]-3] = 2;
+           data[data[LENGTH_V1_NDX]-2] = 3;
+           data[data[LENGTH_V1_NDX]-1] = 4;
+           server.write(data,data[LENGTH_V1_NDX]);
          }
        } else {
          Serial.print("Bad Read: ");
          Serial.print(size_read);
          Serial.print(" vs ");
-         Serial.println(data[0]);
+         Serial.println(data[LENGTH_V1_NDX]);
+         VERSION;
+         data[ACTION_V1_NDX] = STRING;
+         data[STR_START_V1_NDX]   = 'B';
+         data[STR_START_V1_NDX+1] = 'a';
+         data[STR_START_V1_NDX+2] = 'd';
+         data[STR_START_V1_NDX+3] = ' ';
+         data[STR_START_V1_NDX+4] = 'R';
+         data[STR_START_V1_NDX+5] = 'e';
+         data[STR_START_V1_NDX+6] = 'a';
+         data[STR_START_V1_NDX+7] = 'd';
+         data[STR_START_V1_NDX+8] = 1;           // Bogus CRC
+         data[STR_START_V1_NDX+9] = 2;
+         data[STR_START_V1_NDX+10] = 3;
+         data[STR_START_V1_NDX+11] = 4;
+         data[LENGTH_V1_NDX] = STR_START_V1_NDX+12;
+         server.write(data,data[LENGTH_V1_NDX]);   // Just echo string.
+
          server.write("Bad Read");
        }
      }
   }
 }
+
 
 //Function to print time with time zone
 void printTime(time_t t, char *tz)
