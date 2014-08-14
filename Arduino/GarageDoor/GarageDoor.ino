@@ -1,3 +1,5 @@
+#include <Ultrasonic.h>
+
 #include <Adafruit_CC3000.h>
 #include <ccspi.h>
 #include <SPI.h>
@@ -7,15 +9,23 @@
 #include "utility/socket.h"
 //#include "crc.h";
 
-// These are the interrupt and control pins
-#define ADAFRUIT_CC3000_IRQ   3  // MUST be an interrupt pin!
-// These can be any two pins
-#define ADAFRUIT_CC3000_VBAT  5
-#define ADAFRUIT_CC3000_CS    10
-// Use hardware SPI for the remaining pins
-// On an UNO, SCK = 13, MISO = 12, and MOSI = 11
-Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ, ADAFRUIT_CC3000_VBAT,
-                                         SPI_CLOCK_DIVIDER); // you can change this clock speed but DI
+int lightPin = 0;  //define a pin for Photo resistor
+
+// Sonic Ranging
+#define TRIGGER_PIN  12
+#define ECHO_PIN     11
+
+// Door opener relay
+#define RELAY_PIN     7
+
+// LED status pins
+#define LED_DOOR_OPEN  8
+
+#define ADAFRUIT_CC3000_IRQ    3  // MUST be an interrupt pin!
+#define ADAFRUIT_CC3000_VBAT   5  // These can be any pins
+#define ADAFRUIT_CC3000_CS     10 // These can be any pins
+#define ADAFRUIT_REMAINING_PIN 13 // Use hardware SPI for the remaining pins. On an UNO, SCK = 13, MISO = 12, and MOSI = 11
+
 
 #define WLAN_SSID       "WHITESPRUCE2"        // cannot be longer than 32 characters!
 #define WLAN_PASS       "underdog"
@@ -25,6 +35,19 @@ Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ
 #define GARAGE_PORT 55555
 Adafruit_CC3000_Client client;
 Adafruit_CC3000_Server server(GARAGE_PORT);
+
+/*
+Duration to close the switch on the door opener. This should be long
+enough for the mechanism to start; typically it doesn't to remain 
+activated for the door to complete its motion. It is the same as the
+time you'd hold down the button to start the door moving. 
+*/
+#define DOOR_ACTIVATION_PERIOD 600 // [ms]
+
+Ultrasonic ultrasonic(TRIGGER_PIN, ECHO_PIN);
+
+Adafruit_CC3000 cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, ADAFRUIT_CC3000_IRQ, ADAFRUIT_CC3000_VBAT,
+                                         SPI_CLOCK_DIVIDER); // you can change this clock speed but DI
 
 TimeChangeRule myDST = {"MDT", Second, Sun, Mar, 2, -360};    //Daylight time = UTC - 6 hours
 TimeChangeRule mySTD = {"MST", First, Sun, Nov, 2, -420};     //Standard time = UTC - 7 hours
@@ -36,8 +59,8 @@ TimeChangeRule *tcr;        //pointer to the time change rule, use to get TZ abb
 // 1 byte length
 // 1 byte Version = 0x01
 // 1 action byte
-// command byte, status 1 byte , string...
-//               status 2 byte   ....
+// command byte, door  status 1 byte , string...
+//               light status 2 byte   ....
 // 4 byte crc - not used right now.
 
 #define LENGTH_V1_NDX  0
@@ -47,8 +70,8 @@ TimeChangeRule *tcr;        //pointer to the time change rule, use to get TZ abb
 #define COMMAND_V1_NDX 3
 #define COMMAND_REPLY_V1_NDX 3
 #define STR_START_V1_NDX 3
-#define STATUS1_V1_NDX 3
-#define STATUS2_V1_NDX 4
+#define STATUS_DOOR_V1_NDX 3
+#define STATUS_LIGHT_V1_NDX 4
 
 // Version 1 Lengths
 #define COMMAND_LENGTH_V1 data[LENGTH_V1_NDX]         = 8
@@ -80,6 +103,9 @@ TimeChangeRule *tcr;        //pointer to the time change rule, use to get TZ abb
 #define TIME_TO_OPEN 30 // Seconds
 unsigned long time_of_last_door_command = 0;
 uint8_t       last_door_command;
+uint8_t       data[80];
+
+float inMsec;
 
 const unsigned long
   connectTimeout  = 15L * 1000L, // Max time to wait for server connection
@@ -90,7 +116,10 @@ unsigned long
 void setup(void)
 {
   Serial.begin(9600);
-  Serial.println(F("Garage Here!\n")); 
+  Serial.println(F("Garage Here!")); 
+
+  Serial.println(F("Configuring pinouts."));
+  SetupDoorControl();
 
   Serial.println(F("\nInitialising the CC3000 ..."));
   if (!cc3000.begin()) {
@@ -181,37 +210,35 @@ void loop(void) {
      // Check if there is data available to read.
      if (client.available() > 0) {
        // Read a byte and write it to all clients.
-       uint8_t data[80];
        int size_read = client.read(data,80,0);
 
        if(size_read == data[LENGTH_V1_NDX]) {
          Serial.println(size_read);
          if(data[ACTION_V1_NDX] == STRING) {
            VERSION;
-           data[data[LENGTH_V1_NDX]-4] = 1;           // Bogus CRC
-           data[data[LENGTH_V1_NDX]-3] = 2;
-           data[data[LENGTH_V1_NDX]-2] = 3;
-           data[data[LENGTH_V1_NDX]-1] = 4;
-           server.write(data,data[LENGTH_V1_NDX]);   // Just echo string.
+           sendData(); // Just echo
          } else if(data[ACTION_V1_NDX] == COMMAND) { // Door command.
-           if(time_of_last_door_command + TIME_TO_OPEN < now()) {
+           if(time_of_last_door_command + TIME_TO_OPEN < now()) { // Door is static.
              COMMAND_REPLY_LENGTH_V1;
              VERSION;
              data[ACTION_V1_NDX] = COMMANDREPLY;
-             if(data[COMMAND_V1_NDX] == OPEN_DOOR) {
+
+             inMsec = ultrasonic.convert(ultrasonic.timing(), Ultrasonic::IN);
+             int doorState = (inMsec > 0.0) ? DOOR_OPENED : DOOR_CLOSED ; // Any range means its closed.
+
+             if(data[COMMAND_V1_NDX] == OPEN_DOOR && doorState == DOOR_CLOSE) { // Open door
                data[COMMAND_REPLY_V1_NDX] = DOOR_OPENING;
-             } else if(data[COMMAND_V1_NDX] == CLOSE_DOOR) {
+			   ActivateGarageDoor();
+             } else if(data[COMMAND_V1_NDX] == CLOSE_DOOR && doorState == DOOR_OPENED) { // Close door.
                data[COMMAND_REPLY_V1_NDX] = DOOR_CLOSING;
-             }
-             data[data[LENGTH_V1_NDX]-4] = 1;           // Bogus CRC
-             data[data[LENGTH_V1_NDX]-3] = 2;
-             data[data[LENGTH_V1_NDX]-2] = 3;
-             data[data[LENGTH_V1_NDX]-1] = 4;
-             server.write(data,data[data[LENGTH_V1_NDX]]); // Send reply
+			   ActivateGarageDoor();
+             } else { // Already there. Just give status.
+			 }
+             sendData();
              time_of_last_door_command = now();
              last_door_command = data[COMMAND_V1_NDX];
-           } else {
-             if(last_door_command == data[COMMAND_V1_NDX]) {
+           } else {                                             // Door state changing state. Must wait.
+             if(last_door_command == data[COMMAND_V1_NDX]) {    // Already commanded.
                COMMAND_REPLY_LENGTH_V1;
                data[ACTION_V1_NDX] = COMMANDREPLY;
                if(last_door_command == OPEN_DOOR) {
@@ -219,12 +246,8 @@ void loop(void) {
                } else {
                  data[COMMAND_REPLY_V1_NDX] = DOOR_CLOSING;
                }
-               data[data[LENGTH_V1_NDX]-4] = 1;           // Bogus CRC
-               data[data[LENGTH_V1_NDX]-3] = 2;
-               data[data[LENGTH_V1_NDX]-2] = 3;
-               data[data[LENGTH_V1_NDX]-1] = 4;
-               server.write(data,data[LENGTH_V1_NDX]);
-             } else {
+               sendData();
+             } else {                                           // Conflicting command.
                int time_to_wait = (TIME_TO_OPEN + time_of_last_door_command) - now();
                COMMAND_REPLY_LENGTH_V1;
                data[ACTION_V1_NDX] = COMMANDREPLY;
@@ -233,23 +256,11 @@ void loop(void) {
                } else {
                  data[COMMAND_REPLY_V1_NDX] = DOOR_CLOSING;
                }
-               data[data[LENGTH_V1_NDX]-4] = 1;           // Bogus CRC
-               data[data[LENGTH_V1_NDX]-3] = 2;
-               data[data[LENGTH_V1_NDX]-2] = 3;
-               data[data[LENGTH_V1_NDX]-1] = 4;
-               server.write(data,data[LENGTH_V1_NDX]);
+               sendData();
              }
            }
-         } else if(data[ACTION_V1_NDX] == STATUSREQ) {
-           STATUS_REPLY_LENGTH_V1;
-           data[ACTION_V1_NDX] = STATUSREPLY;
-           data[STATUS1_V1_NDX] = 5; // Bogus data
-           data[STATUS2_V1_NDX] = 6;
-           data[data[LENGTH_V1_NDX]-4] = 1;           // Bogus CRC
-           data[data[LENGTH_V1_NDX]-3] = 2;
-           data[data[LENGTH_V1_NDX]-2] = 3;
-           data[data[LENGTH_V1_NDX]-1] = 4;
-           server.write(data,data[LENGTH_V1_NDX]);
+         } else if(data[ACTION_V1_NDX] == STATUSREQ) {    // Status Request
+		   sendStatusReply();
          }
        } else {
          Serial.print("Bad Read: ");
@@ -266,37 +277,51 @@ void loop(void) {
          data[STR_START_V1_NDX+5] = 'e';
          data[STR_START_V1_NDX+6] = 'a';
          data[STR_START_V1_NDX+7] = 'd';
-         data[STR_START_V1_NDX+8] = 1;           // Bogus CRC
-         data[STR_START_V1_NDX+9] = 2;
-         data[STR_START_V1_NDX+10] = 3;
-         data[STR_START_V1_NDX+11] = 4;
          data[LENGTH_V1_NDX] = STR_START_V1_NDX+12;
-         server.write(data,data[LENGTH_V1_NDX]);   // Just echo string.
-
-         server.write("Bad Read");
+         sendData();
        }
      }
   }
 }
 
+void sendStatusReply() {
+   STATUS_REPLY_LENGTH_V1;
+   data[ACTION_V1_NDX] = STATUSREPLY;
+
+   inMsec = ultrasonic.convert(ultrasonic.timing(), Ultrasonic::IN);
+   data[STATUS_DOOR_V1_NDX] = (inMsec > 0.0) ? DOOR_OPENED : DOOR_CLOSED ; // Any range means its closed.
+
+   int led = analogRead(lightPin);
+   data[STATUS_LIGHT_V1_NDX] = (led < 50) ? LIGHT_OFF : LIGHT_ON;  // Range 0 - ~500
+
+   sendData();
+}
+
+void sendData() {
+  data[data[LENGTH_V1_NDX]-4] = 1;           // Bogus CRC
+  data[data[LENGTH_V1_NDX]-3] = 2;
+  data[data[LENGTH_V1_NDX]-2] = 3;
+  data[data[LENGTH_V1_NDX]-1] = 4;
+  server.write(data,data[LENGTH_V1_NDX]);   // Just echo string.
+}
 
 //Function to print time with time zone
 void printTime(time_t t, char *tz)
 {
-    sPrintI00(hour(t));
-    sPrintDigits(minute(t));
-    sPrintDigits(second(t));
-    Serial.print(' ');
-    Serial.print(dayShortStr(weekday(t)));
-    Serial.print(' ');
-    sPrintI00(day(t));
-    Serial.print(' ');
-    Serial.print(monthShortStr(month(t)));
-    Serial.print(' ');
-    Serial.print(year(t));
-    Serial.print(' ');
-    Serial.print(tz);
-    Serial.println();
+  sPrintI00(hour(t));
+  sPrintDigits(minute(t));
+  sPrintDigits(second(t));
+  Serial.print(' ');
+  Serial.print(dayShortStr(weekday(t)));
+  Serial.print(' ');
+  sPrintI00(day(t));
+  Serial.print(' ');
+  Serial.print(monthShortStr(month(t)));
+  Serial.print(' ');
+  Serial.print(year(t));
+  Serial.print(' ');
+  Serial.print(tz);
+  Serial.println();
 }
 
 //Print an integer in "00" format (with leading zero).
@@ -420,4 +445,30 @@ unsigned long getServerTime(void) {
   }
   if(!t) Serial.println(F("error"));
   return t;
+}
+
+/*
+Configures pin mode for the digital output that controls the garage door
+opener & sets the to a default (deactivated state). 
+*/
+void SetupDoorControl()
+{
+  pinMode(LED_DOOR_OPEN, OUTPUT);     
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(LED_DOOR_OPEN, LOW);
+  digitalWrite(RELAY_PIN, LOW);
+}
+
+/*
+Briefly triggers the garage door opener & flashes the indicator. 
+*/
+void ActivateGarageDoor()
+{
+  Serial.println(F("Door activated."));
+  
+  digitalWrite(LED_DOOR_OPEN, HIGH);   // set the LED on
+  digitalWrite(RELAY_PIN, HIGH);  // Open door.
+  delay(DOOR_ACTIVATION_PERIOD);              
+  digitalWrite(RELAY_PIN, LOW);    // set the LED off
+  digitalWrite(PIN_DOOR, LOW);  // Door will continue to open by itself.
 }
