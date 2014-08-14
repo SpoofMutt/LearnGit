@@ -9,6 +9,8 @@
 #include "utility/socket.h"
 //#include "crc.h";
 
+//#define ENABLE_NTP 1
+
 int lightPin = 0;  //define a pin for Photo resistor
 
 // Sonic Ranging
@@ -88,7 +90,7 @@ TimeChangeRule *tcr;        //pointer to the time change rule, use to get TZ abb
 
 // Status Byte1
 #define DOOR_CLOSED  0
-#define DOOR_OPENED  1
+#define DOOR_OPEN    1
 #define DOOR_OPENING 2
 #define DOOR_CLOSING 3
 
@@ -110,8 +112,6 @@ float inMsec;
 const unsigned long
   connectTimeout  = 15L * 1000L, // Max time to wait for server connection
   responseTimeout = 15L * 1000L; // Max time to wait for data from server
-unsigned long
-  lastPolledTime  = 0L; // Last value retrieved from time server
 
 void setup(void)
 {
@@ -178,13 +178,17 @@ void setup(void)
   }
   server.begin();
   
+#ifdef ENABLE_NTP
   setSyncProvider(getServerTime);
   setSyncInterval(24*60*60);
-  while(timeStatus() == timeNotSet) {
+  int count = 0;
+  while(timeStatus() == timeNotSet && count < 3) {
     Serial.println("Waiting 5 secs to try again.");
     delay(5000L);
     now();
+    count++;
   }
+#endif
   Serial.println(F("Listening..."));
 }
 
@@ -193,49 +197,60 @@ void setup(void)
 // Otherwise use millis() to estimate time since last query.  Plenty accurate.
 void loop(void) {
 
-  utc = now();
-  if(utc-lastPolledTime > 15) {
-    local = myTZ.toLocal(utc, &tcr);
-    printTime(local, tcr -> abbrev);
-    lastPolledTime = utc;
-  }
   delay(1000);
   
   // Try to get a client which is connected.
-  Serial.print(utc);
-  Serial.println(":  Looking for clients.");
+//  Serial.print(utc);
+//  Serial.println(":  Looking for clients.");
   Adafruit_CC3000_ClientRef client = server.available();
   if (client) {
+     utc = now();
+     local = myTZ.toLocal(utc, &tcr);
+     printTime(local, tcr -> abbrev);
      Serial.println("Found client");
      // Check if there is data available to read.
      if (client.available() > 0) {
        // Read a byte and write it to all clients.
        int size_read = client.read(data,80,0);
-
        if(size_read == data[LENGTH_V1_NDX]) {
-         Serial.println(size_read);
+         Serial.print("Size: ");
+         Serial.println(data[LENGTH_V1_NDX]);
+         Serial.print("Version: ");
+         Serial.println(data[VERSION_V1_NDX]);
+         Serial.print("Action: ");
          if(data[ACTION_V1_NDX] == STRING) {
+           Serial.println("STRING");
            VERSION;
            sendData(); // Just echo
          } else if(data[ACTION_V1_NDX] == COMMAND) { // Door command.
+           Serial.println("COMMAND");
+           Serial.print("Order: ");
+           if(data[COMMAND_V1_NDX] == OPEN_DOOR) {
+             Serial.println("OPEN_DOOR");
+           } else {
+             Serial.println("CLOSE_DOOR");
+           }
            if(time_of_last_door_command + TIME_TO_OPEN < now()) { // Door is static.
              COMMAND_REPLY_LENGTH_V1;
              VERSION;
              data[ACTION_V1_NDX] = COMMANDREPLY;
 
              inMsec = ultrasonic.convert(ultrasonic.timing(), Ultrasonic::IN);
-             int doorState = (inMsec > 0.0) ? DOOR_OPENED : DOOR_CLOSED ; // Any range means its closed.
+             int doorState = (inMsec > 0.0) ? DOOR_OPEN : DOOR_CLOSED ; // Any range means its closed.
 
-             if(data[COMMAND_V1_NDX] == OPEN_DOOR && doorState == DOOR_CLOSE) { // Open door
+             if(data[COMMAND_V1_NDX] == OPEN_DOOR && doorState == DOOR_CLOSED) { // Open door
                data[COMMAND_REPLY_V1_NDX] = DOOR_OPENING;
-			   ActivateGarageDoor();
-             } else if(data[COMMAND_V1_NDX] == CLOSE_DOOR && doorState == DOOR_OPENED) { // Close door.
+               sendData();
+               time_of_last_door_command = now();
+               ActivateGarageDoor();
+             } else if(data[COMMAND_V1_NDX] == CLOSE_DOOR && doorState == DOOR_OPEN) { // Close door.
                data[COMMAND_REPLY_V1_NDX] = DOOR_CLOSING;
-			   ActivateGarageDoor();
+               sendData();
+               time_of_last_door_command = now();
+               ActivateGarageDoor();
              } else { // Already there. Just give status.
-			 }
-             sendData();
-             time_of_last_door_command = now();
+                sendStatusReply();
+	     }
              last_door_command = data[COMMAND_V1_NDX];
            } else {                                             // Door state changing state. Must wait.
              if(last_door_command == data[COMMAND_V1_NDX]) {    // Already commanded.
@@ -260,7 +275,8 @@ void loop(void) {
              }
            }
          } else if(data[ACTION_V1_NDX] == STATUSREQ) {    // Status Request
-		   sendStatusReply();
+           Serial.println("STATUSREQ");
+           sendStatusReply();
          }
        } else {
          Serial.print("Bad Read: ");
@@ -289,7 +305,7 @@ void sendStatusReply() {
    data[ACTION_V1_NDX] = STATUSREPLY;
 
    inMsec = ultrasonic.convert(ultrasonic.timing(), Ultrasonic::IN);
-   data[STATUS_DOOR_V1_NDX] = (inMsec > 0.0) ? DOOR_OPENED : DOOR_CLOSED ; // Any range means its closed.
+   data[STATUS_DOOR_V1_NDX] = (inMsec > 0.0) ? DOOR_OPEN : DOOR_CLOSED ; // Any range means its closed.
 
    int led = analogRead(lightPin);
    data[STATUS_LIGHT_V1_NDX] = (led < 50) ? LIGHT_OFF : LIGHT_ON;  // Range 0 - ~500
@@ -298,6 +314,46 @@ void sendStatusReply() {
 }
 
 void sendData() {
+   Serial.println();
+   Serial.println("Response:");
+   Serial.print("Size: ");
+   Serial.println(data[LENGTH_V1_NDX]);
+   Serial.print("Version: ");
+   Serial.println(data[VERSION_V1_NDX]);
+   Serial.print("Action: ");
+   if(data[ACTION_V1_NDX] == STRING) {
+     Serial.println("STRING");
+   } else if(data[ACTION_V1_NDX] == COMMAND) { // Door command.
+     Serial.println("COMMAND");
+     Serial.print("Order: ");
+     if(data[COMMAND_V1_NDX] == OPEN_DOOR) {
+       Serial.println("OPEN_DOOR");
+     } else {
+       Serial.println("CLOSE_DOOR");
+     }
+   } else if(data[ACTION_V1_NDX] == COMMANDREPLY) {
+     Serial.println("COMMANDREPLY");
+     Serial.print("Reply: ");
+     if(data[COMMAND_REPLY_V1_NDX] == DOOR_OPENING) {
+       Serial.println("DOOR_OPENING");
+     } else {
+       Serial.println("DOOR_CLOSINGING");
+     }
+   } else if(data[ACTION_V1_NDX] == STATUSREPLY) {
+     Serial.println("STATUSREPLY");
+     if(data[STATUS_DOOR_V1_NDX] == DOOR_OPEN) {
+       Serial.println("DOOR_OPEN");
+     } else {
+       Serial.println("DOOR_CLOSED");
+     }
+     if(data[STATUS_LIGHT_V1_NDX] == LIGHT_ON) {
+       Serial.println("LIGHT_ON");
+     } else {
+       Serial.println("LIGHT_OFF");
+     }
+   }
+   Serial.println("===================================");
+   
   data[data[LENGTH_V1_NDX]-4] = 1;           // Bogus CRC
   data[data[LENGTH_V1_NDX]-3] = 2;
   data[data[LENGTH_V1_NDX]-2] = 3;
@@ -469,6 +525,6 @@ void ActivateGarageDoor()
   digitalWrite(LED_DOOR_OPEN, HIGH);   // set the LED on
   digitalWrite(RELAY_PIN, HIGH);  // Open door.
   delay(DOOR_ACTIVATION_PERIOD);              
-  digitalWrite(RELAY_PIN, LOW);    // set the LED off
-  digitalWrite(PIN_DOOR, LOW);  // Door will continue to open by itself.
+  digitalWrite(LED_DOOR_OPEN, LOW);    // set the LED off
+  digitalWrite(RELAY_PIN, LOW);  // Door will continue to open by itself.
 }
