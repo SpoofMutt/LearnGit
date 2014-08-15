@@ -17,18 +17,12 @@
 
 <resources>
     <!-- app name and title -->
-    <string name="app_name">Geofence Detection</string>
-    <string name="title_activity_geofence">Geofence Entry</string>
+    <string name="app_name">Home Garage Door Remote</string>
+    <string name="title_activity_geofence">Home Garage Door Remote</string>
 
     <!-- UI -->
-    <string name="geofence1">Geofence 1</string>
-    <string name="geofence2">Geofence 2</string>
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
-    <string name="menu_item_clear_geofence1">Clear geofence 1</string>
-    <string name="menu_item_clear_geofence2">Clear geofence 2</string>
-    <string name="menu_item_clear_all_geofences">Clear all geofences</string>
-    <string name="menu_item_clear_geofence_history">Clear stored geofences</string>
     <string name="radius">Radius</string>
 
     <!-- Messages -->
@@ -105,8 +99,6 @@
         Received an unknown activity request code %1$d in onActivityResult.
     </string>
     <string name="unregister_geofence">Remove geofences</string>
-    <string name="unregister_geofence1">Remove geofence 1</string>
-    <string name="unregister_geofence2">Remove geofence 2</string>
 
     <!-- Number patterns -->
     <string name="lat_lng_pattern">* ###.00000000;* -###.00000000</string>

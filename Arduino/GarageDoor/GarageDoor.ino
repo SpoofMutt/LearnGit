@@ -103,6 +103,7 @@ TimeChangeRule *tcr;        //pointer to the time change rule, use to get TZ abb
 // Command Byte
 #define OPEN_DOOR   0
 #define CLOSE_DOOR  1
+#define TOGGLE_DOOR 2
 
 #define TIME_TO_OPEN 30 // Seconds
 unsigned long time_of_last_door_command = 0;
@@ -246,6 +247,13 @@ void loop(void) {
 #ifdef EMULATOR_MODE
              doorState = door_state;
 #endif         
+             if(data[COMMAND_V1_NDX] == TOGGLE_DOOR) {
+               if(doorState == DOOR_CLOSED) {
+                 data[COMMAND_V1_NDX] = OPEN_DOOR;
+               } else {
+                 data[COMMAND_V1_NDX] = CLOSE_DOOR;
+               }
+             }
              if(data[COMMAND_V1_NDX] == OPEN_DOOR && doorState == DOOR_CLOSED) { // Open door
                time_of_last_door_command = now();
                last_door_command = data[COMMAND_V1_NDX];

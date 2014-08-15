@@ -1,4 +1,4 @@
-package net.lasley.android.geofence;
+package net.lasley.android.HGDOpener;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -10,16 +10,17 @@ import android.content.IntentSender;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,20 +30,17 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 
-import net.lasley.android.geofence.GeofenceUtils.REMOVE_TYPE;
-import net.lasley.android.geofence.GeofenceUtils.REQUEST_TYPE;
+import net.lasley.android.HGDOpener.GeofenceUtils.REMOVE_TYPE;
+import net.lasley.android.HGDOpener.GeofenceUtils.REQUEST_TYPE;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
@@ -70,10 +68,15 @@ public class MainActivity extends FragmentActivity implements
     private IntentFilter mIntentFilter;
     private LocationClient mLocationClient;
     private ArrayAdapter<String> adapter;
+    private ToggleDoorCountDownTimer countDownTimer;
+    private ProgressBar progressBar;
+
 //    private GoogleMap map;
     private static final int GARAGE_PORT = 55555;
     private static final String SERVER_HOSTNAME = "lasley.mynetgear.com";
 
+    private static final int TIME_FOR_DOOR_TO_OPEN = 30;  // Seconds
+    private static final int TIME_TO_WAIT_FOR_DOOR_TO_OPEN = (int)(TIME_FOR_DOOR_TO_OPEN * 1.1 * 1000);  // Milliseconds
     private static final int LENGTH_V1_NDX         = 0;
     private static final int VERSION_V1_NDX        = 1;
     private static final int MSG_VERSION           = 0x01;
@@ -165,10 +168,12 @@ public class MainActivity extends FragmentActivity implements
         mGeofenceRequester = new GeofenceRequester(this);
         mGeofenceRemover = new GeofenceRemover(this);
 
-
+        countDownTimer = new ToggleDoorCountDownTimer(TIME_TO_WAIT_FOR_DOOR_TO_OPEN,
+                (int)(TIME_TO_WAIT_FOR_DOOR_TO_OPEN/10.0));
+        progressBar = (ProgressBar) findViewById(R.id.WaitForDoor);
         // Attach to the main UI
-        setContentView(net.lasley.android.geofence.R.layout.activity_main);
-        ListView list = (ListView) findViewById(net.lasley.android.geofence.R.id.Activity);
+        setContentView(net.lasley.android.HGDOpener.R.layout.activity_main);
+        ListView list = (ListView) findViewById(net.lasley.android.HGDOpener.R.id.Activity);
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mAreaVisits);
         list.setAdapter(adapter);
 
@@ -197,10 +202,10 @@ public class MainActivity extends FragmentActivity implements
                         }
                         break;
                     default:
-                        Log.d(GeofenceUtils.APPTAG, getString(net.lasley.android.geofence.R.string.no_resolution));
+                        Log.d(GeofenceUtils.APPTAG, getString(net.lasley.android.HGDOpener.R.string.no_resolution));
                 }
             default:
-                Log.d(GeofenceUtils.APPTAG, getString(net.lasley.android.geofence.R.string.unknown_activity_request_code, requestCode));
+                Log.d(GeofenceUtils.APPTAG, getString(net.lasley.android.HGDOpener.R.string.unknown_activity_request_code, requestCode));
                 break;
         }
     }
@@ -244,7 +249,7 @@ public class MainActivity extends FragmentActivity implements
         try {
             mGeofenceRemover.removeGeofencesByIntent(mGeofenceRequester.getRequestPendingIntent());
         } catch (UnsupportedOperationException e) {
-            Toast.makeText(this, net.lasley.android.geofence.R.string.remove_geofences_already_requested_error, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, net.lasley.android.HGDOpener.R.string.remove_geofences_already_requested_error, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -275,31 +280,62 @@ public class MainActivity extends FragmentActivity implements
         try {
             mGeofenceRequester.addGeofences(mCurrentGeofences);
         } catch (UnsupportedOperationException e) {
-            Toast.makeText(this, net.lasley.android.geofence.R.string.add_geofences_already_requested_error, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, net.lasley.android.HGDOpener.R.string.add_geofences_already_requested_error, Toast.LENGTH_LONG).show();
         }
     }
 
     public void getLocation() {
         if (servicesConnected()) {
             Location currentLocation = mLocationClient.getLastLocation();
-            ((TextView) (findViewById(net.lasley.android.geofence.R.id.lat_lng))).setText(GeofenceUtils.getLatLng(this, currentLocation));
+            ((TextView) (findViewById(net.lasley.android.HGDOpener.R.id.lat_lng))).setText(GeofenceUtils.getLatLng(this, currentLocation));
+        }
+    }
+
+    public class ToggleDoorCountDownTimer extends CountDownTimer {
+        public ToggleDoorCountDownTimer(long startTime, long interval) {
+            super(startTime, interval);
+        }
+
+        @Override
+        public void onFinish() {
+//            progressBar.setProgress(0);
+            sendStatusRequest();
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+//            progressBar.incrementProgressBy(10);
         }
     }
 
     protected void sendStatusRequest() {
         byte[] msg = new byte[7];
-        msg[0] = 7;
-        msg[1] = 1;
-        msg[2] = STATUSREQ;
-        msg[3] = 1;
-        msg[4] = 2;
-        msg[5] = 3;
-        msg[6] = 4;
+        msg[LENGTH_V1_NDX]              = STATUS_REQUEST_LENGTH_V1;
+        msg[VERSION_V1_NDX]             = VERSION;
+        msg[ACTION_V1_NDX]              = STATUSREQ;
+        msg[STATUS_REQUEST_LENGTH_V1-4] = 1;
+        msg[STATUS_REQUEST_LENGTH_V1-3] = 2;
+        msg[STATUS_REQUEST_LENGTH_V1-2] = 3;
+        msg[STATUS_REQUEST_LENGTH_V1-1] = 4;
         new AsyncGarage().execute(msg);
     }
 
     public void RefreshState(View view) {
         sendStatusRequest();
+    }
+
+    public void toggleDoor(View view) {
+        byte[] msg = new byte[8];
+        msg[LENGTH_V1_NDX]       = COMMAND_LENGTH_V1;
+        msg[VERSION_V1_NDX]      = VERSION;
+        msg[ACTION_V1_NDX]       = COMMAND;
+        msg[COMMAND_V1_NDX]      = TOGGLE_DOOR;
+        msg[COMMAND_LENGTH_V1-4] = 1;
+        msg[COMMAND_LENGTH_V1-3] = 2;
+        msg[COMMAND_LENGTH_V1-2] = 3;
+        msg[COMMAND_LENGTH_V1-1] = 4;
+        new AsyncGarage().execute(msg);
+        countDownTimer.start();
     }
 
     protected void decodeReply(byte[] reply) {
@@ -319,7 +355,7 @@ public class MainActivity extends FragmentActivity implements
             if(reply[COMMAND_REPLY_V1_NDX] == DOOR_OPENING) {
                 sb.append("Door Opening");
                 t.setText("Opening");
-            } else if(reply[COMMAND_REPLY_V1_NDX] == DOOR_OPENING) {
+            } else if(reply[COMMAND_REPLY_V1_NDX] == DOOR_CLOSING) {
                 sb.append("Door Closing");
                 t.setText("Closing");
             } else if(reply[COMMAND_REPLY_V1_NDX] == DOOR_BUSY) {
@@ -448,8 +484,8 @@ public class MainActivity extends FragmentActivity implements
             } else if (TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCE_EXIT)) {
                 handleGeofenceExit(context, intent);
             } else {
-                Log.e(GeofenceUtils.APPTAG, getString(net.lasley.android.geofence.R.string.invalid_action_detail, action));
-                Toast.makeText(context, net.lasley.android.geofence.R.string.invalid_action, Toast.LENGTH_LONG).show();
+                Log.e(GeofenceUtils.APPTAG, getString(net.lasley.android.HGDOpener.R.string.invalid_action_detail, action));
+                Toast.makeText(context, net.lasley.android.HGDOpener.R.string.invalid_action, Toast.LENGTH_LONG).show();
             }
         }
 

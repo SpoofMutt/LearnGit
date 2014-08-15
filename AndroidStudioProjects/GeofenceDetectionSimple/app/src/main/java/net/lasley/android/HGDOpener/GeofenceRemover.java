@@ -1,4 +1,4 @@
-package net.lasley.android.geofence;
+package net.lasley.android.HGDOpener;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -101,13 +101,13 @@ public class GeofenceRemover implements
             PendingIntent requestIntent) {
         Intent broadcastIntent = new Intent();
         if (statusCode == LocationStatusCodes.SUCCESS) {
-            Log.d(GeofenceUtils.APPTAG, mContext.getString(net.lasley.android.geofence.R.string.remove_geofences_intent_success));
+            Log.d(GeofenceUtils.APPTAG, mContext.getString(net.lasley.android.HGDOpener.R.string.remove_geofences_intent_success));
             broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCES_REMOVED);
-            broadcastIntent.putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, mContext.getString(net.lasley.android.geofence.R.string.remove_geofences_intent_success));
+            broadcastIntent.putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, mContext.getString(net.lasley.android.HGDOpener.R.string.remove_geofences_intent_success));
         } else {
-            Log.e(GeofenceUtils.APPTAG, mContext.getString(net.lasley.android.geofence.R.string.remove_geofences_intent_failure, statusCode));
+            Log.e(GeofenceUtils.APPTAG, mContext.getString(net.lasley.android.HGDOpener.R.string.remove_geofences_intent_failure, statusCode));
             broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_ERROR);
-            broadcastIntent.putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, mContext.getString(net.lasley.android.geofence.R.string.remove_geofences_intent_failure, statusCode));
+            broadcastIntent.putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, mContext.getString(net.lasley.android.HGDOpener.R.string.remove_geofences_intent_failure, statusCode));
         }
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(broadcastIntent);
         requestDisconnection();
@@ -118,7 +118,7 @@ public class GeofenceRemover implements
         Intent broadcastIntent = new Intent();
         String msg;
         if (LocationStatusCodes.SUCCESS == statusCode) {
-            msg = mContext.getString(net.lasley.android.geofence.R.string.remove_geofences_id_success,
+            msg = mContext.getString(net.lasley.android.HGDOpener.R.string.remove_geofences_id_success,
                     Arrays.toString(geofenceRequestIds));
             Log.d(GeofenceUtils.APPTAG, msg);
             broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCES_REMOVED)
@@ -126,7 +126,7 @@ public class GeofenceRemover implements
                            .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
         } else {
             msg = mContext.getString(
-                    net.lasley.android.geofence.R.string.remove_geofences_id_failure,
+                    net.lasley.android.HGDOpener.R.string.remove_geofences_id_failure,
                     statusCode,
                     Arrays.toString(geofenceRequestIds)
             );
@@ -149,14 +149,14 @@ public class GeofenceRemover implements
 
     @Override
     public void onConnected(Bundle arg0) {
-        Log.d(GeofenceUtils.APPTAG, mContext.getString(net.lasley.android.geofence.R.string.connected));
+        Log.d(GeofenceUtils.APPTAG, mContext.getString(net.lasley.android.HGDOpener.R.string.connected));
         continueRemoveGeofences();
     }
 
     @Override
     public void onDisconnected() {
         mInProgress = false;
-        Log.d(GeofenceUtils.APPTAG, mContext.getString(net.lasley.android.geofence.R.string.disconnected));
+        Log.d(GeofenceUtils.APPTAG, mContext.getString(net.lasley.android.HGDOpener.R.string.disconnected));
         mLocationClient = null;
     }
 

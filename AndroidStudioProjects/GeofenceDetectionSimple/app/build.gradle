@@ -5,7 +5,7 @@ android {
     buildToolsVersion '19.1.0'
 
     defaultConfig {
-        applicationId "net.lasley.android.geofence"
+        applicationId "net.lasley.android.HGDOpener"
         minSdkVersion 19
         targetSdkVersion 19
     }

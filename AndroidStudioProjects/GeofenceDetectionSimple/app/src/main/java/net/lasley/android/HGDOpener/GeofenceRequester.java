@@ -1,4 +1,4 @@
-package net.lasley.android.geofence;
+package net.lasley.android.HGDOpener;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -83,7 +83,7 @@ public class GeofenceRequester
         Intent broadcastIntent = new Intent();
         String msg;
         if (LocationStatusCodes.SUCCESS == statusCode) {
-            msg = mActivity.getString(net.lasley.android.geofence.R.string.add_geofences_result_success,
+            msg = mActivity.getString(net.lasley.android.HGDOpener.R.string.add_geofences_result_success,
                     Arrays.toString(geofenceRequestIds));
             Log.d(GeofenceUtils.APPTAG, msg);
             broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCES_ADDED)
@@ -91,7 +91,7 @@ public class GeofenceRequester
                            .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
         } else {
             msg = mActivity.getString(
-                    net.lasley.android.geofence.R.string.add_geofences_result_failure,
+                    net.lasley.android.HGDOpener.R.string.add_geofences_result_failure,
                     statusCode,
                     Arrays.toString(geofenceRequestIds)
             );
@@ -111,14 +111,14 @@ public class GeofenceRequester
 
     @Override
     public void onConnected(Bundle arg0) {
-        Log.d(GeofenceUtils.APPTAG, mActivity.getString(net.lasley.android.geofence.R.string.connected));
+        Log.d(GeofenceUtils.APPTAG, mActivity.getString(net.lasley.android.HGDOpener.R.string.connected));
         continueAddGeofences();
     }
 
     @Override
     public void onDisconnected() {
         mInProgress = false;
-        Log.d(GeofenceUtils.APPTAG, mActivity.getString(net.lasley.android.geofence.R.string.disconnected));
+        Log.d(GeofenceUtils.APPTAG, mActivity.getString(net.lasley.android.HGDOpener.R.string.disconnected));
         mLocationClient = null;
     }
 

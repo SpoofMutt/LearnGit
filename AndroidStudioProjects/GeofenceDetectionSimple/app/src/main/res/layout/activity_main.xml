@@ -45,6 +45,17 @@
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_alignParentEnd="true" />
 
+        <Space
+            android:layout_width="20px"
+            android:layout_height="20px"
+            android:layout_toEndOf="@+id/label_fencearea"
+            android:layout_below="@+id/label_lat_lng"
+            android:layout_alignStart="@+id/label_lat_lng"
+            android:layout_alignEnd="@+id/lat_lng"
+            android:layout_above="@+id/label_fencearea"
+            android:id="@+id/space_lat_lng"
+            android:background="#ff000a64" />
+
         <TextView
             android:id="@+id/label_fencearea"
             android:layout_width="wrap_content"
@@ -66,34 +77,6 @@
             android:layout_alignParentEnd="true"
             android:layout_alignEnd="@+id/lat_lng"
             android:layout_alignStart="@+id/lat_lng" />
-
-        <ListView
-            android:layout_width="wrap_content"
-            android:layout_height="260dp"
-            android:id="@+id/Activity"
-            android:choiceMode="none"
-            android:layout_below="@+id/TableLayout"
-            android:fastScrollAlwaysVisible="false" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Garage Door Button"
-            android:id="@+id/GarageDoorToggleButton"
-            android:layout_below="@+id/Activity"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentStart="true" />
-
-        <Space
-            android:layout_width="20px"
-            android:layout_height="20px"
-            android:layout_toEndOf="@+id/label_fencearea"
-            android:layout_below="@+id/label_lat_lng"
-            android:layout_alignStart="@+id/label_lat_lng"
-            android:layout_alignEnd="@+id/lat_lng"
-            android:layout_above="@+id/label_fencearea"
-            android:id="@+id/space_lat_lng"
-            android:background="#ff000a64" />
 
         <Space
             android:layout_width="20px"
@@ -196,13 +179,46 @@
         <Space
             android:layout_width="20px"
             android:layout_height="20px"
-            android:layout_below="@+id/TableLayout"
             android:layout_centerHorizontal="true"
-            android:layout_above="@+id/Activity"
             android:layout_alignParentEnd="true"
             android:layout_alignParentStart="true"
             android:id="@+id/Space_Table"
-            android:background="#ff000a64" />
+            android:background="#ff000a64"
+            android:layout_below="@+id/TableLayout" />
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/WaitForDoor"
+            android:layout_alignStart="@+id/fencearea"
+            android:max="100"
+            android:indeterminate="false"
+            android:layout_alignLeft="@+id/GarageDoorToggleButton"
+            android:layout_alignRight="@+id/GarageDoorToggleButton"
+            android:visibility="invisible"
+            android:progress="0"
+            android:layout_below="@+id/Space_Table" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Garage Door Button"
+            android:id="@+id/GarageDoorToggleButton"
+            android:onClick="toggleDoor"
+            android:longClickable="false"
+            android:layout_alignStart="@+id/TableLayout"
+            android:layout_alignLeft="@+id/Activity"
+            android:layout_alignRight="@+id/Activity"
+            android:layout_below="@+id/WaitForDoor" />
+
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="260dp"
+            android:id="@+id/Activity"
+            android:choiceMode="none"
+            android:layout_below="@+id/GarageDoorToggleButton"
+            android:fastScrollAlwaysVisible="false" />
 
         <!--
                 <fragment

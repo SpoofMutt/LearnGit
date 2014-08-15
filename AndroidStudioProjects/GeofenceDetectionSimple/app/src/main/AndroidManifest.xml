@@ -16,7 +16,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="net.lasley.android.geofence"
+    package="net.lasley.android.HGDOpener"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -41,7 +41,7 @@
         <!--<uses-library android:name="com.google.android.maps" />-->
         <!-- The app's entry point -->
         <activity
-            android:name="net.lasley.android.geofence.MainActivity"
+            android:name="net.lasley.android.HGDOpener.MainActivity"
             android:label="@string/title_activity_geofence" >
             <intent-filter>
                 <!--
@@ -56,7 +56,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name="net.lasley.android.geofence.ReceiveTransitionsIntentService" android:exported="false" />
+        <service android:name="net.lasley.android.HGDOpener.ReceiveTransitionsIntentService" android:exported="false" />
     </application>
 
 </manifest>

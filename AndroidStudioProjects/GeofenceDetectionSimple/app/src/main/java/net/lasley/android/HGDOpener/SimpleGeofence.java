@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.lasley.android.geofence;
+package net.lasley.android.HGDOpener;
 
 import com.google.android.gms.location.Geofence;
 
