@@ -1,8 +1,5 @@
 package net.lasley.hgdo;
 
-import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.LocationClient;
-
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,6 +10,9 @@ import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.LocationClient;
 
 import java.util.List;
 
@@ -88,9 +88,9 @@ public class ReceiveTransitionsIntentService extends IntentService {
     }
 
     private void sendNotification(String transitionType, String ids) {
-        Intent notificationIntent = new Intent(getApplicationContext(),MainActivity.class);
+        Intent notificationIntent = new Intent(getApplicationContext(),HGDOActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addParentStack(HGDOActivity.class);
         stackBuilder.addNextIntent(notificationIntent);
         PendingIntent notificationPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);

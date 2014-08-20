@@ -47,7 +47,7 @@ import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
 import static android.text.format.DateUtils.FORMAT_SHOW_TIME;
 import static android.text.format.DateUtils.formatDateTime;
 
-public class MainActivity extends FragmentActivity implements
+public class HGDOActivity extends FragmentActivity implements
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener {
 
@@ -172,8 +172,8 @@ public class MainActivity extends FragmentActivity implements
                 (int)(TIME_TO_WAIT_FOR_DOOR_TO_OPEN/10.0));
         progressBar = (ProgressBar) findViewById(R.id.WaitForDoor);
         // Attach to the main UI
-        setContentView(net.lasley.hgdo.R.layout.activity_main);
-        ListView list = (ListView) findViewById(net.lasley.hgdo.R.id.Activity);
+        setContentView(R.layout.activity_hgdo);
+        ListView list = (ListView) findViewById(R.id.Activity);
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mAreaVisits);
         list.setAdapter(adapter);
 
