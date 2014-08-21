@@ -75,7 +75,7 @@ public class HGDOActivity extends FragmentActivity implements
     private static final int GARAGE_PORT = 55555;
     private static final String SERVER_HOSTNAME = "lasley.mynetgear.com";
 
-    private static final int TIME_FOR_DOOR_TO_OPEN = 30;  // Seconds
+    private static final int TIME_FOR_DOOR_TO_OPEN = 16;  // Seconds
     private static final int TIME_TO_WAIT_FOR_DOOR_TO_OPEN = (int)(TIME_FOR_DOOR_TO_OPEN * 1.1 * 1000);  // Milliseconds
     private static final int LENGTH_V1_NDX         = 0;
     private static final int VERSION_V1_NDX        = 1;
@@ -384,7 +384,7 @@ public class HGDOActivity extends FragmentActivity implements
                 t.setText("Busy");
             }
             sb = new StringBuilder("Range: ");
-            sb.append(Byte.toString(reply[STATUS_RANGE_V1_NDX]));
+            sb.append(Short.toString(reply[STATUS_RANGE_V1_NDX] & 0xFF));
             Log.d("decodeReply", sb.toString());
             t = (TextView)findViewById(R.id.RangeStatus);
             t.setText(Byte.toString(reply[STATUS_RANGE_V1_NDX]));
