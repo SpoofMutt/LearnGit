@@ -29,7 +29,7 @@
 #endif
 
 // Undefine COMPILE_STD_DEV if you don't want Standard Deviation.
-#define COMPILE_STD_DEV
+//#define COMPILE_STD_DEV
 
 
 typedef struct bufferCtl

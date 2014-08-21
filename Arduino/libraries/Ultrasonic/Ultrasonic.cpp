@@ -55,7 +55,8 @@ long Ultrasonic::timing()
     digitalWrite(_trigPin, HIGH);
     delayMicroseconds(10);
     digitalWrite(_trigPin, LOW);
-    return pulseIn(_echoPin, HIGH);
+	delayMicroseconds(2);
+	return pulseIn(_echoPin, HIGH);
     }
 
 float Ultrasonic::convert(long microsec, int metric)
