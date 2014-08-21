@@ -108,7 +108,7 @@ long range_read;
 #define CLOSE_DOOR  1
 #define TOGGLE_DOOR 2
 
-#define TIME_TO_OPEN 30 // Seconds
+#define TIME_TO_OPEN 15 // Seconds
 unsigned long time_of_last_door_command = 0;
 uint8_t       last_door_command = CLOSE_DOOR;
 uint8_t       data[80];
@@ -248,7 +248,7 @@ void loop(void) {
 							COMMAND_REPLY_LENGTH_V1;
 							VERSION;
 							data[ACTION_V1_NDX] = COMMANDREPLY;
-							int doorState = (inMsec > 0.0) ? DOOR_OPEN : DOOR_CLOSED ; // Any range means its closed.
+							int doorState = (inMsec > 0.0) ? DOOR_OPEN : DOOR_CLOSED ; // Any range means its open.
 							#ifdef EMULATOR_MODE
 							doorState = door_state;
 							#endif         
@@ -344,7 +344,7 @@ void sendStatusReply() {
 	if(time_of_last_door_command + TIME_TO_OPEN > now()) {
 		data[STATUS_DOOR_V1_NDX] = DOOR_BUSY;
 	} else {
-		data[STATUS_DOOR_V1_NDX] = (inMsec > 0.0) ? DOOR_OPEN : DOOR_CLOSED ; // Any range means its closed.
+		data[STATUS_DOOR_V1_NDX] = (inMsec > 0.0) ? DOOR_OPEN : DOOR_CLOSED ; // Any range means its opend.
 	}
 	data[STATUS_RANGE_V1_NDX] = int(inMsec);
 	int led = analogRead(lightPin);
