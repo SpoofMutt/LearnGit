@@ -497,7 +497,7 @@ public class HGDOActivity extends FragmentActivity implements
         }
 
         private void handleGeofenceStatus(Context context, Intent intent) {
-            String action = String.format("Status() %s", intent.getAction().toString());
+            String action = String.format("Status() %s", intent.getAction());
             Log.d(GeofenceUtils.APPTAG, action);
         }
 
