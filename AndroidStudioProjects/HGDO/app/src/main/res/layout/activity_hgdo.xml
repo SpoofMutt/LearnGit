@@ -124,9 +124,45 @@
             </TableRow>
 
             <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/TableRow2">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Range"
+                    android:id="@+id/textView3"
+                    android:layout_column="0"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="Unknown"
+                    android:id="@+id/RangeStatus"
+                    android:layout_column="1"
+                    android:textAlignment="textStart"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:id="@+id/TimeChecked"
+                    android:layout_column="2"
+                    android:layout_weight="1"
+                    android:textSize="8dp"/>
+
+
+            </TableRow>
+
+            <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/TableRow2">
+                android:id="@+id/TableRow3">
 
                 <TextView
                     android:layout_width="0dp"
@@ -151,7 +187,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:id="@+id/TimeChecked"
+                    android:id="@+id/textView4"
                     android:layout_column="2"
                     android:layout_weight="1"
                     android:textSize="8dp"/>

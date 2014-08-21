@@ -86,12 +86,13 @@ public class HGDOActivity extends FragmentActivity implements
     private static final int STR_START_V1_NDX      = 3;
     private static final int STATUS_DOOR_V1_NDX    = 3;
     private static final int STATUS_LIGHT_V1_NDX   = 4;
+    private static final int STATUS_RANGE_V1_NDX   = 5;
 
 // Version 1 Lengths
     private static final int COMMAND_LENGTH_V1         = 8;
     private static final int COMMAND_REPLY_LENGTH_V1   = 8;
     private static final int STATUS_REQUEST_LENGTH_V1  = 7;
-    private static final int STATUS_REPLY_LENGTH_V1    = 9;
+    private static final int STATUS_REPLY_LENGTH_V1    = 10;
 
     private static final byte VERSION = 1;
 
@@ -382,6 +383,12 @@ public class HGDOActivity extends FragmentActivity implements
             } else if(reply[STATUS_DOOR_V1_NDX] == DOOR_BUSY) {
                 t.setText("Busy");
             }
+            sb = new StringBuilder("Range: ");
+            sb.append(Byte.toString(reply[STATUS_RANGE_V1_NDX]));
+            Log.d("decodeReply", sb.toString());
+            t = (TextView)findViewById(R.id.RangeStatus);
+            t.setText(Byte.toString(reply[STATUS_RANGE_V1_NDX]));
+
             sb = new StringBuilder("Light: ");
             sb.append(Byte.toString(reply[STATUS_LIGHT_V1_NDX]));
             Log.d("decodeReply", sb.toString());

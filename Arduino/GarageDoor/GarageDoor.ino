@@ -21,7 +21,8 @@ int lightPin = 0;  //define a pin for Photo resistor
 #define RELAY_PIN     7
 
 // LED status pins
-#define LED_DOOR_OPEN  8
+#define LED1  8
+#define LED2  15
 
 #define ADAFRUIT_CC3000_IRQ    3  // MUST be an interrupt pin!
 #define ADAFRUIT_CC3000_VBAT   5  // These can be any pins
@@ -64,6 +65,7 @@ long range_read;
 // 1 action byte
 // command byte, door  status 1 byte , string...
 //               light status 2 byte   ....
+//               range status 3 byte
 // 4 byte crc - not used right now.
 
 #define LENGTH_V1_NDX  0
@@ -75,12 +77,13 @@ long range_read;
 #define STR_START_V1_NDX 3
 #define STATUS_DOOR_V1_NDX 3
 #define STATUS_LIGHT_V1_NDX 4
+#define STATUS_RANGE_V1_NDX 5
 
 // Version 1 Lengths
 #define COMMAND_LENGTH_V1 data[LENGTH_V1_NDX]         = 8
 #define COMMAND_REPLY_LENGTH_V1 data[LENGTH_V1_NDX]   = 8
 #define STATUS_REQUEST_LENGTH_V1  data[LENGTH_V1_NDX] = 7
-#define STATUS_REPLY_LENGTH_V1  data[LENGTH_V1_NDX]   = 9
+#define STATUS_REPLY_LENGTH_V1  data[LENGTH_V1_NDX]   = 10
 
 // Action Byte
 #define COMMAND     10
@@ -207,11 +210,11 @@ void loop(void) {
 	//  Serial.print(utc);
 	//  Serial.println(":  Looking for clients.");
 	//  if (client) {
-        Serial.print("Toggle: ");
-        Serial.println(toggle);
+	Serial.print("Toggle: ");
+	Serial.println(toggle);
 	if (toggle) {
 		Adafruit_CC3000_ClientRef client = server.available();
-                
+		
 		if(client) {
 			utc = now();
 			local = myTZ.toLocal(utc, &tcr);
@@ -219,8 +222,10 @@ void loop(void) {
 			Serial.println("Found client");
 			// Check if there is data available to read.
 			if (client.available() > 0) {
+				digitalWrite(LED2, HIGH);
 				// Read a byte and write it to all clients.
 				int size_read = client.read(data,80,0);
+				digitalWrite(LED2, LOW);
 				if(size_read == data[LENGTH_V1_NDX]) {
 					Serial.print("Size: ");
 					Serial.println(data[LENGTH_V1_NDX]);
@@ -243,12 +248,10 @@ void loop(void) {
 							COMMAND_REPLY_LENGTH_V1;
 							VERSION;
 							data[ACTION_V1_NDX] = COMMANDREPLY;
-
-							//             inMsec = ultrasonic.convert(ultrasonic.timing(), Ultrasonic::IN);
 							int doorState = (inMsec > 0.0) ? DOOR_OPEN : DOOR_CLOSED ; // Any range means its closed.
-	#ifdef EMULATOR_MODE
+							#ifdef EMULATOR_MODE
 							doorState = door_state;
-	#endif         
+							#endif         
 							if(data[COMMAND_V1_NDX] == TOGGLE_DOOR) {
 								if(doorState == DOOR_CLOSED) {
 									data[COMMAND_V1_NDX] = OPEN_DOOR;
@@ -262,20 +265,20 @@ void loop(void) {
 								data[COMMAND_REPLY_V1_NDX] = DOOR_OPENING;
 								sendData();
 								ActivateGarageDoor();
-	#ifdef EMULATOR_MODE
+								#ifdef EMULATOR_MODE
 								door_state = DOOR_OPEN;
 								light_state= LIGHT_ON;
-	#endif         
+								#endif         
 							} else if(data[COMMAND_V1_NDX] == CLOSE_DOOR && doorState == DOOR_OPEN) { // Close door.
 								time_of_last_door_command = now();
 								last_door_command = data[COMMAND_V1_NDX];
 								data[COMMAND_REPLY_V1_NDX] = DOOR_CLOSING;
 								sendData();
 								ActivateGarageDoor();
-	#ifdef EMULATOR_MODE
+								#ifdef EMULATOR_MODE
 								door_state = DOOR_CLOSED;
 								light_state= LIGHT_OFF;
-	#endif         
+								#endif         
 							} else { // Already there. Just give status.
 								sendStatusReply();
 							}
@@ -319,9 +322,9 @@ void loop(void) {
 		Serial.println(inMsec);
 	}
 	toggle++;
-        if(toggle > 4) {
-          toggle = 0;
-        }
+	if(toggle > 4) {
+		toggle = 0;
+	}
 	delay(1000);
 }
 
@@ -336,13 +339,14 @@ void sendStatusReply() {
 		data[STATUS_DOOR_V1_NDX] = door_state;
 	}
 	data[STATUS_LIGHT_V1_NDX] = light_state;
+	data[STATUS_RANGE_V1_NDX] = 42;
 #else
-	//   inMsec = ultrasonic.convert(ultrasonic.timing(), Ultrasonic::IN);
 	if(time_of_last_door_command + TIME_TO_OPEN > now()) {
 		data[STATUS_DOOR_V1_NDX] = DOOR_BUSY;
 	} else {
 		data[STATUS_DOOR_V1_NDX] = (inMsec > 0.0) ? DOOR_OPEN : DOOR_CLOSED ; // Any range means its closed.
 	}
+	data[STATUS_RANGE_V1_NDX] = int(inMsec);
 	int led = analogRead(lightPin);
 	data[STATUS_LIGHT_V1_NDX] = (led < 50) ? LIGHT_OFF : LIGHT_ON;  // Range 0 - ~500
 #endif         
@@ -351,6 +355,7 @@ void sendStatusReply() {
 }
 
 void sendData() {
+	digitalWrite(LED2, HIGH);	
 	Serial.println();
 	Serial.println("Response:");
 	Serial.print("Size: ");
@@ -406,6 +411,7 @@ void sendData() {
 	data[data[LENGTH_V1_NDX]-2] = 3;
 	data[data[LENGTH_V1_NDX]-1] = 4;
 	server.write(data,data[LENGTH_V1_NDX]);   // Just echo string.
+	digitalWrite(LED2, LOW);
 }
 
 //Function to print time with time zone
@@ -555,10 +561,13 @@ opener & sets the to a default (deactivated state).
 */
 void SetupDoorControl()
 {
-	pinMode(LED_DOOR_OPEN, OUTPUT);     
+	pinMode(LED1, OUTPUT);     
+	pinMode(LED2, OUTPUT);     
 	pinMode(RELAY_PIN, OUTPUT);
-	digitalWrite(LED_DOOR_OPEN, LOW);
+	digitalWrite(LED1, LOW);
+	digitalWrite(LED2, LOW);
 	digitalWrite(RELAY_PIN, LOW);
+	BlinkLED(true,true,1000,1000,3);
 }
 
 /*
@@ -569,10 +578,29 @@ void ActivateGarageDoor()
 	Serial.println(F("Door activated."));
 
 #ifndef EMULATOR_MODE
-	digitalWrite(LED_DOOR_OPEN, HIGH);   // set the LED on
+	digitalWrite(LED1, HIGH);   // set the LED on
 	digitalWrite(RELAY_PIN, HIGH);  // Open door.
 	delay(DOOR_ACTIVATION_PERIOD);              
-	digitalWrite(LED_DOOR_OPEN, LOW);    // set the LED off
+	digitalWrite(LED1, LOW);    // set the LED off
 	digitalWrite(RELAY_PIN, LOW);  // Door will continue to open by itself.
 #endif
+}
+
+void BlinkLED(bool blink1, bool blink2, int timeon, int timeoff, int repeatcount) {
+	for(int x=0; x<repeatcount; x++) {
+		if(blink1) {
+			digitalWrite(LED1,HIGH);
+		} else {
+			digitalWrite(LED1,LOW);
+		}
+		if(blink2) {
+			digitalWrite(LED2,HIGH);
+		} else {
+			digitalWrite(LED2,LOW);
+		}
+		delay(timeon);
+		digitalWrite(LED1,LOW);
+		digitalWrite(LED2,LOW);
+		delay(timeoff);
+	}
 }
