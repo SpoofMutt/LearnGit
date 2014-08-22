@@ -39,13 +39,11 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
-import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
-import static android.text.format.DateUtils.FORMAT_SHOW_TIME;
-import static android.text.format.DateUtils.formatDateTime;
+import java.util.Locale;
 
 public class HGDOActivity extends FragmentActivity implements
         GooglePlayServicesClient.ConnectionCallbacks,
@@ -69,7 +67,6 @@ public class HGDOActivity extends FragmentActivity implements
     private LocationClient mLocationClient;
     private ArrayAdapter<String> adapter;
     private ToggleDoorCountDownTimer countDownTimer;
-    private ProgressBar progressBar;
 
 //    private GoogleMap map;
     private static final int GARAGE_PORT = 55555;
@@ -169,11 +166,11 @@ public class HGDOActivity extends FragmentActivity implements
         mGeofenceRequester = new GeofenceRequester(this);
         mGeofenceRemover = new GeofenceRemover(this);
 
-        countDownTimer = new ToggleDoorCountDownTimer(TIME_TO_WAIT_FOR_DOOR_TO_OPEN,
-                (int)(TIME_TO_WAIT_FOR_DOOR_TO_OPEN/10.0));
-        progressBar = (ProgressBar) findViewById(R.id.WaitForDoor);
         // Attach to the main UI
         setContentView(R.layout.activity_hgdo);
+
+        countDownTimer = new ToggleDoorCountDownTimer(TIME_TO_WAIT_FOR_DOOR_TO_OPEN,  (int)(TIME_TO_WAIT_FOR_DOOR_TO_OPEN/11.0));
+
         ListView list = (ListView) findViewById(R.id.Activity);
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mAreaVisits);
         list.setAdapter(adapter);
@@ -293,19 +290,22 @@ public class HGDOActivity extends FragmentActivity implements
     }
 
     public class ToggleDoorCountDownTimer extends CountDownTimer {
+        private ProgressBar progressBar;
+
         public ToggleDoorCountDownTimer(long startTime, long interval) {
             super(startTime, interval);
+            progressBar = (ProgressBar) findViewById(R.id.WaitForDoor);
         }
 
         @Override
         public void onFinish() {
-//            progressBar.setProgress(0);
+            progressBar.setProgress(0);
             sendStatusRequest();
         }
 
         @Override
         public void onTick(long millisUntilFinished) {
-//            progressBar.incrementProgressBy(10);
+            progressBar.incrementProgressBy(10);
         }
     }
 
@@ -366,7 +366,9 @@ public class HGDOActivity extends FragmentActivity implements
             Log.d("decodeReply", sb.toString());
         } else if (reply[ACTION_V1_NDX] == STATUSREPLY) {
             Calendar rightNow = Calendar.getInstance();
-            String date = formatDateTime (getApplicationContext(),rightNow.getTimeInMillis(),FORMAT_SHOW_DATE|FORMAT_SHOW_TIME);
+            //java.text.SimpleDateFormat
+            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yy hh:mm:ss", Locale.US);
+            String date = sdf.format(rightNow.getTime());
             TextView t = (TextView)findViewById(R.id.TimeChecked);
             t.setText("Refreshed: " + date);
 
@@ -384,7 +386,8 @@ public class HGDOActivity extends FragmentActivity implements
                 t.setText("Busy");
             }
             sb = new StringBuilder("Range: ");
-            sb.append(Short.toString(reply[STATUS_RANGE_V1_NDX] & 0xFF));
+            short s = (short)(reply[STATUS_RANGE_V1_NDX] & 0xFF);
+            sb.append(s);
             Log.d("decodeReply", sb.toString());
             t = (TextView)findViewById(R.id.RangeStatus);
             t.setText(Byte.toString(reply[STATUS_RANGE_V1_NDX]));
