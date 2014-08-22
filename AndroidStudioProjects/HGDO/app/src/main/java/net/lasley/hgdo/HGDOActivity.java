@@ -107,6 +107,15 @@ public class HGDOActivity extends FragmentActivity implements
     private LocationClient mLocationClient;
     private ArrayAdapter<String> adapter;
     private ToggleDoorCountDownTimer countDownTimer;
+    private enum Fences {APPROACH, ENTRY, DRIVEWAY, UNKNOWN};
+    private Fences LastFence;
+
+    @Override
+    protected void onDestroy() {
+        RemoveGeoFencing();
+        Log.d(GeofenceUtils.APPTAG, "onDestroy()");
+        super.onDestroy();
+    }
 
     @Override
     public void onConnected(Bundle dataBundle) {
@@ -142,6 +151,8 @@ public class HGDOActivity extends FragmentActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        LastFence = Fences.UNKNOWN;
 
         mUIGeofence = new ArrayList<SimpleGeofence>();
         mCurrentGeofences = new ArrayList<Geofence>();
@@ -325,6 +336,10 @@ public class HGDOActivity extends FragmentActivity implements
             AddGeoFencing();
         } else {
             Log.d(GeofenceUtils.APPTAG, "SetGPSState - Unchecked.");
+            ((TextView)findViewById(R.id.lat_lng)).setText("Indeterminate");
+            ((TextView)findViewById(R.id.fencearea)).setText("Indeterminate");
+            ((TextView)findViewById(R.id.accuracy)).setText("Indeterminate");
+            adapter.clear();
             RemoveGeoFencing();
         }
     }
@@ -541,6 +556,27 @@ public class HGDOActivity extends FragmentActivity implements
             adapter.insert(msg, 0);
             Log.d(GeofenceUtils.APPTAG, action);
             getLocation();
+            if (action.indexOf("APPROACH") != -1) {
+                sendStatusRequest();
+                LastFence = Fences.APPROACH;
+            } else if(action.indexOf("ENTRY") != -1) {
+                if(LastFence == Fences.APPROACH) {
+                    TextView t = (TextView) findViewById(R.id.DoorStatus);
+                    String state = t.getText().toString();
+                    if (state.indexOf("Closed") != -1) {
+                        tmp.setToNow();
+                        msg = tmp.format("%T ") + ": Opening Garage Door Now";
+//                    toggleDoor(findViewById(android.R.id.content));
+                        adapter.insert(msg, 0);
+                        Log.d(GeofenceUtils.APPTAG, msg);
+                    }
+                }
+                LastFence = Fences.ENTRY;
+            } else if(action.indexOf("DRIVEWAY") != -1) {
+                LastFence = Fences.DRIVEWAY;
+            } else {
+                LastFence = Fences.UNKNOWN;
+            }
         }
 
         private void handleGeofenceError(Context context, Intent intent) {
