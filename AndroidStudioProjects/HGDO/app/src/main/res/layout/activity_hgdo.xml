@@ -19,26 +19,29 @@
         android:id="@+id/lat_lng"
         android:layout_width="160dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="false"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:layout_marginStart="10dp"
         android:layout_toEndOf="@+id/label_lat_lng"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textIsSelectable="true"
-        android:layout_alignParentStart="false" />
+        android:layout_alignParentStart="false"
+        android:textSize="12dp"
+        android:layout_alignBottom="@+id/label_lat_lng"
+        android:layout_alignTop="@+id/label_lat_lng"
+        android:gravity="center_vertical"
+        android:text="Indeterminate" />
 
     <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Use GPS"
         android:id="@+id/checkGPS"
-        android:layout_above="@+id/space_area"
         android:layout_alignParentEnd="false"
-        android:layout_alignTop="@+id/label_lat_lng"
-        android:layout_toRightOf="@+id/lat_lng"
-        android:layout_alignBottom="@+id/fencearea"
         android:visibility="visible"
-        android:layout_toEndOf="@id/lat_lng" />
+        android:onClick="SetGPSState"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/space_area" />
 
     <Space
         android:id="@+id/space_lat_lng"
@@ -67,27 +70,29 @@
         android:layout_width="160dp"
         android:layout_height="wrap_content"
         android:layout_alignEnd="@+id/lat_lng"
-        android:layout_alignParentEnd="false"
+        android:layout_alignParentEnd="true"
         android:layout_alignStart="@+id/lat_lng"
         android:layout_below="@+id/lat_lng"
-        android:text=""
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:text="Indeterminate"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="@dimen/margin_medium"
+        android:gravity="center_vertical" />
 
     <Space
         android:id="@+id/space_area"
         android:layout_width="20px"
         android:layout_height="20px"
-        android:layout_alignEnd="@+id/fencearea"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/label_fencearea"
-        android:background="#ff000a64" />
+        android:background="#ff000a64"
+        android:layout_alignParentEnd="true" />
 
     <TableLayout
         android:id="@+id/TableLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_below="@+id/space_area"
+        android:layout_below="@+id/checkGPS"
         android:layout_gravity="center"
         android:measureWithLargestChild="false"
         android:shrinkColumns="*"

@@ -53,7 +53,7 @@ public class ReceiveTransitionsIntentService extends IntentService {
                                 ids));
                 LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
 
-//                sendNotification(transitionType, ids);
+                //sendNotification(transitionType, ids);
 
                 Log.d(GeofenceUtils.APPTAG, getString(
                         net.lasley.hgdo.R.string.geofence_transition_notification_title,
@@ -75,7 +75,7 @@ public class ReceiveTransitionsIntentService extends IntentService {
                                     ids));
                     LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
 
-//                sendNotification(transitionType, ids);
+                    //sendNotification(transitionType, ids);
 
                     Log.d(GeofenceUtils.APPTAG, getString(
                             net.lasley.hgdo.R.string.geofence_transition_notification_title,

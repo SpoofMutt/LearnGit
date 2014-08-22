@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,6 +21,7 @@ import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -51,6 +54,42 @@ public class HGDOActivity extends FragmentActivity implements
 
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = Geofence.NEVER_EXPIRE;
+    //    private GoogleMap map;
+    private static final int GARAGE_PORT = 55555;
+    private static final String SERVER_HOSTNAME = "lasley.mynetgear.com";
+    private static final int TIME_FOR_DOOR_TO_OPEN = 16;  // Seconds
+    private static final int TIME_TO_WAIT_FOR_DOOR_TO_OPEN = (int) (TIME_FOR_DOOR_TO_OPEN * 1.1 * 1000);  // Milliseconds
+    private static final int LENGTH_V1_NDX = 0;
+    private static final int VERSION_V1_NDX = 1;
+    private static final int MSG_VERSION = 0x01;
+    private static final int ACTION_V1_NDX = 2;
+    private static final int COMMAND_V1_NDX = 3;
+    private static final int COMMAND_REPLY_V1_NDX = 3;
+    private static final int STR_START_V1_NDX = 3;
+    private static final int STATUS_DOOR_V1_NDX = 3;
+    private static final int STATUS_LIGHT_V1_NDX = 4;
+    private static final int STATUS_RANGE_V1_NDX = 5;
+    // Version 1 Lengths
+    private static final int COMMAND_LENGTH_V1 = 8;
+    private static final int COMMAND_REPLY_LENGTH_V1 = 8;
+    private static final int STATUS_REQUEST_LENGTH_V1 = 7;
+    private static final int STATUS_REPLY_LENGTH_V1 = 10;
+    private static final byte VERSION = 1;
+    private static final byte STRING = 16;
+    private static final byte COMMAND = 10;
+    private static final byte COMMANDREPLY = 45;
+    private static final byte STATUSREQ = 21;
+    private static final byte STATUSREPLY = 33;
+    private static final byte DOOR_CLOSED = 0;
+    private static final byte DOOR_OPEN = 1;
+    private static final byte DOOR_OPENING = 2;
+    private static final byte DOOR_CLOSING = 3;
+    private static final byte DOOR_BUSY = 4;
+    private static final byte LIGHT_OFF = 0;
+    private static final byte LIGHT_ON = 1;
+    private static final byte OPEN_DOOR = 0;
+    private static final byte CLOSE_DOOR = 1;
+    private static final byte TOGGLE_DOOR = 2;
     // Store a list of geofences to add
     List<Geofence> mCurrentGeofences;
     List<SimpleGeofence> mUIGeofence;
@@ -68,56 +107,14 @@ public class HGDOActivity extends FragmentActivity implements
     private ArrayAdapter<String> adapter;
     private ToggleDoorCountDownTimer countDownTimer;
 
-//    private GoogleMap map;
-    private static final int GARAGE_PORT = 55555;
-    private static final String SERVER_HOSTNAME = "lasley.mynetgear.com";
-
-    private static final int TIME_FOR_DOOR_TO_OPEN = 16;  // Seconds
-    private static final int TIME_TO_WAIT_FOR_DOOR_TO_OPEN = (int)(TIME_FOR_DOOR_TO_OPEN * 1.1 * 1000);  // Milliseconds
-    private static final int LENGTH_V1_NDX         = 0;
-    private static final int VERSION_V1_NDX        = 1;
-    private static final int MSG_VERSION           = 0x01;
-    private static final int ACTION_V1_NDX         = 2;
-    private static final int COMMAND_V1_NDX        = 3;
-    private static final int COMMAND_REPLY_V1_NDX  = 3;
-    private static final int STR_START_V1_NDX      = 3;
-    private static final int STATUS_DOOR_V1_NDX    = 3;
-    private static final int STATUS_LIGHT_V1_NDX   = 4;
-    private static final int STATUS_RANGE_V1_NDX   = 5;
-
-// Version 1 Lengths
-    private static final int COMMAND_LENGTH_V1         = 8;
-    private static final int COMMAND_REPLY_LENGTH_V1   = 8;
-    private static final int STATUS_REQUEST_LENGTH_V1  = 7;
-    private static final int STATUS_REPLY_LENGTH_V1    = 10;
-
-    private static final byte VERSION = 1;
-
-    private static final byte STRING       = 16;
-    private static final byte COMMAND      = 10;
-    private static final byte COMMANDREPLY = 45;
-    private static final byte STATUSREQ    = 21;
-    private static final byte STATUSREPLY  = 33;
-
-    private static final byte DOOR_CLOSED  = 0;
-    private static final byte DOOR_OPEN    = 1;
-    private static final byte DOOR_OPENING = 2;
-    private static final byte DOOR_CLOSING = 3;
-    private static final byte DOOR_BUSY    = 4;
-
-    private static final byte LIGHT_OFF = 0;
-    private static final byte LIGHT_ON  = 1;
-
-    private static final byte OPEN_DOOR   = 0;
-    private static final byte CLOSE_DOOR  = 1;
-    private static final byte TOGGLE_DOOR = 2;
-
     @Override
     public void onConnected(Bundle dataBundle) {
         Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
-        Location mCurrentLocation = mLocationClient.getLastLocation();
-        // map.animateCamera(CameraUpdateFactory.newLatLngZoom( new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), 17));
-        AddGeoFencing();
+        CheckBox cb = (CheckBox) findViewById(R.id.checkGPS);
+        if (cb.isChecked()) {
+            Log.d(GeofenceUtils.APPTAG, "onResume - AddGeoFencing.");
+            AddGeoFencing();
+        }
     }
 
     @Override
@@ -145,9 +142,9 @@ public class HGDOActivity extends FragmentActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mLocationClient = new LocationClient(this, this, this);
-        mLocationClient.connect();
-        mBroadcastReceiver = new GeofenceSampleReceiver();
+        mUIGeofence = new ArrayList<SimpleGeofence>();
+        mCurrentGeofences = new ArrayList<Geofence>();
+        mAreaVisits = new ArrayList<String>();
 
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCES_ADDED);
@@ -158,18 +155,19 @@ public class HGDOActivity extends FragmentActivity implements
         // All Location Services sample apps use this category
         mIntentFilter.addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES);
 
-        mUIGeofence = new ArrayList<SimpleGeofence>();
-        mCurrentGeofences = new ArrayList<Geofence>();
-        mAreaVisits = new ArrayList<String>();
+        mLocationClient = new LocationClient(this, this, this);
+        mLocationClient.connect();
 
-        // Instantiate a Geofence requester/Removers
+        mBroadcastReceiver = new GeofenceSampleReceiver();
         mGeofenceRequester = new GeofenceRequester(this);
         mGeofenceRemover = new GeofenceRemover(this);
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, mIntentFilter);
 
         // Attach to the main UI
         setContentView(R.layout.activity_hgdo);
 
-        countDownTimer = new ToggleDoorCountDownTimer(TIME_TO_WAIT_FOR_DOOR_TO_OPEN,  (int)(TIME_TO_WAIT_FOR_DOOR_TO_OPEN/11.0));
+        countDownTimer = new ToggleDoorCountDownTimer(TIME_TO_WAIT_FOR_DOOR_TO_OPEN, (int) (TIME_TO_WAIT_FOR_DOOR_TO_OPEN / 11.0));
 
         ListView list = (ListView) findViewById(R.id.Activity);
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mAreaVisits);
@@ -213,14 +211,24 @@ public class HGDOActivity extends FragmentActivity implements
         super.onResume();
         // Register the broadcast receiver to receive status updates
         Log.d(GeofenceUtils.APPTAG, "OnResume");
-        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, mIntentFilter);
+//        CheckBox cb = (CheckBox)findViewById(R.id.checkGPS);
+//        if(cb.isChecked()) {
+//            Log.d(GeofenceUtils.APPTAG, "onResume - AddGeoFencing.");
+//            AddGeoFencing();
+//        }
+//        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, mIntentFilter);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         Log.d(GeofenceUtils.APPTAG, "OnPause");
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
+//        CheckBox cb = (CheckBox)findViewById(R.id.checkGPS);
+//        if(cb.isChecked()) {
+//            Log.d(GeofenceUtils.APPTAG, "onPause - RemoveGeoFencing.");
+//            RemoveGeoFencing();
+//        }
+//        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
     }
 
     private boolean servicesConnected() {
@@ -257,6 +265,7 @@ public class HGDOActivity extends FragmentActivity implements
             return;
         }
 
+        mUIGeofence.clear();
         mUIGeofence.add(new SimpleGeofence("LOWER_APPROACH", 38.931323d, -104.726197d, 30.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
         // 1/3 Lower Entry
         mUIGeofence.add(new SimpleGeofence("LOWER_ENTRY", 38.930366d, -104.726935d, 20.0f, GEOFENCE_EXPIRATION_IN_MILLISECONDS, Geofence.GEOFENCE_TRANSITION_EXIT));
@@ -286,6 +295,131 @@ public class HGDOActivity extends FragmentActivity implements
         if (servicesConnected()) {
             Location currentLocation = mLocationClient.getLastLocation();
             ((TextView) (findViewById(net.lasley.hgdo.R.id.lat_lng))).setText(GeofenceUtils.getLatLng(this, currentLocation));
+            (new GetAddressTask(this)).execute(currentLocation);
+        }
+    }
+
+    protected void sendStatusRequest() {
+        byte[] msg = new byte[7];
+        msg[LENGTH_V1_NDX] = STATUS_REQUEST_LENGTH_V1;
+        msg[VERSION_V1_NDX] = VERSION;
+        msg[ACTION_V1_NDX] = STATUSREQ;
+        msg[STATUS_REQUEST_LENGTH_V1 - 4] = 1;
+        msg[STATUS_REQUEST_LENGTH_V1 - 3] = 2;
+        msg[STATUS_REQUEST_LENGTH_V1 - 2] = 3;
+        msg[STATUS_REQUEST_LENGTH_V1 - 1] = 4;
+        new AsyncGarage().execute(msg);
+    }
+
+    public void RefreshState(View view) {
+        sendStatusRequest();
+    }
+
+    public void SetGPSState(View view) {
+        CheckBox cb = (CheckBox) findViewById(R.id.checkGPS);
+        if (cb.isChecked()) {
+            Log.d(GeofenceUtils.APPTAG, "SetGPSState - Checked.");
+            AddGeoFencing();
+        } else {
+            Log.d(GeofenceUtils.APPTAG, "SetGPSState - Unchecked.");
+            RemoveGeoFencing();
+        }
+    }
+
+    public void toggleDoor(View view) {
+        byte[] msg = new byte[8];
+        msg[LENGTH_V1_NDX] = COMMAND_LENGTH_V1;
+        msg[VERSION_V1_NDX] = VERSION;
+        msg[ACTION_V1_NDX] = COMMAND;
+        msg[COMMAND_V1_NDX] = TOGGLE_DOOR;
+        msg[COMMAND_LENGTH_V1 - 4] = 1;
+        msg[COMMAND_LENGTH_V1 - 3] = 2;
+        msg[COMMAND_LENGTH_V1 - 2] = 3;
+        msg[COMMAND_LENGTH_V1 - 1] = 4;
+        new AsyncGarage().execute(msg);
+        countDownTimer.start();
+    }
+
+    protected void decodeReply(byte[] reply) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Length: ");
+        sb.append(Byte.toString(reply[LENGTH_V1_NDX]));
+        Log.d("decodeReply", sb.toString());
+        sb = new StringBuilder("Version: ");
+        sb.append(Byte.toString(reply[VERSION_V1_NDX]));
+        Log.d("decodeReply", sb.toString());
+        sb = new StringBuilder("Action: ");
+        if (reply[ACTION_V1_NDX] == COMMANDREPLY) {
+            sb.append("CommandReply");
+            Log.d("decodeReply", sb.toString());
+            TextView t = (TextView) findViewById(R.id.DoorStatus);
+            sb = new StringBuilder("Action: ");
+            if (reply[COMMAND_REPLY_V1_NDX] == DOOR_OPENING) {
+                sb.append("Door Opening");
+                t.setText("Opening");
+            } else if (reply[COMMAND_REPLY_V1_NDX] == DOOR_CLOSING) {
+                sb.append("Door Closing");
+                t.setText("Closing");
+            } else if (reply[COMMAND_REPLY_V1_NDX] == DOOR_BUSY) {
+                sb.append("Door Busy");
+                t.setText("Busy");
+            }
+            Log.d("decodeReply", sb.toString());
+        } else if (reply[ACTION_V1_NDX] == STATUSREPLY) {
+            Calendar rightNow = Calendar.getInstance();
+            //java.text.SimpleDateFormat
+            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yy hh:mm:ss", Locale.US);
+            String date = sdf.format(rightNow.getTime());
+            TextView t = (TextView) findViewById(R.id.TimeChecked);
+            t.setText("Refreshed: " + date);
+
+            sb.append("StatusReply");
+            Log.d("decodeReply", sb.toString());
+            sb = new StringBuilder("Door: ");
+            sb.append(Byte.toString(reply[STATUS_DOOR_V1_NDX]));
+            Log.d("decodeReply", sb.toString());
+            t = (TextView) findViewById(R.id.DoorStatus);
+            if (reply[STATUS_DOOR_V1_NDX] == DOOR_OPEN) {
+                t.setText("Open");
+            } else if (reply[STATUS_DOOR_V1_NDX] == DOOR_CLOSED) {
+                t.setText("Closed");
+            } else if (reply[STATUS_DOOR_V1_NDX] == DOOR_BUSY) {
+                t.setText("Busy");
+            }
+            sb = new StringBuilder("Range: ");
+            short s = (short) (reply[STATUS_RANGE_V1_NDX] & 0xFF);
+            sb.append(s);
+            Log.d("decodeReply", sb.toString());
+            t = (TextView) findViewById(R.id.RangeStatus);
+            t.setText(Byte.toString(reply[STATUS_RANGE_V1_NDX]));
+
+            sb = new StringBuilder("Light: ");
+            sb.append(Byte.toString(reply[STATUS_LIGHT_V1_NDX]));
+            Log.d("decodeReply", sb.toString());
+            t = (TextView) findViewById(R.id.LightStatus);
+            if (reply[STATUS_LIGHT_V1_NDX] == LIGHT_ON) {
+                t.setText("On");
+            } else if (reply[STATUS_LIGHT_V1_NDX] == LIGHT_OFF) {
+                t.setText("Off");
+            }
+        }
+    }
+
+    public static class ErrorDialogFragment extends DialogFragment {
+        private Dialog mDialog;
+
+        public ErrorDialogFragment() {
+            super();
+            mDialog = null;
+        }
+
+        public void setDialog(Dialog dialog) {
+            mDialog = dialog;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            return mDialog;
         }
     }
 
@@ -309,111 +443,15 @@ public class HGDOActivity extends FragmentActivity implements
         }
     }
 
-    protected void sendStatusRequest() {
-        byte[] msg = new byte[7];
-        msg[LENGTH_V1_NDX]              = STATUS_REQUEST_LENGTH_V1;
-        msg[VERSION_V1_NDX]             = VERSION;
-        msg[ACTION_V1_NDX]              = STATUSREQ;
-        msg[STATUS_REQUEST_LENGTH_V1-4] = 1;
-        msg[STATUS_REQUEST_LENGTH_V1-3] = 2;
-        msg[STATUS_REQUEST_LENGTH_V1-2] = 3;
-        msg[STATUS_REQUEST_LENGTH_V1-1] = 4;
-        new AsyncGarage().execute(msg);
-    }
-
-    public void RefreshState(View view) {
-        sendStatusRequest();
-    }
-
-    public void toggleDoor(View view) {
-        byte[] msg = new byte[8];
-        msg[LENGTH_V1_NDX]       = COMMAND_LENGTH_V1;
-        msg[VERSION_V1_NDX]      = VERSION;
-        msg[ACTION_V1_NDX]       = COMMAND;
-        msg[COMMAND_V1_NDX]      = TOGGLE_DOOR;
-        msg[COMMAND_LENGTH_V1-4] = 1;
-        msg[COMMAND_LENGTH_V1-3] = 2;
-        msg[COMMAND_LENGTH_V1-2] = 3;
-        msg[COMMAND_LENGTH_V1-1] = 4;
-        new AsyncGarage().execute(msg);
-        countDownTimer.start();
-    }
-
-    protected void decodeReply(byte[] reply) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Length: ");
-        sb.append(Byte.toString(reply[LENGTH_V1_NDX]));
-        Log.d("decodeReply", sb.toString());
-        sb = new StringBuilder("Version: ");
-        sb.append(Byte.toString(reply[VERSION_V1_NDX]));
-        Log.d("decodeReply", sb.toString());
-        sb = new StringBuilder("Action: ");
-        if (reply[ACTION_V1_NDX] == COMMANDREPLY) {
-            sb.append("CommandReply");
-            Log.d("decodeReply", sb.toString());
-            TextView t = (TextView)findViewById(R.id.DoorStatus);
-            sb = new StringBuilder("Action: ");
-            if(reply[COMMAND_REPLY_V1_NDX] == DOOR_OPENING) {
-                sb.append("Door Opening");
-                t.setText("Opening");
-            } else if(reply[COMMAND_REPLY_V1_NDX] == DOOR_CLOSING) {
-                sb.append("Door Closing");
-                t.setText("Closing");
-            } else if(reply[COMMAND_REPLY_V1_NDX] == DOOR_BUSY) {
-                sb.append("Door Busy");
-                t.setText("Busy");
-            }
-            Log.d("decodeReply", sb.toString());
-        } else if (reply[ACTION_V1_NDX] == STATUSREPLY) {
-            Calendar rightNow = Calendar.getInstance();
-            //java.text.SimpleDateFormat
-            SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yy hh:mm:ss", Locale.US);
-            String date = sdf.format(rightNow.getTime());
-            TextView t = (TextView)findViewById(R.id.TimeChecked);
-            t.setText("Refreshed: " + date);
-
-            sb.append("StatusReply");
-            Log.d("decodeReply", sb.toString());
-            sb = new StringBuilder("Door: ");
-            sb.append(Byte.toString(reply[STATUS_DOOR_V1_NDX]));
-            Log.d("decodeReply", sb.toString());
-            t = (TextView)findViewById(R.id.DoorStatus);
-            if(reply[STATUS_DOOR_V1_NDX] == DOOR_OPEN) {
-                t.setText("Open");
-            } else if(reply[STATUS_DOOR_V1_NDX] == DOOR_CLOSED) {
-                t.setText("Closed");
-            } else if(reply[STATUS_DOOR_V1_NDX] == DOOR_BUSY) {
-                t.setText("Busy");
-            }
-            sb = new StringBuilder("Range: ");
-            short s = (short)(reply[STATUS_RANGE_V1_NDX] & 0xFF);
-            sb.append(s);
-            Log.d("decodeReply", sb.toString());
-            t = (TextView)findViewById(R.id.RangeStatus);
-            t.setText(Byte.toString(reply[STATUS_RANGE_V1_NDX]));
-
-            sb = new StringBuilder("Light: ");
-            sb.append(Byte.toString(reply[STATUS_LIGHT_V1_NDX]));
-            Log.d("decodeReply", sb.toString());
-            t = (TextView)findViewById(R.id.LightStatus);
-            if(reply[STATUS_LIGHT_V1_NDX] == LIGHT_ON) {
-                t.setText("On");
-            } else if(reply[STATUS_LIGHT_V1_NDX] == LIGHT_OFF) {
-                t.setText("Off");
-            }
-        }
-    }
-
     private class AsyncGarage extends AsyncTask<byte[], Void, byte[]> {
 
         @Override
-        protected void onPreExecute()
-        {
+        protected void onPreExecute() {
             super.onPreExecute();
         }
 
         @Override
-        protected byte[] doInBackground(byte[] ... outbuffers) {
+        protected byte[] doInBackground(byte[]... outbuffers) {
             Socket nsocket = new Socket();   //Network Socket
             byte[] tempdata = new byte[20];
 
@@ -461,24 +499,6 @@ public class HGDOActivity extends FragmentActivity implements
 
     }
 
-    public static class ErrorDialogFragment extends DialogFragment {
-        private Dialog mDialog;
-
-        public ErrorDialogFragment() {
-            super();
-            mDialog = null;
-        }
-
-        public void setDialog(Dialog dialog) {
-            mDialog = dialog;
-        }
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            return mDialog;
-        }
-    }
-
     public class GeofenceSampleReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -524,6 +544,90 @@ public class HGDOActivity extends FragmentActivity implements
             String msg = intent.getStringExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS);
             Log.e(GeofenceUtils.APPTAG, msg);
             Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private class GetAddressTask extends
+            AsyncTask<Location, Void, String> {
+        Context mContext;
+
+        public GetAddressTask(Context context) {
+            super();
+            mContext = context;
+        }
+
+        /**
+         * Get a Geocoder instance, get the latitude and longitude
+         * look up the address, and return it
+         *
+         * @return A string containing the address of the current
+         * location, or an empty string if no address can be found,
+         * or an error message
+         * @params params One or more Location objects
+         */
+        @Override
+        protected String doInBackground(Location... params) {
+            Geocoder geocoder =
+                    new Geocoder(mContext, Locale.getDefault());
+            // Get the current location from the input parameter list
+            Location loc = params[0];
+            // Create a list to contain the result address
+            List<Address> addresses = null;
+            try {
+                /*
+                 * Return 1 address.
+                 */
+                addresses = geocoder.getFromLocation(loc.getLatitude(),
+                        loc.getLongitude(), 1);
+            } catch (IOException e1) {
+                Log.e("LocationSampleActivity",
+                        "IO Exception in getFromLocation()");
+                e1.printStackTrace();
+                return ("IO Exception trying to get address");
+            } catch (IllegalArgumentException e2) {
+                // Error message to post in the log
+                String errorString = "Illegal arguments " +
+                        Double.toString(loc.getLatitude()) +
+                        " , " +
+                        Double.toString(loc.getLongitude()) +
+                        " passed to address service";
+                Log.e("LocationSampleActivity", errorString);
+                e2.printStackTrace();
+                return errorString;
+            }
+            // If the reverse geocode returned an address
+            if (addresses != null && addresses.size() > 0) {
+                // Get the first address
+                Address address = addresses.get(0);
+                /*
+                 * Format the first line of address (if available),
+                 * city, and country name.
+                 */
+                String addressText = String.format(
+                        "%s, %s, %s",
+                        // If there's a street address, add it
+                        address.getMaxAddressLineIndex() > 0 ?
+                                address.getAddressLine(0) : "",
+                        // Locality is usually a city
+                        address.getLocality(),
+                        // The country of the address
+                        address.getCountryName());
+                // Return the text
+                return addressText;
+            } else {
+                return "No address found";
+            }
+        }
+        /**
+         * A method that's called once doInBackground() completes. Turn
+         * off the indeterminate activity indicator and set
+         * the text of the UI element that shows the address. If the
+         * lookup failed, display the error message.
+         */
+        @Override
+        protected void onPostExecute(String address) {
+            // Display the results of the lookup.
+            ((TextView) (findViewById(R.id.fencearea))).setText(address);
         }
     }
 }

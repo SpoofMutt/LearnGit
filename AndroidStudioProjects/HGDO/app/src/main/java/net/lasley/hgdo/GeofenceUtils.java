@@ -23,7 +23,7 @@ public final class GeofenceUtils {
 
     public static final String CATEGORY_LOCATION_SERVICES = "net.lasley.hgdo.CATEGORY_LOCATION_SERVICES";
 
-    public static final String EXTRA_CONNECTION_CODE = "net.lasley.android.EXTRA_CONNECTION_CODE";
+    public static final String EXTRA_CONNECTION_CODE = "net.lasley.hgdo.EXTRA_CONNECTION_CODE";
     public static final String EXTRA_CONNECTION_ERROR_CODE = "net.lasley.hgdo.EXTRA_CONNECTION_ERROR_CODE";
     public static final String EXTRA_CONNECTION_ERROR_MESSAGE = "net.lasley.hgdo.EXTRA_CONNECTION_ERROR_MESSAGE";
     public static final String EXTRA_GEOFENCE_STATUS = "net.lasley.hgdo.EXTRA_GEOFENCE_STATUS";

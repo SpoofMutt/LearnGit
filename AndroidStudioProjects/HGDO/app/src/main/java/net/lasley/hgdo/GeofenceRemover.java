@@ -1,13 +1,5 @@
 package net.lasley.hgdo;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
-import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
-import com.google.android.gms.location.LocationClient;
-import com.google.android.gms.location.LocationStatusCodes;
-import com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener;
-
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -16,6 +8,14 @@ import android.content.IntentSender.SendIntentException;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
+import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
+import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationClient.OnRemoveGeofencesResultListener;
+import com.google.android.gms.location.LocationStatusCodes;
 
 import java.util.Arrays;
 import java.util.List;
@@ -142,9 +142,6 @@ public class GeofenceRemover implements
     private void requestDisconnection() {
         mInProgress = false;
         getLocationClient().disconnect();
-        if (mRequestType == GeofenceUtils.REMOVE_TYPE.INTENT) {
-            mCurrentIntent.cancel();
-        }
     }
 
     @Override

@@ -15,7 +15,7 @@
         Add Geofences: Failure, error code %1$d GeofenceRequestIds=%2$s
     </string>
     <string name="add_geofences_already_requested_error">
-        Can\'t add geofences, previous request hasn\'t finished.
+        Delay adding geofences, please wait.
     </string>
     <string name="connected">Client connected</string>
     <string name="connection_failed">Connection failed</string>
@@ -62,7 +62,7 @@
         Removing geofences by request id failed: error code %1$d GeofenceRequestIds=%2$s
     </string>
     <string name="remove_geofences_already_requested_error">
-        Can\'t remove geofences, previous request hasn\'t finished.
+        Delay removing geofences, please wait.
     </string>
     <string name="remove_geofences_id_success">
         Removing geofences by request ids succeeded: request ids: %1$s
