@@ -1,136 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     android:layout_margin="5dp"
-    tools:context=".MainActivity">
-
-    <TextView
-        android:id="@+id/label_lat_lng"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:text="@string/latlng"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <TextView
-        android:id="@+id/lat_lng"
-        android:layout_width="160dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="10dp"
-        android:layout_toEndOf="@+id/label_lat_lng"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textIsSelectable="true"
-        android:layout_alignParentStart="false"
-        android:textSize="12dp"
-        android:layout_alignBottom="@+id/label_lat_lng"
-        android:layout_alignTop="@+id/label_lat_lng"
-        android:gravity="center_vertical"
-        android:text="Indeterminate" />
-
-    <CheckBox
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Use GPS"
-        android:id="@+id/checkGPS"
-        android:layout_alignParentEnd="false"
-        android:visibility="visible"
-        android:onClick="SetGPSState"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/space_area" />
-
-    <Space
-        android:id="@+id/space_lat_lng"
-        android:layout_width="20px"
-        android:layout_height="20px"
-        android:layout_above="@+id/label_fencearea"
-        android:layout_alignEnd="@+id/lat_lng"
-        android:layout_alignStart="@+id/label_lat_lng"
-        android:layout_below="@+id/label_lat_lng"
-        android:layout_toEndOf="@+id/label_fencearea"
-        android:background="#ff000a64" />
-
-    <TextView
-        android:id="@+id/label_fencearea"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/label_lat_lng"
-        android:layout_alignParentStart="true"
-        android:layout_alignStart="@+id/label_lat_lng"
-        android:layout_below="@+id/label_lat_lng"
-        android:text="@string/fencearea"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <TextView
-        android:id="@+id/fencearea"
-        android:layout_width="160dp"
-        android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/lat_lng"
-        android:layout_alignParentEnd="true"
-        android:layout_alignStart="@+id/lat_lng"
-        android:layout_below="@+id/lat_lng"
-        android:text="Indeterminate"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="@dimen/margin_medium"
-        android:gravity="center_vertical" />
-
-    <Space
-        android:id="@+id/space_area"
-        android:layout_width="20px"
-        android:layout_height="20px"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/label_fencearea"
-        android:background="#ff000a64"
-        android:layout_alignParentEnd="true" />
+    tools:context=".MainActivity"
+    android:id="@+id/TopLayout">
 
     <TableLayout
         android:id="@+id/TableLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@+id/checkGPS"
         android:layout_gravity="center"
         android:measureWithLargestChild="false"
-        android:shrinkColumns="*"
+        android:shrinkColumns="0,2"
         android:stretchColumns="*">
 
         <TableRow
             android:id="@+id/TableRow1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/textView"
-                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_column="0"
                 android:layout_gravity="center_vertical"
-                android:layout_weight="1"
                 android:text="Door"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_width="wrap_content" />
 
             <TextView
                 android:id="@+id/DoorStatus"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_column="1"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="1"
                 android:text="Opened"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_gravity="center_vertical"
+                android:layout_column="1" />
 
             <Button
                 android:id="@+id/RefreshStatus"
                 style="?android:attr/buttonStyleSmall"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="2"
                 android:layout_gravity="center_vertical"
-                android:layout_weight="1"
                 android:clickable="true"
                 android:enabled="true"
                 android:onClick="RefreshState"
@@ -140,34 +55,31 @@
 
         <TableRow
             android:id="@+id/TableRow2"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/textView3"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="0"
-                android:layout_weight="1"
                 android:text="Range"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <TextView
                 android:id="@+id/RangeStatus"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
-                android:layout_weight="1"
                 android:text="Unknown"
                 android:textAlignment="textStart"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <TextView
                 android:id="@+id/TimeChecked"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="2"
-                android:layout_weight="1"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textSize="8dp" />
 
@@ -176,24 +88,22 @@
 
         <TableRow
             android:id="@+id/TableRow3"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/textView4"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="0"
-                android:layout_weight="1"
                 android:text="Light"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <TextView
                 android:id="@+id/LightStatus"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="1"
-                android:layout_weight="1"
                 android:text="On"
                 android:textAlignment="textStart"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
@@ -203,7 +113,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_column="2"
-                android:layout_weight="1"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textSize="8dp" />
 
@@ -213,10 +122,8 @@
 
     <Space
         android:id="@+id/Space_Table"
-        android:layout_width="20px"
-        android:layout_height="20px"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentStart="true"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:layout_below="@+id/TableLayout"
         android:layout_centerHorizontal="true"
         android:background="#ff000a64" />
@@ -245,13 +152,128 @@
         android:onClick="toggleDoor"
         android:text="Garage Door Button" />
 
+    <RelativeLayout
+        android:id="@+id/GPSLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/TableLayout"
+        android:layout_alignRight="@+id/TableLayout"
+        android:layout_below="@+id/GarageDoorToggleButton">
+
+        <TextView
+            android:id="@+id/label_lat_lng"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/latlng"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="false" />
+
+        <TextView
+            android:id="@+id/lat_lng"
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/label_lat_lng"
+            android:layout_alignTop="@+id/label_lat_lng"
+            android:layout_marginStart="10dp"
+            android:layout_toEndOf="@+id/label_lat_lng"
+            android:gravity="center_vertical"
+            android:text="Indeterminate"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textIsSelectable="true"
+            android:textSize="12dp"
+            android:layout_toRightOf="@+id/label_lat_lng"
+            android:layout_alignParentRight="true" />
+
+        <Space
+            android:id="@+id/space_lat_lng"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_alignEnd="@+id/lat_lng"
+            android:layout_alignStart="@+id/label_lat_lng"
+            android:layout_below="@+id/label_lat_lng"
+            android:background="#ff000a64"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true" />
+
+        <TextView
+            android:id="@+id/label_fencearea"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/space_lat_lng"
+            android:text="@string/fencearea"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_alignStart="@+id/label_lat_lng"
+            android:layout_alignEnd="@+id/label_lat_lng" />
+
+        <TextView
+            android:id="@+id/fencearea"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:text="Indeterminate"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="@dimen/margin_medium"
+            android:layout_alignParentEnd="false"
+            android:layout_below="@+id/space_lat_lng"
+            android:layout_toRightOf="@+id/label_fencearea"
+            android:layout_alignBottom="@+id/label_fencearea"
+            android:layout_alignTop="@+id/label_fencearea"
+            android:layout_marginLeft="10dp" />
+
+        <Space
+            android:id="@+id/space_area"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_below="@+id/label_fencearea"
+            android:background="#ff000a64"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Accuracy:"
+            android:id="@+id/AccuracyLabel"
+            android:layout_below="@+id/space_area"
+            android:layout_alignParentStart="true"
+            android:layout_alignStart="@+id/label_lat_lng"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView
+            android:id="@+id/accuracy"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:text="Indeterminate"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_marginLeft="10dp"
+            android:textSize="@dimen/margin_medium"
+            android:layout_alignParentEnd="false"
+            android:layout_below="@+id/space_lat_lng"
+            android:layout_toRightOf="@+id/AccuracyLabel"
+            android:layout_alignBottom="@+id/AccuracyLabel"
+            android:layout_alignTop="@+id/AccuracyLabel" />
+
+        <CheckBox
+            android:id="@+id/checkGPS"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="SetGPSState"
+            android:text="Use GPS"
+            android:visibility="visible"
+            android:layout_below="@+id/AccuracyLabel" />
+
+    </RelativeLayout>
+
     <ListView
         android:id="@+id/Activity"
         android:layout_width="wrap_content"
-        android:layout_height="260dp"
-        android:layout_below="@+id/GarageDoorToggleButton"
+        android:layout_height="195dp"
         android:choiceMode="none"
-        android:fastScrollAlwaysVisible="false" />
+        android:fastScrollAlwaysVisible="false"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/GPSLayout" />
 
     <!--
             <fragment

@@ -42,6 +42,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -296,6 +297,8 @@ public class HGDOActivity extends FragmentActivity implements
             Location currentLocation = mLocationClient.getLastLocation();
             ((TextView) (findViewById(net.lasley.hgdo.R.id.lat_lng))).setText(GeofenceUtils.getLatLng(this, currentLocation));
             (new GetAddressTask(this)).execute(currentLocation);
+            String feetstr = new DecimalFormat("0.0").format(currentLocation.getAccuracy() * 3.2808);
+            ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setText(feetstr + " ft.");
         }
     }
 

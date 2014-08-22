@@ -89,7 +89,7 @@
     <string name="latitude_longitude">%1$.8f, %2$.8f</string>
 
     <!-- Labels -->
-    <string name="latlng">Lat/Long:</string>
+    <string name="latlng">Lat/Long:   </string>
     <string name="fencearea">Area:</string>
 
 </resources>
