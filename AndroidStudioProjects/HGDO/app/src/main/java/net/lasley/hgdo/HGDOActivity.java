@@ -105,13 +105,11 @@ public class HGDOActivity extends FragmentActivity implements
     private static final byte CLOSE_DOOR = 1;
     private static final byte TOGGLE_DOOR = 2;
     // Store a list of geofences to add
-    List<Geofence> mCurrentGeofences;
-    List<SimpleGeofence> mUIGeofence;
-    List<String> mAreaVisits;
-    WifiManager Wifi;
+    private List<Geofence> mCurrentGeofences;
+    private List<SimpleGeofence> mUIGeofence;
+    private WifiManager Wifi;
     // Define an object that holds accuracy and frequency parameters
-    LocationRequest mLocationRequest;
-    LocationRequest mLocationRequestSlow;
+    private LocationRequest mLocationRequest;
     // Store the current request
     private REQUEST_TYPE mRequestType;
     // Store the current type of removal
@@ -120,8 +118,6 @@ public class HGDOActivity extends FragmentActivity implements
     private GeofenceRequester mGeofenceRequester;
     private GeofenceRemover mGeofenceRemover;
     private GeofenceSampleReceiver mBroadcastReceiver;
-    private IntentFilter mIntentFilter;
-    private IntentFilter mIntentWIFIFilter;
     private LocationClient mLocationClient;
     private WIFIReceiver mWIFIReceiver;
     private ArrayAdapter<String> adapter;
@@ -132,16 +128,6 @@ public class HGDOActivity extends FragmentActivity implements
     private ProgressBar commProgressBar;
     private int OrigWiFiSettingOn;
     private boolean ReadyToMonitorWifi;
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
 
     @Override
     protected void onDestroy() {
@@ -218,7 +204,7 @@ public class HGDOActivity extends FragmentActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mLocationRequestSlow = LocationRequest.create();
+        LocationRequest mLocationRequestSlow = LocationRequest.create();
         mLocationRequestSlow.setPriority(LocationRequest.PRIORITY_NO_POWER);
         mLocationRequestSlow.setInterval(60 * 1000); // Milliseconds
         mLocationRequestSlow.setFastestInterval(30 * 1000);
@@ -232,7 +218,7 @@ public class HGDOActivity extends FragmentActivity implements
 
         mUIGeofence = new ArrayList<SimpleGeofence>();
         mCurrentGeofences = new ArrayList<Geofence>();
-        mAreaVisits = new ArrayList<String>();
+        List<String> mAreaVisits = new ArrayList<String>();
 
         mLocationClient = new LocationClient(this, this, this);
         mLocationClient.connect();
@@ -243,14 +229,10 @@ public class HGDOActivity extends FragmentActivity implements
         mWIFIReceiver = new WIFIReceiver();
         Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         OrigWiFiSettingOn = Wifi.getWifiState();
-        if(OrigWiFiSettingOn == WifiManager.WIFI_STATE_ENABLED) {
-            ReadyToMonitorWifi = true;
-        } else {
-            ReadyToMonitorWifi = false;
-        }
+        ReadyToMonitorWifi = OrigWiFiSettingOn == WifiManager.WIFI_STATE_ENABLED;
 //        Wifi.setWifiEnabled(false);
 
-        mIntentWIFIFilter = new IntentFilter();
+        IntentFilter mIntentWIFIFilter = new IntentFilter();
         mIntentWIFIFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
 //        mIntentWIFIFilter.addAction(WifiManager.NETWORK_IDS_CHANGED_ACTION);
 //        mIntentWIFIFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
@@ -259,7 +241,7 @@ public class HGDOActivity extends FragmentActivity implements
 //        mIntentWIFIFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(mWIFIReceiver, mIntentWIFIFilter);
 
-        mIntentFilter = new IntentFilter();
+        IntentFilter mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCES_ADDED);
         mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCES_REMOVED);
         mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCE_ERROR);
@@ -361,7 +343,7 @@ public class HGDOActivity extends FragmentActivity implements
         }
     }
 
-    public void RemoveGeoFencing() {
+    void RemoveGeoFencing() {
         mRemoveType = GeofenceUtils.REMOVE_TYPE.INTENT;
         if (!servicesConnected()) {
             return;
@@ -374,7 +356,7 @@ public class HGDOActivity extends FragmentActivity implements
         }
     }
 
-    public void AddGeoFencing() {
+    void AddGeoFencing() {
         mRequestType = GeofenceUtils.REQUEST_TYPE.ADD;
         if (!servicesConnected()) {
             return;
@@ -406,7 +388,7 @@ public class HGDOActivity extends FragmentActivity implements
         }
     }
 
-    public void getLocation() {
+    void getLocation() {
         if (servicesConnected()) {
             Location currentLocation = mLocationClient.getLastLocation();
             ((TextView) (findViewById(net.lasley.hgdo.R.id.lat_lng))).setText(GeofenceUtils.getLatLng(this, currentLocation));
@@ -416,7 +398,7 @@ public class HGDOActivity extends FragmentActivity implements
         }
     }
 
-    protected void sendStatusRequest() {
+    void sendStatusRequest() {
         byte[] msg = new byte[7];
         msg[LENGTH_V1_NDX] = STATUS_REQUEST_LENGTH_V1;
         msg[VERSION_V1_NDX] = VERSION;
@@ -428,65 +410,7 @@ public class HGDOActivity extends FragmentActivity implements
         new AsyncGarage().execute(msg);
     }
 
-    public void RefreshState(View view) {
-        sendStatusRequest();
-    }
-
-    public void SetWIFIState(View view) {
-        CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
-        if (cb.isChecked()) {
-            if(ReadyToMonitorWifi == false) {
-                Wifi.setWifiEnabled(true);
-                wifiTimer.start();
-            }
-            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Checked.");
-        } else {
-            ReadyToMonitorWifi = false;
-            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Unchecked.");
-//            Wifi.setWifiEnabled(false);
-        }
-    }
-
-    public void SetGPSState(View view) {
-        CheckBox cb = (CheckBox) findViewById(R.id.checkGPS);
-        if (cb.isChecked()) {
-            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetGPSState - Checked.");
-            mLocationClient.requestLocationUpdates(mLocationRequest, this);
-            getLocation();
-            AddGeoFencing();
-        } else {
-            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetGPSState - Unchecked.");
-            mLocationClient.removeLocationUpdates(this);
-//            mLocationClient.requestLocationUpdates(mLocationRequestSlow, this);
-            ((TextView) findViewById(R.id.lat_lng)).setText("Indeterminate");
-            ((TextView) findViewById(R.id.fencearea)).setText("Indeterminate");
-
-            TypedArray themeArray = this.getTheme().obtainStyledAttributes(new int[]{android.R.attr.textColorPrimary});
-            int index = 0;
-            int defaultColorValue = 0;
-            int TextColor = themeArray.getColor(index, defaultColorValue);
-            ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setTextColor(TextColor);
-            ((TextView) findViewById(R.id.accuracy)).setText("Indeterminate");
-            adapter.clear();
-            RemoveGeoFencing();
-        }
-    }
-
-    public void toggleDoor(View view) {
-        byte[] msg = new byte[8];
-        msg[LENGTH_V1_NDX] = COMMAND_LENGTH_V1;
-        msg[VERSION_V1_NDX] = VERSION;
-        msg[ACTION_V1_NDX] = COMMAND;
-        msg[COMMAND_V1_NDX] = TOGGLE_DOOR;
-        msg[COMMAND_LENGTH_V1 - 4] = 1;
-        msg[COMMAND_LENGTH_V1 - 3] = 2;
-        msg[COMMAND_LENGTH_V1 - 2] = 3;
-        msg[COMMAND_LENGTH_V1 - 1] = 4;
-        new AsyncGarage().execute(msg);
-        countDownTimer.start();
-    }
-
-    protected void decodeReply(byte[] reply) {
+    void decodeReply(byte[] reply) {
         StringBuilder sb = new StringBuilder();
         sb.append("Length: ");
         sb.append(Byte.toString(reply[LENGTH_V1_NDX]));
@@ -548,6 +472,64 @@ public class HGDOActivity extends FragmentActivity implements
             } else if (reply[STATUS_LIGHT_V1_NDX] == LIGHT_OFF) {
                 t.setText("Off");
             }
+        }
+    }
+
+    public void RefreshState(View view) {
+        sendStatusRequest();
+    }
+
+    public void toggleDoor(View view) {
+        byte[] msg = new byte[8];
+        msg[LENGTH_V1_NDX] = COMMAND_LENGTH_V1;
+        msg[VERSION_V1_NDX] = VERSION;
+        msg[ACTION_V1_NDX] = COMMAND;
+        msg[COMMAND_V1_NDX] = TOGGLE_DOOR;
+        msg[COMMAND_LENGTH_V1 - 4] = 1;
+        msg[COMMAND_LENGTH_V1 - 3] = 2;
+        msg[COMMAND_LENGTH_V1 - 2] = 3;
+        msg[COMMAND_LENGTH_V1 - 1] = 4;
+        new AsyncGarage().execute(msg);
+        countDownTimer.start();
+    }
+
+    public void SetWIFIState(View view) {
+        CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
+        if (cb.isChecked()) {
+            if (!ReadyToMonitorWifi) {
+                Wifi.setWifiEnabled(true);
+                wifiTimer.start();
+            }
+            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Checked.");
+        } else {
+            ReadyToMonitorWifi = false;
+            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Unchecked.");
+//            Wifi.setWifiEnabled(false);
+        }
+    }
+
+    public void SetGPSState(View view) {
+        CheckBox cb = (CheckBox) findViewById(R.id.checkGPS);
+        if (cb.isChecked()) {
+            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetGPSState - Checked.");
+            mLocationClient.requestLocationUpdates(mLocationRequest, this);
+            getLocation();
+            AddGeoFencing();
+        } else {
+            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetGPSState - Unchecked.");
+            mLocationClient.removeLocationUpdates(this);
+//            mLocationClient.requestLocationUpdates(mLocationRequestSlow, this);
+            ((TextView) findViewById(R.id.lat_lng)).setText("Indeterminate");
+            ((TextView) findViewById(R.id.fencearea)).setText("Indeterminate");
+
+            TypedArray themeArray = this.getTheme().obtainStyledAttributes(new int[]{android.R.attr.textColorPrimary});
+            int index = 0;
+            int defaultColorValue = 0;
+            int TextColor = themeArray.getColor(index, defaultColorValue);
+            ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setTextColor(TextColor);
+            ((TextView) findViewById(R.id.accuracy)).setText("Indeterminate");
+            adapter.clear();
+            RemoveGeoFencing();
         }
     }
 
@@ -622,11 +604,10 @@ public class HGDOActivity extends FragmentActivity implements
             Socket nsocket = new Socket();   //Network Socket
             byte[] tempdata = new byte[20];
 
-            boolean result = false;
             try {
                 ConnectivityManager cm = (ConnectivityManager) hgdoApp.getAppContext().getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo ni = cm.getActiveNetworkInfo();
-                while (ni.isConnected() == false) {
+                while (!ni.isConnected()) {
                     ni = cm.getActiveNetworkInfo();
                 }
                 Log.i("SendDataToNetwork", "Creating socket");
@@ -681,29 +662,29 @@ public class HGDOActivity extends FragmentActivity implements
             } else if (TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCES_ADDED)
                     ||
                     TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCES_REMOVED)) {
-                handleGeofenceStatus(context, intent);
+                handleGeofenceStatus(intent);
             } else if (TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCE_ENTER)) {
-                handleGeofenceEnter(context, intent);
+                handleGeofenceEnter(intent);
             } else if (TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCE_EXIT)) {
-                handleGeofenceExit(context, intent);
+                handleGeofenceExit(intent);
             } else {
                 Log.e(hgdoApp.getAppContext().getString(R.string.app_name), getString(net.lasley.hgdo.R.string.invalid_action_detail, action));
                 Toast.makeText(context, net.lasley.hgdo.R.string.invalid_action, Toast.LENGTH_LONG).show();
             }
         }
 
-        private void handleGeofenceStatus(Context context, Intent intent) {
+        private void handleGeofenceStatus(Intent intent) {
             String action = String.format("Status() %s", intent.getAction());
             Log.d(hgdoApp.getAppContext().getString(R.string.app_name), action);
         }
 
-        private void handleGeofenceEnter(Context context, Intent intent) {
+        private void handleGeofenceEnter(Intent intent) {
             String action = String.format("Enter() %s", intent.getStringExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS));
             Log.d(hgdoApp.getAppContext().getString(R.string.app_name), action);
             getLocation();
         }
 
-        private void handleGeofenceExit(Context context, Intent intent) {
+        private void handleGeofenceExit(Intent intent) {
             String action = String.format("Exit() %s", intent.getStringExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS));
             Time tmp = new Time();
             tmp.setToNow();
@@ -711,23 +692,23 @@ public class HGDOActivity extends FragmentActivity implements
             adapter.insert(msg, 0);
             Log.d(hgdoApp.getAppContext().getString(R.string.app_name), action);
             getLocation();
-            if (action.indexOf("APPROACH") != -1) {
+            if (action.contains("APPROACH")) {
                 sendStatusRequest();
                 LastFence = Fences.APPROACH;
-            } else if (action.indexOf("ENTRY") != -1) {
+            } else if (action.contains("ENTRY")) {
                 if (LastFence == Fences.APPROACH) {
                     TextView t = (TextView) findViewById(R.id.DoorStatus);
                     String state = t.getText().toString();
-                    if (state.indexOf("Closed") != -1) {
+                    if (state.contains("Closed")) {
                         tmp.setToNow();
                         msg = tmp.format("%T ") + ": Opening Garage Door Now";
-                        toggleDoor(findViewById(android.R.id.content));
+                        toggleDoor(null);
                         adapter.insert(msg, 0);
                         Log.d(hgdoApp.getAppContext().getString(R.string.app_name), msg);
                     }
                 }
                 LastFence = Fences.ENTRY;
-            } else if (action.indexOf("DRIVEWAY") != -1) {
+            } else if (action.contains("DRIVEWAY")) {
                 LastFence = Fences.DRIVEWAY;
             } else {
                 LastFence = Fences.UNKNOWN;
@@ -741,7 +722,7 @@ public class HGDOActivity extends FragmentActivity implements
         }
     }
 
-    public class WIFIReceiver extends BroadcastReceiver {
+    private class WIFIReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
@@ -793,7 +774,7 @@ public class HGDOActivity extends FragmentActivity implements
             // Get the current location from the input parameter list
             Location loc = params[0];
             // Create a list to contain the result address
-            List<Address> addresses = null;
+            List<Address> addresses;
             try {
                 /*
                  * Return 1 address.
@@ -824,7 +805,8 @@ public class HGDOActivity extends FragmentActivity implements
                  * Format the first line of address (if available),
                  * city, and country name.
                  */
-                String addressText = String.format(
+                // Return the text
+                return String.format(
                         "%s, %s, %s",
                         // If there's a street address, add it
                         address.getMaxAddressLineIndex() > 0 ?
@@ -833,8 +815,6 @@ public class HGDOActivity extends FragmentActivity implements
                         address.getLocality(),
                         // The country of the address
                         address.getCountryName());
-                // Return the text
-                return addressText;
             } else {
                 return "No address found";
             }

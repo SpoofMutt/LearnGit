@@ -157,8 +157,8 @@
         android:id="@+id/WIFI"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/TableLayout"
-        android:layout_alignRight="@+id/TableLayout"
+        android:layout_alignEnd="@+id/TableLayout"
+        android:layout_alignStart="@+id/TableLayout"
         android:layout_below="@+id/GarageDoorToggleButton">
 
         <Space
@@ -167,9 +167,6 @@
             android:layout_height="20dp"
             android:layout_alignEnd="@+id/checkWIFI"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentLeft="false"
-            android:layout_alignParentRight="false"
-            android:layout_alignParentStart="true"
             android:layout_alignParentTop="true" />
 
         <ProgressBar
@@ -199,8 +196,8 @@
             android:layout_width="fill_parent"
             android:layout_height="10dp"
             android:layout_alignEnd="@+id/checkWIFI"
-            android:layout_alignParentLeft="false"
-            android:layout_alignParentRight="false"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentStart="false"
             android:layout_below="@+id/checkWIFI" />
 
     </RelativeLayout>
@@ -209,16 +206,16 @@
         android:id="@+id/GPSLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/TableLayout"
-        android:layout_alignRight="@+id/TableLayout"
+        android:layout_alignEnd="@+id/TableLayout"
+        android:layout_alignStart="@+id/TableLayout"
         android:layout_below="@+id/WIFI">
 
         <TextView
             android:id="@+id/label_lat_lng"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="false"
+            android:layout_alignParentEnd="false"
+            android:layout_alignParentStart="true"
             android:text="@string/latlng"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -227,11 +224,10 @@
             android:layout_width="160dp"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/label_lat_lng"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:layout_alignTop="@+id/label_lat_lng"
             android:layout_marginStart="10dp"
             android:layout_toEndOf="@+id/label_lat_lng"
-            android:layout_toRightOf="@+id/label_lat_lng"
             android:gravity="center_vertical"
             android:text="Indeterminate"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -243,8 +239,8 @@
             android:layout_width="10dp"
             android:layout_height="10dp"
             android:layout_alignEnd="@+id/lat_lng"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentStart="true"
             android:layout_alignStart="@+id/label_lat_lng"
             android:layout_below="@+id/label_lat_lng"
             android:background="#ff000a64" />
@@ -267,8 +263,8 @@
             android:layout_alignParentEnd="false"
             android:layout_alignTop="@+id/label_fencearea"
             android:layout_below="@+id/space_lat_lng"
-            android:layout_marginLeft="10dp"
-            android:layout_toRightOf="@+id/label_fencearea"
+            android:layout_marginStart="10dp"
+            android:layout_toEndOf="@+id/label_fencearea"
             android:gravity="center_vertical"
             android:text="Indeterminate"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -301,8 +297,8 @@
             android:layout_alignParentEnd="false"
             android:layout_alignTop="@+id/AccuracyLabel"
             android:layout_below="@+id/space_lat_lng"
-            android:layout_marginLeft="10dp"
-            android:layout_toRightOf="@+id/AccuracyLabel"
+            android:layout_marginStart="10dp"
+            android:layout_toEndOf="@+id/AccuracyLabel"
             android:gravity="center_vertical"
             android:text="Indeterminate"
             android:textAppearance="?android:attr/textAppearanceMedium"

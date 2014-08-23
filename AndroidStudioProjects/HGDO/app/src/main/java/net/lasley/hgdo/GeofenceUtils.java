@@ -22,8 +22,8 @@ public final class GeofenceUtils {
     public static final String EXTRA_CONNECTION_ERROR_MESSAGE = "net.lasley.hgdo.EXTRA_CONNECTION_ERROR_MESSAGE";
     public static final String EXTRA_GEOFENCE_STATUS = "net.lasley.hgdo.EXTRA_GEOFENCE_STATUS";
     public final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-    public static final String EMPTY_STRING = new String();
     public static final CharSequence GEOFENCE_ID_DELIMITER = ",";
+    private static final String EMPTY_STRING = "";
 
     public static String getLatLng(Context context, Location currentLocation) {
         if (currentLocation != null) {

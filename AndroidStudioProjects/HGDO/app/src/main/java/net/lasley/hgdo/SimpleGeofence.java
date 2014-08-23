@@ -6,7 +6,7 @@ package net.lasley.hgdo;
 
 import com.google.android.gms.location.Geofence;
 
-public class SimpleGeofence {
+class SimpleGeofence {
     private final String mId;
     private final double mLatitude;
     private final double mLongitude;
@@ -29,19 +29,19 @@ public class SimpleGeofence {
         this.mTransitionType = transition;
     }
 
-    public String getId() {
+    String getId() {
         return mId;
     }
 
-    public double getLatitude() {
+    double getLatitude() {
         return mLatitude;
     }
 
-    public double getLongitude() {
+    double getLongitude() {
         return mLongitude;
     }
 
-    public float getRadius() {
+    float getRadius() {
         return mRadius;
     }
 
