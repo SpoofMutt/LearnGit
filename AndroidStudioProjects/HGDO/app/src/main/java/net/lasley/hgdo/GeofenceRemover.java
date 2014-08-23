@@ -21,15 +21,16 @@ import java.util.Arrays;
 import java.util.List;
 
 public class GeofenceRemover implements
-            ConnectionCallbacks,
-            OnConnectionFailedListener,
-            OnRemoveGeofencesResultListener {
+        ConnectionCallbacks,
+        OnConnectionFailedListener,
+        OnRemoveGeofencesResultListener {
     private Context mContext;
     private List<String> mCurrentGeofenceIds;
     private LocationClient mLocationClient;
     private PendingIntent mCurrentIntent;
     private GeofenceUtils.REMOVE_TYPE mRequestType;
     private boolean mInProgress;
+
     public GeofenceRemover(Context context) {
         // Save the context
         mContext = context;
@@ -40,17 +41,17 @@ public class GeofenceRemover implements
         mInProgress = false;
     }
 
+    public boolean getInProgressFlag() {
+        return mInProgress;
+    }
+
     public void setInProgressFlag(boolean flag) {
         // Set the "In Progress" flag.
         mInProgress = flag;
     }
 
-    public boolean getInProgressFlag() {
-        return mInProgress;
-    }
-
     public void removeGeofencesById(List<String> geofenceIds) throws
-        IllegalArgumentException, UnsupportedOperationException {
+            IllegalArgumentException, UnsupportedOperationException {
         if ((null == geofenceIds) || (geofenceIds.size() == 0)) {
             throw new IllegalArgumentException();
         } else {
@@ -76,10 +77,10 @@ public class GeofenceRemover implements
 
     private void continueRemoveGeofences() {
         switch (mRequestType) {
-            case INTENT :
+            case INTENT:
                 mLocationClient.removeGeofences(mCurrentIntent, this);
                 break;
-            case LIST :
+            case LIST:
                 mLocationClient.removeGeofences(mCurrentGeofenceIds, this);
                 break;
         }
@@ -98,7 +99,7 @@ public class GeofenceRemover implements
 
     @Override
     public void onRemoveGeofencesByPendingIntentResult(int statusCode,
-            PendingIntent requestIntent) {
+                                                       PendingIntent requestIntent) {
         Intent broadcastIntent = new Intent();
         if (statusCode == LocationStatusCodes.SUCCESS) {
             Log.d(GeofenceUtils.APPTAG, mContext.getString(net.lasley.hgdo.R.string.remove_geofences_intent_success));
@@ -122,8 +123,8 @@ public class GeofenceRemover implements
                     Arrays.toString(geofenceRequestIds));
             Log.d(GeofenceUtils.APPTAG, msg);
             broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCES_REMOVED)
-                           .addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
-                           .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
+                    .addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
+                    .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
         } else {
             msg = mContext.getString(
                     net.lasley.hgdo.R.string.remove_geofences_id_failure,
@@ -132,8 +133,8 @@ public class GeofenceRemover implements
             );
             Log.e(GeofenceUtils.APPTAG, msg);
             broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_ERROR)
-                           .addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
-                           .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
+                    .addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
+                    .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
         }
         LocalBroadcastManager.getInstance(mContext).sendBroadcast(broadcastIntent);
         requestDisconnection();
@@ -170,8 +171,8 @@ public class GeofenceRemover implements
         } else {
             Intent errorBroadcastIntent = new Intent(GeofenceUtils.ACTION_CONNECTION_ERROR);
             errorBroadcastIntent.addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
-                                .putExtra(GeofenceUtils.EXTRA_CONNECTION_ERROR_CODE,
-                                        connectionResult.getErrorCode());
+                    .putExtra(GeofenceUtils.EXTRA_CONNECTION_ERROR_CODE,
+                            connectionResult.getErrorCode());
             LocalBroadcastManager.getInstance(mContext).sendBroadcast(errorBroadcastIntent);
         }
     }

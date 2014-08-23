@@ -3,7 +3,9 @@ package net.lasley.hgdo;
 /**
  * Created by Kent on 8/20/2014.
  */
+
 import com.google.android.gms.location.Geofence;
+
 public class SimpleGeofence {
     private final String mId;
     private final double mLatitude;
@@ -30,32 +32,37 @@ public class SimpleGeofence {
     public String getId() {
         return mId;
     }
+
     public double getLatitude() {
         return mLatitude;
     }
+
     public double getLongitude() {
         return mLongitude;
     }
-    public float  getRadius() {
+
+    public float getRadius() {
         return mRadius;
     }
-    public long   getExpirationDuration() {
+
+    public long getExpirationDuration() {
         return mExpirationDuration;
     }
-    public int    getTransitionType() {
+
+    public int getTransitionType() {
         return mTransitionType;
     }
 
     public Geofence toGeofence() {
         return new Geofence.Builder()
-                       .setRequestId(getId())
-                       .setTransitionTypes(mTransitionType)
-                       .setNotificationResponsiveness(0)
-                       .setCircularRegion(
-                               getLatitude(),
-                               getLongitude(),
-                               getRadius())
-                       .setExpirationDuration(mExpirationDuration)
-                       .build();
+                .setRequestId(getId())
+                .setTransitionTypes(mTransitionType)
+                .setNotificationResponsiveness(0)
+                .setCircularRegion(
+                        getLatitude(),
+                        getLongitude(),
+                        getRadius())
+                .setExpirationDuration(mExpirationDuration)
+                .build();
     }
 }

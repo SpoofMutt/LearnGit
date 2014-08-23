@@ -22,10 +22,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public class GeofenceRequester
-                implements
-                    OnAddGeofencesResultListener,
-                    ConnectionCallbacks,
-                    OnConnectionFailedListener {
+        implements
+        OnAddGeofencesResultListener,
+        ConnectionCallbacks,
+        OnConnectionFailedListener {
     private final Activity mActivity;
     private PendingIntent mGeofencePendingIntent;
     private ArrayList<Geofence> mCurrentGeofences;
@@ -39,12 +39,12 @@ public class GeofenceRequester
         mInProgress = false;
     }
 
-    public void setInProgressFlag(boolean flag) {
-        mInProgress = flag;
-    }
-
     public boolean getInProgressFlag() {
         return mInProgress;
+    }
+
+    public void setInProgressFlag(boolean flag) {
+        mInProgress = flag;
     }
 
     public PendingIntent getRequestPendingIntent() {
@@ -87,8 +87,8 @@ public class GeofenceRequester
                     Arrays.toString(geofenceRequestIds));
             Log.d(GeofenceUtils.APPTAG, msg);
             broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCES_ADDED)
-                           .addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
-                           .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
+                    .addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
+                    .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
         } else {
             msg = mActivity.getString(
                     net.lasley.hgdo.R.string.add_geofences_result_failure,
@@ -97,8 +97,8 @@ public class GeofenceRequester
             );
             Log.e(GeofenceUtils.APPTAG, msg);
             broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_ERROR)
-                           .addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
-                           .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
+                    .addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
+                    .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
         }
         LocalBroadcastManager.getInstance(mActivity).sendBroadcast(broadcastIntent);
         requestDisconnection();
@@ -141,15 +141,15 @@ public class GeofenceRequester
         if (connectionResult.hasResolution()) {
             try {
                 connectionResult.startResolutionForResult(mActivity,
-                    GeofenceUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                        GeofenceUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
             } catch (SendIntentException e) {
                 e.printStackTrace();
             }
         } else {
             Intent errorBroadcastIntent = new Intent(GeofenceUtils.ACTION_CONNECTION_ERROR);
             errorBroadcastIntent.addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
-                                .putExtra(GeofenceUtils.EXTRA_CONNECTION_ERROR_CODE,
-                                        connectionResult.getErrorCode());
+                    .putExtra(GeofenceUtils.EXTRA_CONNECTION_ERROR_CODE,
+                            connectionResult.getErrorCode());
             LocalBroadcastManager.getInstance(mActivity).sendBroadcast(errorBroadcastIntent);
         }
     }

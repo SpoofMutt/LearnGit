@@ -81,7 +81,7 @@
                 android:layout_height="wrap_content"
                 android:layout_column="2"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="12dp" />
+                android:textSize="14dp" />
 
 
         </TableRow>
@@ -153,12 +153,30 @@
         android:text="Garage Door Button" />
 
     <RelativeLayout
-        android:id="@+id/GPSLayout"
+        android:id="@+id/WIFI"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/TableLayout"
         android:layout_alignRight="@+id/TableLayout"
         android:layout_below="@+id/GarageDoorToggleButton">
+
+        <CheckBox
+            android:id="@+id/checkWIFI"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="SetWIFIState"
+            android:text="Use WIFI - In development."
+            android:visibility="visible"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/GPSLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/TableLayout"
+        android:layout_alignRight="@+id/TableLayout"
+        android:layout_below="@+id/WIFI">
 
         <TextView
             android:id="@+id/label_lat_lng"
@@ -260,7 +278,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="SetGPSState"
-            android:text="Use GPS"
+            android:text="Use GPS - In development."
             android:visibility="visible"
             android:layout_below="@+id/AccuracyLabel" />
 
@@ -271,9 +289,11 @@
         android:layout_width="wrap_content"
         android:layout_height="195dp"
         android:choiceMode="none"
+        android:textSize="6dp"
         android:fastScrollAlwaysVisible="false"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/GPSLayout" />
+        android:layout_below="@+id/GPSLayout"
+        tools:listitem="@android:layout/simple_list_item_1" />
 
     <!--
             <fragment

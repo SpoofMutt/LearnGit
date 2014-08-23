@@ -7,9 +7,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -32,6 +38,8 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 
 import net.lasley.hgdo.GeofenceUtils.REMOVE_TYPE;
 import net.lasley.hgdo.GeofenceUtils.REQUEST_TYPE;
@@ -51,7 +59,8 @@ import java.util.Locale;
 
 public class HGDOActivity extends FragmentActivity implements
         GooglePlayServicesClient.ConnectionCallbacks,
-        GooglePlayServicesClient.OnConnectionFailedListener {
+        GooglePlayServicesClient.OnConnectionFailedListener,
+        LocationListener {
 
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = Geofence.NEVER_EXPIRE;
@@ -95,6 +104,10 @@ public class HGDOActivity extends FragmentActivity implements
     List<Geofence> mCurrentGeofences;
     List<SimpleGeofence> mUIGeofence;
     List<String> mAreaVisits;
+    WifiManager Wifi;
+    // Define an object that holds accuracy and frequency parameters
+    LocationRequest mLocationRequest;
+    LocationRequest mLocationRequestSlow;
     // Store the current request
     private REQUEST_TYPE mRequestType;
     // Store the current type of removal
@@ -104,11 +117,22 @@ public class HGDOActivity extends FragmentActivity implements
     private GeofenceRemover mGeofenceRemover;
     private GeofenceSampleReceiver mBroadcastReceiver;
     private IntentFilter mIntentFilter;
+    private IntentFilter mIntentWIFIFilter;
     private LocationClient mLocationClient;
+    private WIFIReceiver mWIFIReceiver;
     private ArrayAdapter<String> adapter;
     private ToggleDoorCountDownTimer countDownTimer;
-    private enum Fences {APPROACH, ENTRY, DRIVEWAY, UNKNOWN};
     private Fences LastFence;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
 
     @Override
     protected void onDestroy() {
@@ -123,6 +147,7 @@ public class HGDOActivity extends FragmentActivity implements
         CheckBox cb = (CheckBox) findViewById(R.id.checkGPS);
         if (cb.isChecked()) {
             Log.d(GeofenceUtils.APPTAG, "onResume - AddGeoFencing.");
+            mLocationClient.requestLocationUpdates(mLocationRequest, this);
             AddGeoFencing();
         }
     }
@@ -148,15 +173,69 @@ public class HGDOActivity extends FragmentActivity implements
         }
     }
 
+    // Define the callback method that receives location updates
+    @Override
+    public void onLocationChanged(Location location) {
+        if (servicesConnected()) {
+            ((TextView) (findViewById(net.lasley.hgdo.R.id.lat_lng))).setText(GeofenceUtils.getLatLng(this, location));
+            (new GetAddressTask(this)).execute(location);
+            float meter = location.getAccuracy();
+            if (meter > 13.0) {
+                ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setTextColor(Color.RED);
+            } else if (meter > 10.0) {
+                ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setTextColor(Color.YELLOW);
+            } else {
+                ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setTextColor(Color.GREEN);
+//                TypedArray themeArray = this.getTheme().obtainStyledAttributes(new int[] {android.R.attr.textColor});
+//                int index = 0;
+//                int defaultColorValue = 0;
+//                int TextColor = themeArray.getColor(index, defaultColorValue);
+//                ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setTextColor(TextColor);
+            }
+            float feet = meter * 3.2808f;
+            String feetstr = new DecimalFormat("0.0").format(feet);
+            ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setText(feetstr + " ft.");
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mLocationRequestSlow = LocationRequest.create();
+        mLocationRequestSlow.setPriority(LocationRequest.PRIORITY_NO_POWER);
+        mLocationRequestSlow.setInterval(60 * 1000); // Milliseconds
+        mLocationRequestSlow.setFastestInterval(30 * 1000);
+
+        mLocationRequest = LocationRequest.create();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(5 * 1000); // Milliseconds
+        mLocationRequest.setFastestInterval(1 * 1000);
 
         LastFence = Fences.UNKNOWN;
 
         mUIGeofence = new ArrayList<SimpleGeofence>();
         mCurrentGeofences = new ArrayList<Geofence>();
         mAreaVisits = new ArrayList<String>();
+
+        mLocationClient = new LocationClient(this, this, this);
+        mLocationClient.connect();
+
+        mBroadcastReceiver = new GeofenceSampleReceiver();
+        mGeofenceRequester = new GeofenceRequester(this);
+        mGeofenceRemover = new GeofenceRemover(this);
+        mWIFIReceiver = new WIFIReceiver();
+        Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        Wifi.setWifiEnabled(false);
+
+        mIntentWIFIFilter = new IntentFilter();
+        mIntentWIFIFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        mIntentWIFIFilter.addAction(WifiManager.NETWORK_IDS_CHANGED_ACTION);
+        mIntentWIFIFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+        mIntentWIFIFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+        mIntentWIFIFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        mIntentWIFIFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(mWIFIReceiver, mIntentWIFIFilter);
 
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCES_ADDED);
@@ -166,30 +245,29 @@ public class HGDOActivity extends FragmentActivity implements
         mIntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCE_EXIT);
         // All Location Services sample apps use this category
         mIntentFilter.addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES);
-
-        mLocationClient = new LocationClient(this, this, this);
-        mLocationClient.connect();
-
-        mBroadcastReceiver = new GeofenceSampleReceiver();
-        mGeofenceRequester = new GeofenceRequester(this);
-        mGeofenceRemover = new GeofenceRemover(this);
-
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, mIntentFilter);
+
+        countDownTimer = new ToggleDoorCountDownTimer(TIME_TO_WAIT_FOR_DOOR_TO_OPEN, (int) (TIME_TO_WAIT_FOR_DOOR_TO_OPEN / 11.0));
 
         // Attach to the main UI
         setContentView(R.layout.activity_hgdo);
 
-        countDownTimer = new ToggleDoorCountDownTimer(TIME_TO_WAIT_FOR_DOOR_TO_OPEN, (int) (TIME_TO_WAIT_FOR_DOOR_TO_OPEN / 11.0));
-
         ListView list = (ListView) findViewById(R.id.Activity);
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mAreaVisits);
         list.setAdapter(adapter);
+
 
 /*
         map = ((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
         map.setMyLocationEnabled(true);
 */
         sendStatusRequest();
+    }
+
+    private boolean isConnectedViaWifi() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mWifi = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        return mWifi.isConnected();
     }
 
     @Override
@@ -329,16 +407,37 @@ public class HGDOActivity extends FragmentActivity implements
         sendStatusRequest();
     }
 
+    public void SetWIFIState(View view) {
+        CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
+        if (cb.isChecked()) {
+            Log.d(GeofenceUtils.APPTAG, "SetWIFIState - Checked.");
+            Wifi.setWifiEnabled(true);
+        } else {
+            Log.d(GeofenceUtils.APPTAG, "SetWIFIState - Unchecked.");
+            Wifi.setWifiEnabled(false);
+        }
+    }
+
     public void SetGPSState(View view) {
         CheckBox cb = (CheckBox) findViewById(R.id.checkGPS);
         if (cb.isChecked()) {
             Log.d(GeofenceUtils.APPTAG, "SetGPSState - Checked.");
+            mLocationClient.requestLocationUpdates(mLocationRequest, this);
+            getLocation();
             AddGeoFencing();
         } else {
             Log.d(GeofenceUtils.APPTAG, "SetGPSState - Unchecked.");
-            ((TextView)findViewById(R.id.lat_lng)).setText("Indeterminate");
-            ((TextView)findViewById(R.id.fencearea)).setText("Indeterminate");
-            ((TextView)findViewById(R.id.accuracy)).setText("Indeterminate");
+            mLocationClient.removeLocationUpdates(this);
+//            mLocationClient.requestLocationUpdates(mLocationRequestSlow, this);
+            ((TextView) findViewById(R.id.lat_lng)).setText("Indeterminate");
+            ((TextView) findViewById(R.id.fencearea)).setText("Indeterminate");
+
+            TypedArray themeArray = this.getTheme().obtainStyledAttributes(new int[]{android.R.attr.textColorPrimary});
+            int index = 0;
+            int defaultColorValue = 0;
+            int TextColor = themeArray.getColor(index, defaultColorValue);
+            ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setTextColor(TextColor);
+            ((TextView) findViewById(R.id.accuracy)).setText("Indeterminate");
             adapter.clear();
             RemoveGeoFencing();
         }
@@ -422,6 +521,8 @@ public class HGDOActivity extends FragmentActivity implements
             }
         }
     }
+
+    private enum Fences {APPROACH, ENTRY, DRIVEWAY, UNKNOWN}
 
     public static class ErrorDialogFragment extends DialogFragment {
         private Dialog mDialog;
@@ -559,20 +660,20 @@ public class HGDOActivity extends FragmentActivity implements
             if (action.indexOf("APPROACH") != -1) {
                 sendStatusRequest();
                 LastFence = Fences.APPROACH;
-            } else if(action.indexOf("ENTRY") != -1) {
-                if(LastFence == Fences.APPROACH) {
+            } else if (action.indexOf("ENTRY") != -1) {
+                if (LastFence == Fences.APPROACH) {
                     TextView t = (TextView) findViewById(R.id.DoorStatus);
                     String state = t.getText().toString();
                     if (state.indexOf("Closed") != -1) {
                         tmp.setToNow();
                         msg = tmp.format("%T ") + ": Opening Garage Door Now";
-//                    toggleDoor(findViewById(android.R.id.content));
+                        toggleDoor(findViewById(android.R.id.content));
                         adapter.insert(msg, 0);
                         Log.d(GeofenceUtils.APPTAG, msg);
                     }
                 }
                 LastFence = Fences.ENTRY;
-            } else if(action.indexOf("DRIVEWAY") != -1) {
+            } else if (action.indexOf("DRIVEWAY") != -1) {
                 LastFence = Fences.DRIVEWAY;
             } else {
                 LastFence = Fences.UNKNOWN;
@@ -583,6 +684,24 @@ public class HGDOActivity extends FragmentActivity implements
             String msg = intent.getStringExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS);
             Log.e(GeofenceUtils.APPTAG, msg);
             Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public class WIFIReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            Log.d(GeofenceUtils.APPTAG, action);
+            if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
+                NetworkInfo ni = (NetworkInfo) intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                if (ni.isConnected()) {
+                    //do stuff
+                    WifiInfo wi = Wifi.getConnectionInfo();
+                    Log.d(GeofenceUtils.APPTAG, wi.getSSID());
+                } else {
+                    // wifi connection was lost
+                }
+            }
         }
     }
 
@@ -657,6 +776,7 @@ public class HGDOActivity extends FragmentActivity implements
                 return "No address found";
             }
         }
+
         /**
          * A method that's called once doInBackground() completes. Turn
          * off the indeterminate activity indicator and set

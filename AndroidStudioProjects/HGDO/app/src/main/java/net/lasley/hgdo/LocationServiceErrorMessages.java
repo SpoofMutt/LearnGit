@@ -10,7 +10,8 @@ import com.google.android.gms.common.ConnectionResult;
  */
 public class LocationServiceErrorMessages {
     // Don't allow instantiation
-    private LocationServiceErrorMessages () {}
+    private LocationServiceErrorMessages() {
+    }
 
     public static String getErrorString(Context context, int errorCode) {
 
