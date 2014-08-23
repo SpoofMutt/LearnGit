@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/TopLayout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:layout_margin="5dp"
-    tools:context=".MainActivity"
-    android:id="@+id/TopLayout">
+    tools:context=".MainActivity">
 
     <TableLayout
         android:id="@+id/TableLayout"
@@ -23,21 +23,21 @@
 
             <TextView
                 android:id="@+id/textView"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="0"
                 android:layout_gravity="center_vertical"
                 android:text="Door"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_width="wrap_content" />
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <TextView
                 android:id="@+id/DoorStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Opened"
-                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_column="1"
                 android:layout_gravity="center_vertical"
-                android:layout_column="1" />
+                android:text="Opened"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
             <Button
                 android:id="@+id/RefreshStatus"
@@ -137,8 +137,9 @@
         android:layout_alignStart="@+id/GarageDoorToggleButton"
         android:layout_below="@+id/Space_Table"
         android:indeterminate="false"
-        android:max="100"
+        android:minHeight="20dp"
         android:progress="0"
+        android:secondaryProgress="0"
         android:visibility="visible" />
 
     <Button
@@ -161,35 +162,46 @@
         android:layout_below="@+id/GarageDoorToggleButton">
 
         <Space
+            android:id="@+id/Space_WiFi"
             android:layout_width="fill_parent"
             android:layout_height="20dp"
-            android:layout_alignParentTop="true"
             android:layout_alignEnd="@+id/checkWIFI"
+            android:layout_alignParentEnd="true"
             android:layout_alignParentLeft="false"
             android:layout_alignParentRight="false"
             android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:id="@+id/Space_WiFi" />
+            android:layout_alignParentTop="true" />
+
+        <ProgressBar
+            android:id="@+id/WaitForComm"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/Space_WiFi"
+            android:indeterminate="true"
+            android:max="100"
+            android:progress="0"
+            android:visibility="invisible" />
 
         <CheckBox
             android:id="@+id/checkWIFI"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="SetWIFIState"
-            android:layout_below="@+id/Space_WiFi"
-            android:text="Use WIFI"
-            android:visibility="visible"
             android:layout_alignParentTop="false"
-            android:checked="false" />
+            android:layout_below="@+id/WaitForComm"
+            android:checked="false"
+            android:onClick="SetWIFIState"
+            android:text="Use WIFI"
+            android:visibility="visible" />
 
         <Space
+            android:id="@+id/Space_WiFi2"
             android:layout_width="fill_parent"
             android:layout_height="10dp"
             android:layout_alignEnd="@+id/checkWIFI"
             android:layout_alignParentLeft="false"
             android:layout_alignParentRight="false"
-            android:layout_below="@+id/checkWIFI"
-            android:id="@+id/Space_WiFi2" />
+            android:layout_below="@+id/checkWIFI" />
 
     </RelativeLayout>
 
@@ -205,105 +217,105 @@
             android:id="@+id/label_lat_lng"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/latlng"
-            android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="false" />
+            android:layout_alignParentRight="false"
+            android:text="@string/latlng"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
             android:id="@+id/lat_lng"
             android:layout_width="160dp"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/label_lat_lng"
+            android:layout_alignParentRight="true"
             android:layout_alignTop="@+id/label_lat_lng"
             android:layout_marginStart="10dp"
             android:layout_toEndOf="@+id/label_lat_lng"
+            android:layout_toRightOf="@+id/label_lat_lng"
             android:gravity="center_vertical"
             android:text="Indeterminate"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textIsSelectable="true"
-            android:textSize="12dp"
-            android:layout_toRightOf="@+id/label_lat_lng"
-            android:layout_alignParentRight="true" />
+            android:textSize="12dp" />
 
         <Space
             android:id="@+id/space_lat_lng"
             android:layout_width="10dp"
             android:layout_height="10dp"
             android:layout_alignEnd="@+id/lat_lng"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
             android:layout_alignStart="@+id/label_lat_lng"
             android:layout_below="@+id/label_lat_lng"
-            android:background="#ff000a64"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true" />
+            android:background="#ff000a64" />
 
         <TextView
             android:id="@+id/label_fencearea"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/label_lat_lng"
+            android:layout_alignStart="@+id/label_lat_lng"
             android:layout_below="@+id/space_lat_lng"
             android:text="@string/fencearea"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:layout_alignStart="@+id/label_lat_lng"
-            android:layout_alignEnd="@+id/label_lat_lng" />
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
             android:id="@+id/fencearea"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/label_fencearea"
+            android:layout_alignParentEnd="false"
+            android:layout_alignTop="@+id/label_fencearea"
+            android:layout_below="@+id/space_lat_lng"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/label_fencearea"
             android:gravity="center_vertical"
             android:text="Indeterminate"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="@dimen/margin_medium"
-            android:layout_alignParentEnd="false"
-            android:layout_below="@+id/space_lat_lng"
-            android:layout_toRightOf="@+id/label_fencearea"
-            android:layout_alignBottom="@+id/label_fencearea"
-            android:layout_alignTop="@+id/label_fencearea"
-            android:layout_marginLeft="10dp" />
+            android:textSize="@dimen/margin_medium" />
 
         <Space
             android:id="@+id/space_area"
             android:layout_width="10dp"
             android:layout_height="10dp"
-            android:layout_below="@+id/label_fencearea"
-            android:background="#ff000a64"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentStart="true" />
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/label_fencearea"
+            android:background="#ff000a64" />
 
         <TextView
+            android:id="@+id/AccuracyLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Accuracy:"
-            android:id="@+id/AccuracyLabel"
-            android:layout_below="@+id/space_area"
             android:layout_alignParentStart="true"
             android:layout_alignStart="@+id/label_lat_lng"
+            android:layout_below="@+id/space_area"
+            android:text="Accuracy:"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
             android:id="@+id/accuracy"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/AccuracyLabel"
+            android:layout_alignParentEnd="false"
+            android:layout_alignTop="@+id/AccuracyLabel"
+            android:layout_below="@+id/space_lat_lng"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@+id/AccuracyLabel"
             android:gravity="center_vertical"
             android:text="Indeterminate"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:layout_marginLeft="10dp"
-            android:textSize="@dimen/margin_medium"
-            android:layout_alignParentEnd="false"
-            android:layout_below="@+id/space_lat_lng"
-            android:layout_toRightOf="@+id/AccuracyLabel"
-            android:layout_alignBottom="@+id/AccuracyLabel"
-            android:layout_alignTop="@+id/AccuracyLabel" />
+            android:textSize="@dimen/margin_medium" />
 
         <CheckBox
             android:id="@+id/checkGPS"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/AccuracyLabel"
             android:onClick="SetGPSState"
             android:text="Use GPS - In development."
-            android:visibility="visible"
-            android:layout_below="@+id/AccuracyLabel" />
+            android:visibility="visible" />
 
     </RelativeLayout>
 
@@ -311,11 +323,11 @@
         android:id="@+id/Activity"
         android:layout_width="wrap_content"
         android:layout_height="100dp"
-        android:choiceMode="none"
-        android:textSize="6dp"
-        android:fastScrollAlwaysVisible="false"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/GPSLayout"
+        android:choiceMode="none"
+        android:fastScrollAlwaysVisible="false"
+        android:textSize="6dp"
         tools:listitem="@android:layout/simple_list_item_1" />
 
     <!--

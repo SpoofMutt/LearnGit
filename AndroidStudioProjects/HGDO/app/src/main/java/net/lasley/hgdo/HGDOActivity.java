@@ -69,7 +69,7 @@ public class HGDOActivity extends FragmentActivity implements
     private static final String SERVER_HOSTNAME = "lasley.mynetgear.com";
 
     private static final int TIME_FOR_DOOR_TO_OPEN = 16;  // Seconds
-    private static final int TIME_TO_WAIT_FOR_DOOR_TO_OPEN = (int) (TIME_FOR_DOOR_TO_OPEN * 1.1 * 1000);  // Milliseconds
+    private static final int TIME_TO_WAIT_FOR_DOOR_TO_OPEN = (int) (TIME_FOR_DOOR_TO_OPEN * 1000);  // Milliseconds
 
     private static final int TIME_TO_WAIT_WIFI = 16 * 1000;  // Milliseconds
 
@@ -128,7 +128,8 @@ public class HGDOActivity extends FragmentActivity implements
     private ToggleDoorCountDownTimer countDownTimer;
     private WiFiCountDownTimer wifiTimer;
     private Fences LastFence;
-    private ProgressBar progressBar;
+    private ProgressBar doorProgressBar;
+    private ProgressBar commProgressBar;
     private int OrigWiFiSettingOn;
     private boolean ReadyToMonitorWifi;
 
@@ -268,8 +269,8 @@ public class HGDOActivity extends FragmentActivity implements
         mIntentFilter.addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES);
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, mIntentFilter);
 
-        countDownTimer = new ToggleDoorCountDownTimer(TIME_TO_WAIT_FOR_DOOR_TO_OPEN, (int) (TIME_TO_WAIT_FOR_DOOR_TO_OPEN / 11.0));
-        wifiTimer      = new WiFiCountDownTimer(TIME_TO_WAIT_WIFI,(long)(TIME_TO_WAIT_WIFI*2));
+        countDownTimer = new ToggleDoorCountDownTimer(TIME_TO_WAIT_FOR_DOOR_TO_OPEN, (int) (TIME_TO_WAIT_FOR_DOOR_TO_OPEN / 100.0));
+        wifiTimer = new WiFiCountDownTimer(TIME_TO_WAIT_WIFI, (long) (TIME_TO_WAIT_WIFI / 100.0));
 
         // Attach to the main UI
         setContentView(R.layout.activity_hgdo);
@@ -278,7 +279,8 @@ public class HGDOActivity extends FragmentActivity implements
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mAreaVisits);
         list.setAdapter(adapter);
 
-        progressBar = (ProgressBar) findViewById(R.id.WaitForDoor);
+        doorProgressBar = (ProgressBar) findViewById(R.id.WaitForDoor);
+        commProgressBar = (ProgressBar) findViewById(R.id.WaitForComm);
 
 /*
         map = ((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
@@ -570,36 +572,39 @@ public class HGDOActivity extends FragmentActivity implements
     }
 
     public class ToggleDoorCountDownTimer extends CountDownTimer {
-
+        long st;
         public ToggleDoorCountDownTimer(long startTime, long interval) {
             super(startTime, interval);
+            st = startTime;
         }
 
         @Override
         public void onFinish() {
-            progressBar.setProgress(0);
+            doorProgressBar.setProgress(0);
             sendStatusRequest();
         }
 
         @Override
         public void onTick(long millisUntilFinished) {
-            progressBar.incrementProgressBy(10);
+            doorProgressBar.setProgress((int) ((float) (st - millisUntilFinished) * 100. / (float) st));
         }
     }
 
     public class WiFiCountDownTimer extends CountDownTimer {
-
+        long st;
         public WiFiCountDownTimer(long startTime, long interval) {
             super(startTime, interval);
+            st = startTime;
         }
 
         @Override
         public void onTick(long millisUntilFinished) {
-
+            doorProgressBar.setSecondaryProgress((int) ((float) (st - millisUntilFinished) * 100. / (float) st));
         }
 
         @Override
         public void onFinish() {
+            doorProgressBar.setSecondaryProgress(0);
             ReadyToMonitorWifi = true;
         }
     }
@@ -609,6 +614,7 @@ public class HGDOActivity extends FragmentActivity implements
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            commProgressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -660,6 +666,7 @@ public class HGDOActivity extends FragmentActivity implements
         @Override
         protected void onPostExecute(byte[] result) {
             super.onPostExecute(result);
+            commProgressBar.setVisibility(View.INVISIBLE);
             decodeReply(result);
         }
 
