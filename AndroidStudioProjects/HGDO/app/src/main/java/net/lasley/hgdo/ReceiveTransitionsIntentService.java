@@ -28,7 +28,7 @@ public class ReceiveTransitionsIntentService extends IntentService {
         if (LocationClient.hasError(intent)) {
             int errorCode = LocationClient.getErrorCode(intent);
             String errorMessage = LocationServiceErrorMessages.getErrorString(this, errorCode);
-            Log.e(GeofenceUtils.APPTAG,
+            Log.e(hgdoApp.getAppContext().getString(R.string.app_name),
                     getString(net.lasley.hgdo.R.string.geofence_transition_error_detail, errorMessage)
             );
             broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_ERROR)
@@ -55,7 +55,7 @@ public class ReceiveTransitionsIntentService extends IntentService {
 
                 //sendNotification(transitionType, ids);
 
-                Log.d(GeofenceUtils.APPTAG, getString(
+                Log.d(hgdoApp.getAppContext().getString(R.string.app_name), getString(
                         net.lasley.hgdo.R.string.geofence_transition_notification_title,
                         transitionType,
                         ids));
@@ -77,12 +77,12 @@ public class ReceiveTransitionsIntentService extends IntentService {
 
                 //sendNotification(transitionType, ids);
 
-                Log.d(GeofenceUtils.APPTAG, getString(
+                Log.d(hgdoApp.getAppContext().getString(R.string.app_name), getString(
                         net.lasley.hgdo.R.string.geofence_transition_notification_title,
                         transitionType,
                         ids));
             } else {
-                Log.e(GeofenceUtils.APPTAG, getString(net.lasley.hgdo.R.string.geofence_transition_invalid_type, transition));
+                Log.e(hgdoApp.getAppContext().getString(R.string.app_name), getString(net.lasley.hgdo.R.string.geofence_transition_invalid_type, transition));
             }
         }
     }

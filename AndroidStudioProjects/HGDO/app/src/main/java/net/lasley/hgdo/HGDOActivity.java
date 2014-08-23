@@ -123,6 +123,8 @@ public class HGDOActivity extends FragmentActivity implements
     private ArrayAdapter<String> adapter;
     private ToggleDoorCountDownTimer countDownTimer;
     private Fences LastFence;
+    private ProgressBar progressBar;
+    private int OrigWiFiSettingOn;
 
     @Override
     protected void onStart() {
@@ -137,7 +139,14 @@ public class HGDOActivity extends FragmentActivity implements
     @Override
     protected void onDestroy() {
         RemoveGeoFencing();
-        Log.d(GeofenceUtils.APPTAG, "onDestroy()");
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
+        unregisterReceiver(mWIFIReceiver);
+        if (OrigWiFiSettingOn == WifiManager.WIFI_STATE_ENABLED) {
+            Wifi.setWifiEnabled(true);
+        } else {
+            Wifi.setWifiEnabled(false);
+        }
+        Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "onDestroy()");
         super.onDestroy();
     }
 
@@ -146,7 +155,7 @@ public class HGDOActivity extends FragmentActivity implements
         Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
         CheckBox cb = (CheckBox) findViewById(R.id.checkGPS);
         if (cb.isChecked()) {
-            Log.d(GeofenceUtils.APPTAG, "onResume - AddGeoFencing.");
+            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "onResume - AddGeoFencing.");
             mLocationClient.requestLocationUpdates(mLocationRequest, this);
             AddGeoFencing();
         }
@@ -169,7 +178,7 @@ public class HGDOActivity extends FragmentActivity implements
                 e.printStackTrace();
             }
         } else {
-            Log.d(GeofenceUtils.APPTAG, "ErrorCode: " + Integer.toString(connectionResult.getErrorCode()));
+            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "ErrorCode: " + Integer.toString(connectionResult.getErrorCode()));
         }
     }
 
@@ -226,15 +235,16 @@ public class HGDOActivity extends FragmentActivity implements
         mGeofenceRemover = new GeofenceRemover(this);
         mWIFIReceiver = new WIFIReceiver();
         Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        Wifi.setWifiEnabled(false);
+        OrigWiFiSettingOn = Wifi.getWifiState();
+//        Wifi.setWifiEnabled(false);
 
         mIntentWIFIFilter = new IntentFilter();
         mIntentWIFIFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        mIntentWIFIFilter.addAction(WifiManager.NETWORK_IDS_CHANGED_ACTION);
-        mIntentWIFIFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
-        mIntentWIFIFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
-        mIntentWIFIFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        mIntentWIFIFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+//        mIntentWIFIFilter.addAction(WifiManager.NETWORK_IDS_CHANGED_ACTION);
+//        mIntentWIFIFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+//        mIntentWIFIFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+//        mIntentWIFIFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+//        mIntentWIFIFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(mWIFIReceiver, mIntentWIFIFilter);
 
         mIntentFilter = new IntentFilter();
@@ -256,6 +266,7 @@ public class HGDOActivity extends FragmentActivity implements
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mAreaVisits);
         list.setAdapter(adapter);
 
+        progressBar = (ProgressBar) findViewById(R.id.WaitForDoor);
 
 /*
         map = ((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
@@ -288,10 +299,10 @@ public class HGDOActivity extends FragmentActivity implements
                         }
                         break;
                     default:
-                        Log.d(GeofenceUtils.APPTAG, getString(net.lasley.hgdo.R.string.no_resolution));
+                        Log.d(hgdoApp.getAppContext().getString(R.string.app_name), getString(net.lasley.hgdo.R.string.no_resolution));
                 }
             default:
-                Log.d(GeofenceUtils.APPTAG, getString(net.lasley.hgdo.R.string.unknown_activity_request_code, requestCode));
+                Log.d(hgdoApp.getAppContext().getString(R.string.app_name), getString(net.lasley.hgdo.R.string.unknown_activity_request_code, requestCode));
                 break;
         }
     }
@@ -300,10 +311,10 @@ public class HGDOActivity extends FragmentActivity implements
     protected void onResume() {
         super.onResume();
         // Register the broadcast receiver to receive status updates
-        Log.d(GeofenceUtils.APPTAG, "OnResume");
+        Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "OnResume");
 //        CheckBox cb = (CheckBox)findViewById(R.id.checkGPS);
 //        if(cb.isChecked()) {
-//            Log.d(GeofenceUtils.APPTAG, "onResume - AddGeoFencing.");
+//            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "onResume - AddGeoFencing.");
 //            AddGeoFencing();
 //        }
 //        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, mIntentFilter);
@@ -312,10 +323,10 @@ public class HGDOActivity extends FragmentActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(GeofenceUtils.APPTAG, "OnPause");
+        Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "OnPause");
 //        CheckBox cb = (CheckBox)findViewById(R.id.checkGPS);
 //        if(cb.isChecked()) {
-//            Log.d(GeofenceUtils.APPTAG, "onPause - RemoveGeoFencing.");
+//            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "onPause - RemoveGeoFencing.");
 //            RemoveGeoFencing();
 //        }
 //        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
@@ -330,7 +341,7 @@ public class HGDOActivity extends FragmentActivity implements
             if (dialog != null) {
                 ErrorDialogFragment errorFragment = new ErrorDialogFragment();
                 errorFragment.setDialog(dialog);
-                errorFragment.show(getSupportFragmentManager(), GeofenceUtils.APPTAG);
+                errorFragment.show(getSupportFragmentManager(), hgdoApp.getAppContext().getString(R.string.app_name));
             }
             return false;
         }
@@ -410,23 +421,23 @@ public class HGDOActivity extends FragmentActivity implements
     public void SetWIFIState(View view) {
         CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
         if (cb.isChecked()) {
-            Log.d(GeofenceUtils.APPTAG, "SetWIFIState - Checked.");
-            Wifi.setWifiEnabled(true);
+            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Checked.");
+//            Wifi.setWifiEnabled(true);
         } else {
-            Log.d(GeofenceUtils.APPTAG, "SetWIFIState - Unchecked.");
-            Wifi.setWifiEnabled(false);
+            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Unchecked.");
+//            Wifi.setWifiEnabled(false);
         }
     }
 
     public void SetGPSState(View view) {
         CheckBox cb = (CheckBox) findViewById(R.id.checkGPS);
         if (cb.isChecked()) {
-            Log.d(GeofenceUtils.APPTAG, "SetGPSState - Checked.");
+            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetGPSState - Checked.");
             mLocationClient.requestLocationUpdates(mLocationRequest, this);
             getLocation();
             AddGeoFencing();
         } else {
-            Log.d(GeofenceUtils.APPTAG, "SetGPSState - Unchecked.");
+            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetGPSState - Unchecked.");
             mLocationClient.removeLocationUpdates(this);
 //            mLocationClient.requestLocationUpdates(mLocationRequestSlow, this);
             ((TextView) findViewById(R.id.lat_lng)).setText("Indeterminate");
@@ -543,11 +554,9 @@ public class HGDOActivity extends FragmentActivity implements
     }
 
     public class ToggleDoorCountDownTimer extends CountDownTimer {
-        private ProgressBar progressBar;
 
         public ToggleDoorCountDownTimer(long startTime, long interval) {
             super(startTime, interval);
-            progressBar = (ProgressBar) findViewById(R.id.WaitForDoor);
         }
 
         @Override
@@ -576,6 +585,11 @@ public class HGDOActivity extends FragmentActivity implements
 
             boolean result = false;
             try {
+                ConnectivityManager cm = (ConnectivityManager) hgdoApp.getAppContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo ni = cm.getActiveNetworkInfo();
+                while (ni.isConnected() == false) {
+                    ni = cm.getActiveNetworkInfo();
+                }
                 Log.i("SendDataToNetwork", "Creating socket");
                 SocketAddress sockaddr = new InetSocketAddress(SERVER_HOSTNAME, GARAGE_PORT);
                 nsocket = new Socket();
@@ -633,19 +647,19 @@ public class HGDOActivity extends FragmentActivity implements
             } else if (TextUtils.equals(action, GeofenceUtils.ACTION_GEOFENCE_EXIT)) {
                 handleGeofenceExit(context, intent);
             } else {
-                Log.e(GeofenceUtils.APPTAG, getString(net.lasley.hgdo.R.string.invalid_action_detail, action));
+                Log.e(hgdoApp.getAppContext().getString(R.string.app_name), getString(net.lasley.hgdo.R.string.invalid_action_detail, action));
                 Toast.makeText(context, net.lasley.hgdo.R.string.invalid_action, Toast.LENGTH_LONG).show();
             }
         }
 
         private void handleGeofenceStatus(Context context, Intent intent) {
             String action = String.format("Status() %s", intent.getAction());
-            Log.d(GeofenceUtils.APPTAG, action);
+            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), action);
         }
 
         private void handleGeofenceEnter(Context context, Intent intent) {
             String action = String.format("Enter() %s", intent.getStringExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS));
-            Log.d(GeofenceUtils.APPTAG, action);
+            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), action);
             getLocation();
         }
 
@@ -655,7 +669,7 @@ public class HGDOActivity extends FragmentActivity implements
             tmp.setToNow();
             String msg = tmp.format("%T ") + ": " + intent.getStringExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS);
             adapter.insert(msg, 0);
-            Log.d(GeofenceUtils.APPTAG, action);
+            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), action);
             getLocation();
             if (action.indexOf("APPROACH") != -1) {
                 sendStatusRequest();
@@ -669,7 +683,7 @@ public class HGDOActivity extends FragmentActivity implements
                         msg = tmp.format("%T ") + ": Opening Garage Door Now";
                         toggleDoor(findViewById(android.R.id.content));
                         adapter.insert(msg, 0);
-                        Log.d(GeofenceUtils.APPTAG, msg);
+                        Log.d(hgdoApp.getAppContext().getString(R.string.app_name), msg);
                     }
                 }
                 LastFence = Fences.ENTRY;
@@ -682,7 +696,7 @@ public class HGDOActivity extends FragmentActivity implements
 
         private void handleGeofenceError(Context context, Intent intent) {
             String msg = intent.getStringExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS);
-            Log.e(GeofenceUtils.APPTAG, msg);
+            Log.e(hgdoApp.getAppContext().getString(R.string.app_name), msg);
             Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
         }
     }
@@ -691,13 +705,20 @@ public class HGDOActivity extends FragmentActivity implements
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            Log.d(GeofenceUtils.APPTAG, action);
+            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), action);
             if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
                 NetworkInfo ni = (NetworkInfo) intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
                 if (ni.isConnected()) {
                     //do stuff
                     WifiInfo wi = Wifi.getConnectionInfo();
-                    Log.d(GeofenceUtils.APPTAG, wi.getSSID());
+                    Log.d(hgdoApp.getAppContext().getString(R.string.app_name), wi.getSSID());
+                    String ssid = wi.getSSID().trim().replace("\"", "");
+                    if (ssid.equals("WHITESPRUCE") || ssid.equals("WHITESPRUCE2")) {
+                        CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
+                        if (cb.isChecked()) {
+                            toggleDoor(null);
+                        }
+                    }
                 } else {
                     // wifi connection was lost
                 }

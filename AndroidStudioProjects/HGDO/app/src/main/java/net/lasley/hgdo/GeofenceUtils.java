@@ -8,7 +8,6 @@ import android.content.Context;
 import android.location.Location;
 
 public final class GeofenceUtils {
-    public static final String APPTAG = "Geofence Detection";
     public static final String ACTION_CONNECTION_ERROR = "net.lasley.hgdo.ACTION_CONNECTION_ERROR";
     public static final String ACTION_CONNECTION_SUCCESS = "net.lasley.hgdo.ACTION_CONNECTION_SUCCESS";
     public static final String ACTION_GEOFENCES_ADDED = "net.lasley.hgdo.ACTION_GEOFENCES_ADDED";
@@ -36,6 +35,7 @@ public final class GeofenceUtils {
             return EMPTY_STRING;
         }
     }
+
     public enum REMOVE_TYPE {INTENT, LIST}
 
     public enum REQUEST_TYPE {ADD, REMOVE}

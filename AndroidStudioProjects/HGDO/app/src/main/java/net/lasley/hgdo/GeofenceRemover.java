@@ -102,11 +102,11 @@ public class GeofenceRemover implements
                                                        PendingIntent requestIntent) {
         Intent broadcastIntent = new Intent();
         if (statusCode == LocationStatusCodes.SUCCESS) {
-            Log.d(GeofenceUtils.APPTAG, mContext.getString(net.lasley.hgdo.R.string.remove_geofences_intent_success));
+            Log.d(mContext.getString(R.string.app_name), mContext.getString(net.lasley.hgdo.R.string.remove_geofences_intent_success));
             broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCES_REMOVED);
             broadcastIntent.putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, mContext.getString(net.lasley.hgdo.R.string.remove_geofences_intent_success));
         } else {
-            Log.e(GeofenceUtils.APPTAG, mContext.getString(net.lasley.hgdo.R.string.remove_geofences_intent_failure, statusCode));
+            Log.e(mContext.getString(R.string.app_name), mContext.getString(net.lasley.hgdo.R.string.remove_geofences_intent_failure, statusCode));
             broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_ERROR);
             broadcastIntent.putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, mContext.getString(net.lasley.hgdo.R.string.remove_geofences_intent_failure, statusCode));
         }
@@ -121,7 +121,7 @@ public class GeofenceRemover implements
         if (LocationStatusCodes.SUCCESS == statusCode) {
             msg = mContext.getString(net.lasley.hgdo.R.string.remove_geofences_id_success,
                     Arrays.toString(geofenceRequestIds));
-            Log.d(GeofenceUtils.APPTAG, msg);
+            Log.d(mContext.getString(R.string.app_name), msg);
             broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCES_REMOVED)
                     .addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
                     .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
@@ -131,7 +131,7 @@ public class GeofenceRemover implements
                     statusCode,
                     Arrays.toString(geofenceRequestIds)
             );
-            Log.e(GeofenceUtils.APPTAG, msg);
+            Log.e(mContext.getString(R.string.app_name), msg);
             broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_ERROR)
                     .addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
                     .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
@@ -147,14 +147,14 @@ public class GeofenceRemover implements
 
     @Override
     public void onConnected(Bundle arg0) {
-        Log.d(GeofenceUtils.APPTAG, mContext.getString(net.lasley.hgdo.R.string.connected));
+        Log.d(mContext.getString(R.string.app_name), mContext.getString(net.lasley.hgdo.R.string.connected));
         continueRemoveGeofences();
     }
 
     @Override
     public void onDisconnected() {
         mInProgress = false;
-        Log.d(GeofenceUtils.APPTAG, mContext.getString(net.lasley.hgdo.R.string.disconnected));
+        Log.d(mContext.getString(R.string.app_name), mContext.getString(net.lasley.hgdo.R.string.disconnected));
         mLocationClient = null;
     }
 

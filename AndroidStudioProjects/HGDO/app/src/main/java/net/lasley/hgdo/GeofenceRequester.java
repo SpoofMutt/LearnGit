@@ -85,7 +85,7 @@ public class GeofenceRequester
         if (LocationStatusCodes.SUCCESS == statusCode) {
             msg = mActivity.getString(net.lasley.hgdo.R.string.add_geofences_result_success,
                     Arrays.toString(geofenceRequestIds));
-            Log.d(GeofenceUtils.APPTAG, msg);
+            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), msg);
             broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCES_ADDED)
                     .addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
                     .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
@@ -95,7 +95,7 @@ public class GeofenceRequester
                     statusCode,
                     Arrays.toString(geofenceRequestIds)
             );
-            Log.e(GeofenceUtils.APPTAG, msg);
+            Log.e(hgdoApp.getAppContext().getString(R.string.app_name), msg);
             broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_ERROR)
                     .addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES)
                     .putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
@@ -111,14 +111,14 @@ public class GeofenceRequester
 
     @Override
     public void onConnected(Bundle arg0) {
-        Log.d(GeofenceUtils.APPTAG, mActivity.getString(net.lasley.hgdo.R.string.connected));
+        Log.d(hgdoApp.getAppContext().getString(R.string.app_name), mActivity.getString(net.lasley.hgdo.R.string.connected));
         continueAddGeofences();
     }
 
     @Override
     public void onDisconnected() {
         mInProgress = false;
-        Log.d(GeofenceUtils.APPTAG, mActivity.getString(net.lasley.hgdo.R.string.disconnected));
+        Log.d(hgdoApp.getAppContext().getString(R.string.app_name), mActivity.getString(net.lasley.hgdo.R.string.disconnected));
         mLocationClient = null;
     }
 
