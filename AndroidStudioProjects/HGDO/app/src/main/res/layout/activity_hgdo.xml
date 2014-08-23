@@ -160,13 +160,36 @@
         android:layout_alignRight="@+id/TableLayout"
         android:layout_below="@+id/GarageDoorToggleButton">
 
+        <Space
+            android:layout_width="fill_parent"
+            android:layout_height="20dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignEnd="@+id/checkWIFI"
+            android:layout_alignParentLeft="false"
+            android:layout_alignParentRight="false"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:id="@+id/Space_WiFi" />
+
         <CheckBox
             android:id="@+id/checkWIFI"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="SetWIFIState"
-            android:text="Use WIFI - In development."
-            android:visibility="visible"/>
+            android:layout_below="@+id/Space_WiFi"
+            android:text="Use WIFI"
+            android:visibility="visible"
+            android:layout_alignParentTop="false"
+            android:checked="false" />
+
+        <Space
+            android:layout_width="fill_parent"
+            android:layout_height="10dp"
+            android:layout_alignEnd="@+id/checkWIFI"
+            android:layout_alignParentLeft="false"
+            android:layout_alignParentRight="false"
+            android:layout_below="@+id/checkWIFI"
+            android:id="@+id/Space_WiFi2" />
 
     </RelativeLayout>
 
@@ -287,7 +310,7 @@
     <ListView
         android:id="@+id/Activity"
         android:layout_width="wrap_content"
-        android:layout_height="195dp"
+        android:layout_height="100dp"
         android:choiceMode="none"
         android:textSize="6dp"
         android:fastScrollAlwaysVisible="false"

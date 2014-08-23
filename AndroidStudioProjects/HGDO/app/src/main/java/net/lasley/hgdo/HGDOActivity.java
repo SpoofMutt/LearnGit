@@ -67,8 +67,12 @@ public class HGDOActivity extends FragmentActivity implements
     //    private GoogleMap map;
     private static final int GARAGE_PORT = 55555;
     private static final String SERVER_HOSTNAME = "lasley.mynetgear.com";
+
     private static final int TIME_FOR_DOOR_TO_OPEN = 16;  // Seconds
     private static final int TIME_TO_WAIT_FOR_DOOR_TO_OPEN = (int) (TIME_FOR_DOOR_TO_OPEN * 1.1 * 1000);  // Milliseconds
+
+    private static final int TIME_TO_WAIT_WIFI = 16 * 1000;  // Milliseconds
+
     private static final int LENGTH_V1_NDX = 0;
     private static final int VERSION_V1_NDX = 1;
     private static final int MSG_VERSION = 0x01;
@@ -122,9 +126,11 @@ public class HGDOActivity extends FragmentActivity implements
     private WIFIReceiver mWIFIReceiver;
     private ArrayAdapter<String> adapter;
     private ToggleDoorCountDownTimer countDownTimer;
+    private WiFiCountDownTimer wifiTimer;
     private Fences LastFence;
     private ProgressBar progressBar;
     private int OrigWiFiSettingOn;
+    private boolean ReadyToMonitorWifi;
 
     @Override
     protected void onStart() {
@@ -236,6 +242,11 @@ public class HGDOActivity extends FragmentActivity implements
         mWIFIReceiver = new WIFIReceiver();
         Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         OrigWiFiSettingOn = Wifi.getWifiState();
+        if(OrigWiFiSettingOn == WifiManager.WIFI_STATE_ENABLED) {
+            ReadyToMonitorWifi = true;
+        } else {
+            ReadyToMonitorWifi = false;
+        }
 //        Wifi.setWifiEnabled(false);
 
         mIntentWIFIFilter = new IntentFilter();
@@ -258,6 +269,7 @@ public class HGDOActivity extends FragmentActivity implements
         LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver, mIntentFilter);
 
         countDownTimer = new ToggleDoorCountDownTimer(TIME_TO_WAIT_FOR_DOOR_TO_OPEN, (int) (TIME_TO_WAIT_FOR_DOOR_TO_OPEN / 11.0));
+        wifiTimer      = new WiFiCountDownTimer(TIME_TO_WAIT_WIFI,(long)(TIME_TO_WAIT_WIFI*2));
 
         // Attach to the main UI
         setContentView(R.layout.activity_hgdo);
@@ -421,9 +433,13 @@ public class HGDOActivity extends FragmentActivity implements
     public void SetWIFIState(View view) {
         CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
         if (cb.isChecked()) {
+            if(ReadyToMonitorWifi == false) {
+                Wifi.setWifiEnabled(true);
+                wifiTimer.start();
+            }
             Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Checked.");
-//            Wifi.setWifiEnabled(true);
         } else {
+            ReadyToMonitorWifi = false;
             Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Unchecked.");
 //            Wifi.setWifiEnabled(false);
         }
@@ -571,6 +587,23 @@ public class HGDOActivity extends FragmentActivity implements
         }
     }
 
+    public class WiFiCountDownTimer extends CountDownTimer {
+
+        public WiFiCountDownTimer(long startTime, long interval) {
+            super(startTime, interval);
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+
+        }
+
+        @Override
+        public void onFinish() {
+            ReadyToMonitorWifi = true;
+        }
+    }
+
     private class AsyncGarage extends AsyncTask<byte[], Void, byte[]> {
 
         @Override
@@ -709,14 +742,16 @@ public class HGDOActivity extends FragmentActivity implements
             if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
                 NetworkInfo ni = (NetworkInfo) intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
                 if (ni.isConnected()) {
-                    //do stuff
-                    WifiInfo wi = Wifi.getConnectionInfo();
-                    Log.d(hgdoApp.getAppContext().getString(R.string.app_name), wi.getSSID());
-                    String ssid = wi.getSSID().trim().replace("\"", "");
-                    if (ssid.equals("WHITESPRUCE") || ssid.equals("WHITESPRUCE2")) {
-                        CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
-                        if (cb.isChecked()) {
-                            toggleDoor(null);
+                    if(ReadyToMonitorWifi) {
+                        //do stuff
+                        WifiInfo wi = Wifi.getConnectionInfo();
+                        Log.d(hgdoApp.getAppContext().getString(R.string.app_name), wi.getSSID());
+                        String ssid = wi.getSSID().trim().replace("\"", "");
+                        if (ssid.equals("WHITESPRUCE") || ssid.equals("WHITESPRUCE2")) {
+                            CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
+                            if (cb.isChecked()) {
+                                toggleDoor(null);
+                            }
                         }
                     }
                 } else {
