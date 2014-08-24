@@ -227,6 +227,16 @@ public class HGDOActivity
   }
 
   @Override
+  protected void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+  }
+
+  @Override
+  protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    super.onRestoreInstanceState(savedInstanceState);
+  }
+
+  @Override
   public void onDisconnected() {
     Toast.makeText(this, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
   }
@@ -273,6 +283,10 @@ public class HGDOActivity
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+    if (savedInstanceState != null) {
+      //      startTime = (Calendar) bundle.getSerializable("starttime");
+    }
 
     LocationRequest mLocationRequestSlow = LocationRequest.create();
     mLocationRequestSlow.setPriority(LocationRequest.PRIORITY_NO_POWER);
