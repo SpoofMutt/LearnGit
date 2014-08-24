@@ -6,7 +6,7 @@ package net.lasley.hgdo;
 
 import com.google.android.gms.location.Geofence;
 
-class SimpleGeofence {
+public class SimpleGeofence {
   private final String mId;
   private final double mLatitude;
   private final double mLongitude;
