@@ -58,5 +58,6 @@
     <!-- Labels -->
     <string name="latlng">Lat/Long:   </string>
     <string name="fencearea">Area:</string>
+    <string name="server_hostname">lasley.mynetgear.com</string>
 
 </resources>
