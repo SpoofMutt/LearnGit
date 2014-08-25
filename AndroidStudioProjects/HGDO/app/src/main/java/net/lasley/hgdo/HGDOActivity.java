@@ -89,6 +89,7 @@ public class HGDOActivity
     RemoveGeoFencing();
     LocalBroadcastManager.getInstance(this).unregisterReceiver(m_GeofenceReceiver);
     LocalBroadcastManager.getInstance(this).unregisterReceiver(m_ServiceReceiver);
+    stopService(new Intent(this,HGDOService.class));
     Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "onDestroy()");
     super.onDestroy();
   }
@@ -299,7 +300,7 @@ public class HGDOActivity
   }
 
   public void sendStatusRequest() {
-    Intent broadcastIntent = new Intent();
+    Intent broadcastIntent = new Intent(this,HGDOService.class);
     broadcastIntent.setAction(HGDOService.SERVICE_COMMAND).putExtra(HGDOService.EXTRA_PARAM1, HGDOService.STATUSREQ);
     startService(broadcastIntent);
   }
@@ -421,14 +422,14 @@ public class HGDOActivity
   }
 
   public void toggleDoor(View view) {
-    Intent broadcastIntent = new Intent();
+    Intent broadcastIntent = new Intent(this,HGDOService.class);
     broadcastIntent.setAction(HGDOService.SERVICE_COMMAND).putExtra(HGDOService.EXTRA_PARAM1, HGDOService.TOGGLE_DOOR);
     startService(broadcastIntent);
     m_CountDownTimer.start();
   }
 
   public void SetWIFIState(View view) {
-    Intent broadcastIntent = new Intent();
+    Intent broadcastIntent = new Intent(this,HGDOService.class);
     broadcastIntent.setAction(HGDOService.SERVICE_WIFI_SELECTION);
     CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
     if (cb.isChecked()) {
