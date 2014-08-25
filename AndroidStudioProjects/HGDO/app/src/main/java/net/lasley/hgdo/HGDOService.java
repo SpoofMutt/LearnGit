@@ -1,10 +1,8 @@
 package net.lasley.hgdo;
 
 import android.app.IntentService;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
@@ -80,23 +78,11 @@ public class HGDOService
   @Override
   public void onDestroy() {
     super.onDestroy();
-    unregisterReceiver(receiver);
   }
 
   @Override
   public void onCreate() {
     super.onCreate();
-
-    IntentFilter filter = new IntentFilter();
-    filter.addAction("android.net.wifi.STATE_CHANGE");
-    filter.addAction("android.intent.action.EXTERNAL_APPLICATIONS_AVAILABLE");
-    filter.addAction("android.intent.action.BATTERY_LOW");
-    filter.addAction("android.intent.action.BOOT_COMPLETED");
-    filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
-    filter.addAction("android.net.wifi.supplicant.CONNECTION_CHANGE");
-    filter.addAction("android.net.wifi.supplicant.STATE_CHANGE");
-    registerReceiver(receiver, filter);
-
     m_MonitorWifi = false;
     m_Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
     m_wifiTimer = new WiFiCountDownTimer(HGDOActivity.TIME_TO_WAIT_WIFI, HGDOActivity.TIME_TO_WAIT_WIFI + 1);
@@ -109,7 +95,7 @@ public class HGDOService
       Log.d("HGDOService", action);
       if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
         NetworkInfo ni = (NetworkInfo) intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-        if (ni.isConnected()) {
+        if (ni != null && ni.isConnected()) {
           if (m_ReadyToMonitorWifi) {
             //do stuff
             WifiInfo wi = m_Wifi.getConnectionInfo();
@@ -153,13 +139,6 @@ public class HGDOService
       }
     }
   }
-
-  private final BroadcastReceiver receiver = new BroadcastReceiver() {
-    @Override
-    public void onReceive(Context context, Intent intent) {
-      onHandleIntent(intent);
-    }
-  };
 
   public void toggleDoor() {
     byte[] msg = new byte[8];

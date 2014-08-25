@@ -399,11 +399,11 @@ public class HGDOActivity
         t.setText("Busy");
       }
       sb = new StringBuilder("Range: ");
-      short s = (short) (reply[HGDOService.STATUS_RANGE_V1_NDX] & 0xFF);
-      sb.append(s);
+      int i = byteToUnsigned(reply[HGDOService.STATUS_RANGE_V1_NDX]);
+      sb.append(i);
       Log.d("decodeReply", sb.toString());
       t = (TextView) findViewById(R.id.RangeStatus);
-      t.setText(Byte.toString(reply[HGDOService.STATUS_RANGE_V1_NDX]));
+      t.setText(Integer.toString(i));
 
       sb = new StringBuilder("Light: ");
       sb.append(Byte.toString(reply[HGDOService.STATUS_LIGHT_V1_NDX]));
@@ -415,6 +415,10 @@ public class HGDOActivity
         t.setText("Off");
       }
     }
+  }
+
+  public static int byteToUnsigned(byte b) {
+    return b & 0xFF;
   }
 
   public void RefreshState(View view) {
