@@ -8,7 +8,10 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.CountDownTimer;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.view.View;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +24,11 @@ public class HGDOService
         extends IntentService {
   public static final String SERVICE_WIFI_SELECTION = "net.lasley.hgdo.WIFI";
   public static final String SERVICE_COMM_DATA      = "net.lasley.hgdo.DATA";
+  public static final String SERVICE_COMM_INFO     = "net.lasley.hgdo.INFO";
+  public static final String SERVICE_REQ_COMM_INFO = "net.lasley.hgdo.REQ_INFO";
   public static final String SERVICE_COMM_STATE     = "net.lasley.hgdo.COMM_STATE";
+  public static final String SERVICE_WIFI_STATE    = "net.lasley.hgdo.WIFI_STATE";
+  public static final String SERVICE_COMMAND       = "net.lasley.hgdo.COMMAND";
 
   public static final int  LENGTH_V1_NDX            = 0;
   public static final int  VERSION_V1_NDX           = 1;
@@ -55,23 +62,30 @@ public class HGDOService
   public static final byte CLOSE_DOOR               = 1;
   public static final byte TOGGLE_DOOR              = 2;
 
-  private static final String EXTRA_PARAM1    = "net.lasley.hgdo.extra.PARAM1";
-  private static final String EXTRA_PARAM2    = "net.lasley.hgdo.extra.PARAM2";
+  public static final String EXTRA_PARAM1 = "net.lasley.hgdo.extra.PARAM1";
+  public static final String EXTRA_PARAM2 = "net.lasley.hgdo.extra.PARAM2";
   private static final int    GARAGE_PORT     = 55555;
   private static final String SERVER_HOSTNAME = hgdoApp.getAppContext().getString(R.string.server_hostname);
   private boolean     m_ReadyToMonitorWifi;
   private WifiManager m_Wifi;
+  private WiFiCountDownTimer m_wifiTimer;
   private boolean     m_MonitorWifi;
 
   public HGDOService() {
     super("HGDOService");
-    m_Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+  }
+
+  @Override
+  public void onCreate() {
+    super.onCreate();
     m_MonitorWifi = false;
+    m_Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+    m_wifiTimer = new WiFiCountDownTimer(HGDOActivity.TIME_TO_WAIT_WIFI, HGDOActivity.TIME_TO_WAIT_WIFI + 1);
   }
 
   @Override
   protected void onHandleIntent(Intent intent) {
-    if (intent != null) {
+    if (intent != null && intent.getAction() != null) {
       final String action = intent.getAction();
       Log.d("HGDOService", action);
       if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
@@ -83,7 +97,6 @@ public class HGDOService
             Log.d("HGDOService", wi.getSSID());
             String ssid = wi.getSSID().trim().replace("\"", "");
             if (ssid.equals("WHITESPRUCE") || ssid.equals("WHITESPRUCE2")) {
-              // TODO Get Home Network WiFi requested Intent.
               if (m_MonitorWifi) {
                 toggleDoor();
               }
@@ -91,6 +104,31 @@ public class HGDOService
           }
         } else {
           // wifi connection was lost
+        }
+      } else if (action.equals(SERVICE_WIFI_SELECTION)) {
+        int state = intent.getIntExtra(HGDOService.EXTRA_PARAM1, -1);
+        if (state == 0) {
+          m_MonitorWifi = false;
+        } else if (state == 1) {
+          if (m_Wifi.isWifiEnabled()) {
+            m_MonitorWifi = true;
+          } else {
+            m_Wifi.setWifiEnabled(true);
+            m_wifiTimer.start();
+          }
+        }
+      } else if (action.equals(SERVICE_REQ_COMM_INFO)) {
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction(HGDOService.SERVICE_COMM_INFO).putExtra(HGDOService.SERVICE_WIFI_STATE, m_MonitorWifi);
+      } else if (action.equals(SERVICE_COMMAND)) {
+        byte cmd = intent.getByteExtra(HGDOService.EXTRA_PARAM1, (byte) -1);
+        if (cmd == HGDOService.OPEN_DOOR) {
+        } else if (cmd == HGDOService.CLOSE_DOOR) {
+          toggleDoor();
+        } else if (cmd == HGDOService.TOGGLE_DOOR) {
+          toggleDoor();
+        } else if (cmd == HGDOService.STATUSREQ) {
+          sendStatusRequest();
         }
       }
     }
@@ -127,8 +165,9 @@ public class HGDOService
     @Override
     protected void onPreExecute() {
       super.onPreExecute();
-      // TODO Set progress bar intent.
-      // m_CommProgressBar.setVisibility(View.VISIBLE);
+      Intent broadcastIntent = new Intent();
+      broadcastIntent.setAction(HGDOService.SERVICE_COMM_STATE).putExtra(HGDOService.EXTRA_PARAM1, View.VISIBLE);
+      LocalBroadcastManager.getInstance(hgdoApp.getAppContext()).sendBroadcast(broadcastIntent);
     }
 
     @Override
@@ -180,10 +219,33 @@ public class HGDOService
     @Override
     protected void onPostExecute(byte[] result) {
       super.onPostExecute(result);
-      // TODO Set progress bar intent.
-      // m_CommProgressBar.setVisibility(View.INVISIBLE);
-      // TODO Send Reply Intent.
-      // decodeReply(result);
+      Intent broadcastIntent = new Intent();
+      broadcastIntent.setAction(HGDOService.SERVICE_COMM_STATE).putExtra(HGDOService.EXTRA_PARAM1, View.INVISIBLE);
+      LocalBroadcastManager.getInstance(hgdoApp.getAppContext()).sendBroadcast(broadcastIntent);
+      Intent dataIntent = new Intent();
+      dataIntent.setAction(HGDOService.SERVICE_COMM_DATA).putExtra(HGDOService.EXTRA_PARAM1, result);
+      LocalBroadcastManager.getInstance(hgdoApp.getAppContext()).sendBroadcast(dataIntent);
     }
   }
+
+  public class WiFiCountDownTimer
+          extends CountDownTimer {
+    long st;
+
+    public WiFiCountDownTimer(long startTime, long interval) {
+      super(startTime, interval);
+    }
+
+    @Override
+    public void onTick(long millisUntilFinished) {
+    }
+
+    @Override
+    public void onFinish() {
+      m_ReadyToMonitorWifi = true;
+      Log.i("HGDOService", "Ready to watch for WiFi");
+    }
+  }
+
+
 }

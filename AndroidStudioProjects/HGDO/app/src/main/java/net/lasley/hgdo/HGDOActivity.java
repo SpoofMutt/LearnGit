@@ -12,8 +12,6 @@ import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -55,15 +53,13 @@ public class HGDOActivity
         implements GooglePlayServicesClient.ConnectionCallbacks, GooglePlayServicesClient.OnConnectionFailedListener,
                    LocationListener {
 
+  public static final  int  TIME_TO_WAIT_WIFI                     = 16 * 1000;  // Milliseconds
   private final static int  CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-  private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS   = Geofence.NEVER_EXPIRE;
   //    private GoogleMap map;
-
-  private static final int TIME_FOR_DOOR_TO_OPEN         = 16;  // Seconds
-  private static final int TIME_TO_WAIT_FOR_DOOR_TO_OPEN = (int) (TIME_FOR_DOOR_TO_OPEN * 1000);
+  private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS   = Geofence.NEVER_EXPIRE;
+  private static final int  TIME_FOR_DOOR_TO_OPEN                 = 18;  // Seconds
   // Milliseconds
-
-  private static final int TIME_TO_WAIT_WIFI = 16 * 1000;  // Milliseconds
+  private static final int  TIME_TO_WAIT_FOR_DOOR_TO_OPEN         = (int) (TIME_FOR_DOOR_TO_OPEN * 1000);
   // Add handlers
   IntentFilter m_IntentFilter;
   IntentFilter m_IntentFilter2;
@@ -92,9 +88,7 @@ public class HGDOActivity
   protected void onDestroy() {
     RemoveGeoFencing();
     LocalBroadcastManager.getInstance(this).unregisterReceiver(m_GeofenceReceiver);
-    LocalBroadcastManager.getInstance(this).unregisterReceiver(m_ServiceReceiver)
-    // TODO Unregister service.
-    // unregisterReceiver(m_WIFIReceiver);
+    LocalBroadcastManager.getInstance(this).unregisterReceiver(m_ServiceReceiver);
     Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "onDestroy()");
     super.onDestroy();
   }
@@ -279,6 +273,7 @@ public class HGDOActivity
     m_IntentFilter2 = new IntentFilter();
     m_IntentFilter2.addAction(HGDOService.SERVICE_COMM_STATE);
     m_IntentFilter2.addAction(HGDOService.SERVICE_COMM_DATA);
+    m_IntentFilter2.addAction(HGDOService.SERVICE_COMM_INFO);
     m_IntentFilter2.addAction(HGDOService.SERVICE_WIFI_SELECTION);
     LocalBroadcastManager.getInstance(this).registerReceiver(m_ServiceReceiver, m_IntentFilter2);
 
@@ -300,14 +295,20 @@ public class HGDOActivity
         map = ((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
         map.setMyLocationEnabled(true);
 */
-    // TODO Send Status Intent
-    // sendStatusRequest();
+    sendStatusRequest();
   }
 
-  private boolean isConnectedViaWifi() {
-    ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-    NetworkInfo mWifi = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-    return mWifi.isConnected();
+  public void sendStatusRequest() {
+    Intent broadcastIntent = new Intent();
+    broadcastIntent.setAction(HGDOService.SERVICE_COMMAND).putExtra(HGDOService.EXTRA_PARAM1, HGDOService.STATUSREQ);
+    startService(broadcastIntent);
+  }
+
+  @Override
+  protected void onStart() {
+    super.onStart();
+    startService(new Intent(this, HGDOService.class));
+
   }
 
   @Override
@@ -416,24 +417,29 @@ public class HGDOActivity
   }
 
   public void RefreshState(View view) {
-    // TODO Send Status Intent
-    // sendStatusRequest();
+    sendStatusRequest();
   }
 
   public void toggleDoor(View view) {
-    // TODO Send Door Command Intent.
+    Intent broadcastIntent = new Intent();
+    broadcastIntent.setAction(HGDOService.SERVICE_COMMAND).putExtra(HGDOService.EXTRA_PARAM1, HGDOService.TOGGLE_DOOR);
+    startService(broadcastIntent);
     m_CountDownTimer.start();
   }
 
   public void SetWIFIState(View view) {
+    Intent broadcastIntent = new Intent();
+    broadcastIntent.setAction(HGDOService.SERVICE_WIFI_SELECTION);
     CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
     if (cb.isChecked()) {
+      broadcastIntent.putExtra(HGDOService.EXTRA_PARAM1, 1);
       m_wifiTimer.start();
       Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Checked.");
     } else {
+      broadcastIntent.putExtra(HGDOService.EXTRA_PARAM1, 0);
       Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Unchecked.");
     }
-    // TODO Send Watch WiFi Intent.
+    startService(broadcastIntent);
   }
 
   public void SetGPSState(View view) {
@@ -504,8 +510,7 @@ public class HGDOActivity
     @Override
     public void onFinish() {
       m_DoorProgressBar.setProgress(0);
-      // TODO Send Status Intent
-      // sendStatusRequest();
+      sendStatusRequest();
     }
 
     @Override
@@ -575,8 +580,7 @@ public class HGDOActivity
       Log.d(hgdoApp.getAppContext().getString(R.string.app_name), action);
       getLocation();
       if (action.contains("APPROACH")) {
-        // TODO Send Status Intent
-        // sendStatusRequest();
+        sendStatusRequest();
         m_LastFence = Fences.APPROACH;
       } else if (action.contains("ENTRY")) {
         if (m_LastFence == Fences.APPROACH) {
@@ -611,13 +615,20 @@ public class HGDOActivity
     public void onReceive(Context context, Intent intent) {
       final String action = intent.getAction();
       Log.d(hgdoApp.getAppContext().getString(R.string.app_name), action);
-      if (action.equals()) {
-        NetworkInfo ni = (NetworkInfo) intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-        if (ni.isConnected()) {
-          // TODO - Add reciever.
-        } else {
-          // wifi connection was lost
+      if (action.equals(HGDOService.SERVICE_COMM_STATE)) {
+        int state = intent.getIntExtra(HGDOService.EXTRA_PARAM1, -1);
+        if (state == View.INVISIBLE) {
+          m_CommProgressBar.setVisibility(View.INVISIBLE);
+        } else if (state == View.VISIBLE) {
+          m_CommProgressBar.setVisibility(View.VISIBLE);
         }
+      } else if (action.equals(HGDOService.SERVICE_COMM_INFO)) {
+        boolean wifi = intent.getBooleanExtra(HGDOService.SERVICE_WIFI_STATE, false);
+        CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
+        cb.setChecked(wifi);
+      } else if (action.equals(HGDOService.SERVICE_COMM_DATA)) {
+        byte[] data = intent.getByteArrayExtra(HGDOService.EXTRA_PARAM1);
+        decodeReply(data);
       }
     }
   }
