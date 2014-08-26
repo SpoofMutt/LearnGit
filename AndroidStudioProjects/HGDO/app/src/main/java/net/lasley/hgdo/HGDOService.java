@@ -3,6 +3,7 @@ package net.lasley.hgdo;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
@@ -22,13 +23,15 @@ import java.net.SocketAddress;
 
 public class HGDOService
         extends IntentService {
-  public static final String SERVICE_WIFI_SELECTION = "net.lasley.hgdo.WIFI";
+  public static final String SERVICE_COMM_ACTIVITY    = "net.lasley.hgdo.ACTIVITY";
   public static final String SERVICE_COMM_DATA      = "net.lasley.hgdo.DATA";
-  public static final String SERVICE_COMM_INFO     = "net.lasley.hgdo.INFO";
-  public static final String SERVICE_REQ_COMM_INFO = "net.lasley.hgdo.REQ_INFO";
+  public static final String SERVICE_COMM_INFO        = "net.lasley.hgdo.INFO";
   public static final String SERVICE_COMM_STATE     = "net.lasley.hgdo.COMM_STATE";
-  public static final String SERVICE_WIFI_STATE    = "net.lasley.hgdo.WIFI_STATE";
-  public static final String SERVICE_COMMAND       = "net.lasley.hgdo.COMMAND";
+  public static final String SERVICE_COMMAND          = "net.lasley.hgdo.COMMAND";
+  public static final String SERVICE_START_DOOR_TIMER = "net.lasley.hgdo.DOOR_TIMER";
+  public static final String SERVICE_REQ_COMM_INFO    = "net.lasley.hgdo.REQ_INFO";
+  public static final String SERVICE_WIFI_SELECTION   = "net.lasley.hgdo.WIFI";
+  public static final String SERVICE_WIFI_STATE       = "net.lasley.hgdo.WIFI_STATE";
 
   public static final int  LENGTH_V1_NDX            = 0;
   public static final int  VERSION_V1_NDX           = 1;
@@ -83,7 +86,8 @@ public class HGDOService
   @Override
   public void onCreate() {
     super.onCreate();
-    m_MonitorWifi = false;
+    SharedPreferences mPrefs = hgdoApp.getAppContext().getSharedPreferences(getString(R.string.PREFERENCES), MODE_PRIVATE);
+    m_MonitorWifi = mPrefs.getBoolean("wifiState", false);
     m_Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
     m_wifiTimer = new WiFiCountDownTimer(HGDOActivity.TIME_TO_WAIT_WIFI, HGDOActivity.TIME_TO_WAIT_WIFI + 1);
   }
@@ -91,6 +95,17 @@ public class HGDOService
   @Override
   protected void onHandleIntent(Intent intent) {
     if (intent != null && intent.getAction() != null) {
+      {
+        SharedPreferences mPrefs =
+                hgdoApp.getAppContext().getSharedPreferences(getString(R.string.PREFERENCES), MODE_PRIVATE);
+        m_MonitorWifi = mPrefs.getBoolean("wifiState", false);
+        m_ReadyToMonitorWifi = mPrefs.getBoolean("readyToMonitor", false);
+      }
+      String strmsg = "Service: mPrefs(m_ReadyToMonitor):" + Boolean.toString(m_MonitorWifi);
+      Intent dataIntent = new Intent();
+      dataIntent.setAction(HGDOService.SERVICE_COMM_ACTIVITY).putExtra(HGDOService.EXTRA_PARAM1, strmsg);
+      LocalBroadcastManager.getInstance(hgdoApp.getAppContext()).sendBroadcast(dataIntent);
+
       final String action = intent.getAction();
       Log.d("HGDOService", action);
       if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
@@ -102,6 +117,10 @@ public class HGDOService
             Log.d("HGDOService", wi.getSSID());
             String ssid = wi.getSSID().trim().replace("\"", "");
             if (ssid.equals("WHITESPRUCE") || ssid.equals("WHITESPRUCE2")) {
+              strmsg = "Service: Found HomeNet()";
+              dataIntent = new Intent();
+              dataIntent.setAction(HGDOService.SERVICE_COMM_ACTIVITY).putExtra(HGDOService.EXTRA_PARAM1, strmsg);
+              LocalBroadcastManager.getInstance(hgdoApp.getAppContext()).sendBroadcast(dataIntent);
               if (m_MonitorWifi) {
                 toggleDoor();
               }
@@ -116,12 +135,22 @@ public class HGDOService
           m_MonitorWifi = false;
         } else if (state == 1) {
           if (m_Wifi.isWifiEnabled()) {
+            m_ReadyToMonitorWifi = true;
             m_MonitorWifi = true;
           } else {
             m_MonitorWifi = false;
             m_Wifi.setWifiEnabled(true);
             m_wifiTimer.start();
           }
+          SharedPreferences mPrefs =
+                  hgdoApp.getAppContext().getSharedPreferences(getString(R.string.PREFERENCES), MODE_PRIVATE);
+          SharedPreferences.Editor ed = mPrefs.edit();
+          ed.putBoolean("readyToMonitor", m_ReadyToMonitorWifi);
+          ed.commit();
+          strmsg = "Service: m_ReadyToMonitor = " + Boolean.toString(m_MonitorWifi);
+          dataIntent = new Intent();
+          dataIntent.setAction(HGDOService.SERVICE_COMM_ACTIVITY).putExtra(HGDOService.EXTRA_PARAM1, strmsg);
+          LocalBroadcastManager.getInstance(hgdoApp.getAppContext()).sendBroadcast(dataIntent);
         }
       } else if (action.equals(SERVICE_REQ_COMM_INFO)) {
         Intent broadcastIntent = new Intent();
@@ -150,7 +179,17 @@ public class HGDOService
     msg[COMMAND_LENGTH_V1 - 3] = 2;
     msg[COMMAND_LENGTH_V1 - 2] = 3;
     msg[COMMAND_LENGTH_V1 - 1] = 4;
+    String strmsg = "Service: toggleDoor()";
+    Intent dataIntent = new Intent();
+    dataIntent.setAction(HGDOService.SERVICE_START_DOOR_TIMER);
+    LocalBroadcastManager.getInstance(hgdoApp.getAppContext()).sendBroadcast(dataIntent);
+
     new AsyncGarage().execute(msg);
+
+    strmsg = "Service: toggleDoor()";
+    dataIntent = new Intent();
+    dataIntent.setAction(HGDOService.SERVICE_COMM_ACTIVITY).putExtra(HGDOService.EXTRA_PARAM1, strmsg);
+    LocalBroadcastManager.getInstance(hgdoApp.getAppContext()).sendBroadcast(dataIntent);
   }
 
   void sendStatusRequest() {
@@ -163,6 +202,10 @@ public class HGDOService
     msg[STATUS_REQUEST_LENGTH_V1 - 2] = 3;
     msg[STATUS_REQUEST_LENGTH_V1 - 1] = 4;
     new AsyncGarage().execute(msg);
+    String strmsg = "Service: StatusRequest()";
+    Intent dataIntent = new Intent();
+    dataIntent.setAction(HGDOService.SERVICE_COMM_ACTIVITY).putExtra(HGDOService.EXTRA_PARAM1, strmsg);
+    LocalBroadcastManager.getInstance(hgdoApp.getAppContext()).sendBroadcast(dataIntent);
   }
 
   private class AsyncGarage
@@ -249,6 +292,11 @@ public class HGDOService
     @Override
     public void onFinish() {
       m_ReadyToMonitorWifi = true;
+      SharedPreferences mPrefs =
+              hgdoApp.getAppContext().getSharedPreferences(getString(R.string.PREFERENCES), MODE_PRIVATE);
+      SharedPreferences.Editor ed = mPrefs.edit();
+      ed.putBoolean("readyToMonitor", m_ReadyToMonitorWifi);
+      ed.commit();
       Log.i("HGDOService", "Ready to watch for WiFi");
     }
   }

@@ -72,8 +72,8 @@
               <action android:name="android.net.wifi.supplicant.CONNECTION_CHANGE"/>
               <action android:name="android.net.wifi.supplicant.STATE_CHANGE"/>
               <action android:name="net.lasley.hgdo.WIFI" />
-                <action android:name="net.lasley.hgdo.REQ_INFO" />
-                <action android:name="net.lasley.hgdo.COMMAND" />
+              <action android:name="net.lasley.hgdo.REQ_INFO"/>
+              <action android:name="net.lasley.hgdo.COMMAND"/>
             </intent-filter>
         </service>
 

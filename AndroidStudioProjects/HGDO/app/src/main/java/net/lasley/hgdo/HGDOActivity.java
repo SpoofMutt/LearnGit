@@ -7,11 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -176,16 +179,6 @@ public class HGDOActivity
   }
 
   @Override
-  protected void onSaveInstanceState(Bundle outState) {
-    super.onSaveInstanceState(outState);
-  }
-
-  @Override
-  protected void onRestoreInstanceState(Bundle savedInstanceState) {
-    super.onRestoreInstanceState(savedInstanceState);
-  }
-
-  @Override
   public void onDisconnected() {
     Toast.makeText(this, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
   }
@@ -272,9 +265,11 @@ public class HGDOActivity
     LocalBroadcastManager.getInstance(this).registerReceiver(m_GeofenceReceiver, m_IntentFilter);
 
     m_IntentFilter2 = new IntentFilter();
-    m_IntentFilter2.addAction(HGDOService.SERVICE_COMM_STATE);
+    m_IntentFilter2.addAction(HGDOService.SERVICE_COMM_ACTIVITY);
     m_IntentFilter2.addAction(HGDOService.SERVICE_COMM_DATA);
     m_IntentFilter2.addAction(HGDOService.SERVICE_COMM_INFO);
+    m_IntentFilter2.addAction(HGDOService.SERVICE_COMM_STATE);
+    m_IntentFilter2.addAction(HGDOService.SERVICE_START_DOOR_TIMER);
     m_IntentFilter2.addAction(HGDOService.SERVICE_WIFI_SELECTION);
     LocalBroadcastManager.getInstance(this).registerReceiver(m_ServiceReceiver, m_IntentFilter2);
 
@@ -284,6 +279,25 @@ public class HGDOActivity
 
     // Attach to the main UI
     setContentView(R.layout.activity_hgdo);
+
+    CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
+    SharedPreferences mPrefs = hgdoApp.getAppContext().getSharedPreferences(getString(R.string.PREFERENCES), MODE_PRIVATE);
+    cb.setChecked(mPrefs.getBoolean("wifiState", false));
+    SetWIFIState(null);
+
+    boolean isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
+    cb = (CheckBox) findViewById(R.id.DebugWiFi);
+    if (isDebuggable) {
+      cb.setVisibility(View.VISIBLE);
+      WifiManager Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+      if (Wifi.isWifiEnabled()) {
+        cb.setChecked(true);
+      } else {
+        cb.setChecked(false);
+      }
+    } else {
+      cb.setVisibility(View.INVISIBLE);
+    }
 
     ListView list = (ListView) findViewById(R.id.Activity);
     m_Adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mAreaVisits);
@@ -305,11 +319,25 @@ public class HGDOActivity
     startService(broadcastIntent);
   }
 
+  public void SetWIFIState(View view) {
+    Intent broadcastIntent = new Intent(this, HGDOService.class);
+    broadcastIntent.setAction(HGDOService.SERVICE_WIFI_SELECTION);
+    CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
+    if (cb.isChecked()) {
+      broadcastIntent.putExtra(HGDOService.EXTRA_PARAM1, 1);
+      m_wifiTimer.start();
+      Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Checked.");
+    } else {
+      broadcastIntent.putExtra(HGDOService.EXTRA_PARAM1, 0);
+      Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Unchecked.");
+    }
+    startService(broadcastIntent);
+  }
+
   @Override
   protected void onStart() {
     super.onStart();
     startService(new Intent(this, HGDOService.class));
-
   }
 
   @Override
@@ -350,6 +378,21 @@ public class HGDOActivity
     super.onPause();
     Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "OnPause");
     LocalBroadcastManager.getInstance(this).unregisterReceiver(m_GeofenceReceiver);
+    CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
+    SharedPreferences mPrefs = hgdoApp.getAppContext().getSharedPreferences(getString(R.string.PREFERENCES), MODE_PRIVATE);
+    SharedPreferences.Editor ed = mPrefs.edit();
+    ed.putBoolean("wifiState", cb.isChecked());
+    ed.commit();
+  }
+
+  public void toggleWiFi(View view) {
+    WifiManager Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+    CheckBox cb = (CheckBox) findViewById(R.id.DebugWiFi);
+    if (cb.isChecked()) {
+      Wifi.setWifiEnabled(true);
+    } else {
+      Wifi.setWifiEnabled(false);
+    }
   }
 
   void decodeReply(byte[] reply) {
@@ -430,21 +473,6 @@ public class HGDOActivity
     broadcastIntent.setAction(HGDOService.SERVICE_COMMAND).putExtra(HGDOService.EXTRA_PARAM1, HGDOService.TOGGLE_DOOR);
     startService(broadcastIntent);
     m_CountDownTimer.start();
-  }
-
-  public void SetWIFIState(View view) {
-    Intent broadcastIntent = new Intent(this,HGDOService.class);
-    broadcastIntent.setAction(HGDOService.SERVICE_WIFI_SELECTION);
-    CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
-    if (cb.isChecked()) {
-      broadcastIntent.putExtra(HGDOService.EXTRA_PARAM1, 1);
-      m_wifiTimer.start();
-      Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Checked.");
-    } else {
-      broadcastIntent.putExtra(HGDOService.EXTRA_PARAM1, 0);
-      Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Unchecked.");
-    }
-    startService(broadcastIntent);
   }
 
   public void SetGPSState(View view) {
@@ -634,6 +662,15 @@ public class HGDOActivity
       } else if (action.equals(HGDOService.SERVICE_COMM_DATA)) {
         byte[] data = intent.getByteArrayExtra(HGDOService.EXTRA_PARAM1);
         decodeReply(data);
+      } else if (action.equals(HGDOService.SERVICE_COMM_ACTIVITY)) {
+        String msg = intent.getStringExtra(HGDOService.EXTRA_PARAM1);
+        Time tmp = new Time();
+        tmp.setToNow();
+        msg = tmp.format("%T ") + msg;
+        m_Adapter.insert(msg, 0);
+        Log.d(hgdoApp.getAppContext().getString(R.string.app_name), msg);
+      } else if (action.equals(HGDOService.SERVICE_START_DOOR_TIMER)) {
+        m_CountDownTimer.start();
       }
     }
   }

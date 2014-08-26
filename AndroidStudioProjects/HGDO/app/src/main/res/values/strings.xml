@@ -59,5 +59,6 @@
     <string name="latlng">Lat/Long:   </string>
     <string name="fencearea">Area:</string>
     <string name="server_hostname">lasley.mynetgear.com</string>
+  <string name="PREFERENCES">net.lasley.hgdo.preferences</string>
 
 </resources>

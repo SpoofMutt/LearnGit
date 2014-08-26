@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+  android:id="@+id/TopLayout"
+  xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/TopLayout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:layout_margin="5dp"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+  >
 
-    <TableLayout
+  <TableLayout
         android:id="@+id/TableLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -200,6 +202,16 @@
             android:layout_alignParentStart="false"
             android:layout_below="@+id/checkWIFI" />
 
+      <CheckBox
+        android:id="@+id/DebugWiFi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/checkWIFI"
+        android:layout_centerHorizontal="true"
+        android:checked="false"
+        android:onClick="toggleWiFi"
+        android:text="Enable WiFi"/>
+
     </RelativeLayout>
 
     <RelativeLayout
@@ -318,28 +330,28 @@
     <ListView
         android:id="@+id/Activity"
         android:layout_width="wrap_content"
-        android:layout_height="100dp"
+        android:layout_height="fill_parent"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/GPSLayout"
+        android:background="#ff323232"
         android:choiceMode="none"
         android:fastScrollAlwaysVisible="false"
-        android:textSize="6dp"
-        tools:listitem="@android:layout/simple_list_item_1" />
+        tools:listitem="@layout/mylist"/>
 
-    <!--
-            <fragment
-                xmlns:map="http://schemas.android.com/apk/res-auto"
-                android:layout_width="wrap_content"
-                android:layout_height="280dp"
-                android:name="com.google.android.gms.maps.MapFragment"
-                android:id="@+id/map"
-                android:layout_alignParentBottom="true"
-                android:layout_below="@+id/Activity"
-                map:mapType="normal"
-                map:uiCompass="true"
-                map:uiZoomControls="true"
-                tools:layout="@layout/activity_main" />
-    -->
+  <!--
+          <fragment
+              xmlns:map="http://schemas.android.com/apk/res-auto"
+              android:layout_width="wrap_content"
+              android:layout_height="280dp"
+              android:name="com.google.android.gms.maps.MapFragment"
+              android:id="@+id/map"
+              android:layout_alignParentBottom="true"
+              android:layout_below="@+id/Activity"
+              map:mapType="normal"
+              map:uiCompass="true"
+              map:uiZoomControls="true"
+              tools:layout="@layout/activity_main" />
+  -->
 
     <!-- Geofence 2 -->
     <!-- Register and unregister geofences buttons. -->
