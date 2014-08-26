@@ -86,8 +86,6 @@ public class HGDOService
   @Override
   public void onCreate() {
     super.onCreate();
-    SharedPreferences mPrefs = hgdoApp.getAppContext().getSharedPreferences(getString(R.string.PREFERENCES), MODE_PRIVATE);
-    m_MonitorWifi = mPrefs.getBoolean("wifiState", false);
     m_Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
     m_wifiTimer = new WiFiCountDownTimer(HGDOActivity.TIME_TO_WAIT_WIFI, HGDOActivity.TIME_TO_WAIT_WIFI + 1);
   }
@@ -101,7 +99,7 @@ public class HGDOService
         m_MonitorWifi = mPrefs.getBoolean("wifiState", false);
         m_ReadyToMonitorWifi = mPrefs.getBoolean("readyToMonitor", false);
       }
-      String strmsg = "Service: mPrefs(m_ReadyToMonitor):" + Boolean.toString(m_MonitorWifi);
+      String strmsg = "Service: R/M: " + Boolean.toString(m_ReadyToMonitorWifi) + "/" + Boolean.toString(m_MonitorWifi);
       Intent dataIntent = new Intent();
       dataIntent.setAction(HGDOService.SERVICE_COMM_ACTIVITY).putExtra(HGDOService.EXTRA_PARAM1, strmsg);
       LocalBroadcastManager.getInstance(hgdoApp.getAppContext()).sendBroadcast(dataIntent);
@@ -131,14 +129,11 @@ public class HGDOService
         }
       } else if (action.equals(SERVICE_WIFI_SELECTION)) {
         int state = intent.getIntExtra(HGDOService.EXTRA_PARAM1, -1);
-        if (state == 0) {
-          m_MonitorWifi = false;
-        } else if (state == 1) {
+        if (state == 1) {
           if (m_Wifi.isWifiEnabled()) {
             m_ReadyToMonitorWifi = true;
-            m_MonitorWifi = true;
           } else {
-            m_MonitorWifi = false;
+            m_ReadyToMonitorWifi = false;
             m_Wifi.setWifiEnabled(true);
             m_wifiTimer.start();
           }
@@ -147,10 +142,6 @@ public class HGDOService
           SharedPreferences.Editor ed = mPrefs.edit();
           ed.putBoolean("readyToMonitor", m_ReadyToMonitorWifi);
           ed.commit();
-          strmsg = "Service: m_ReadyToMonitor = " + Boolean.toString(m_MonitorWifi);
-          dataIntent = new Intent();
-          dataIntent.setAction(HGDOService.SERVICE_COMM_ACTIVITY).putExtra(HGDOService.EXTRA_PARAM1, strmsg);
-          LocalBroadcastManager.getInstance(hgdoApp.getAppContext()).sendBroadcast(dataIntent);
         }
       } else if (action.equals(SERVICE_REQ_COMM_INFO)) {
         Intent broadcastIntent = new Intent();

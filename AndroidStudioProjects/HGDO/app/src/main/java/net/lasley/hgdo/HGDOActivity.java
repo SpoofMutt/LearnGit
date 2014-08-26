@@ -281,8 +281,10 @@ public class HGDOActivity
     setContentView(R.layout.activity_hgdo);
 
     CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
+    CheckBox wfcb = (CheckBox) findViewById(R.id.DebugWiFi);
     SharedPreferences mPrefs = hgdoApp.getAppContext().getSharedPreferences(getString(R.string.PREFERENCES), MODE_PRIVATE);
     cb.setChecked(mPrefs.getBoolean("wifiState", false));
+    wfcb.setChecked(mPrefs.getBoolean("debugWifi", false));
     SetWIFIState(null);
 
     boolean isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
@@ -323,7 +325,9 @@ public class HGDOActivity
     Intent broadcastIntent = new Intent(this, HGDOService.class);
     broadcastIntent.setAction(HGDOService.SERVICE_WIFI_SELECTION);
     CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
+    CheckBox wfcb = (CheckBox) findViewById(R.id.DebugWiFi);
     if (cb.isChecked()) {
+      wfcb.setChecked(true);
       broadcastIntent.putExtra(HGDOService.EXTRA_PARAM1, 1);
       m_wifiTimer.start();
       Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Checked.");
@@ -331,6 +335,11 @@ public class HGDOActivity
       broadcastIntent.putExtra(HGDOService.EXTRA_PARAM1, 0);
       Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Unchecked.");
     }
+    SharedPreferences mPrefs = hgdoApp.getAppContext().getSharedPreferences(getString(R.string.PREFERENCES), MODE_PRIVATE);
+    SharedPreferences.Editor ed = mPrefs.edit();
+    ed.putBoolean("wifiState", cb.isChecked());
+    ed.putBoolean("debugWifi", wfcb.isChecked());
+    ed.commit();
     startService(broadcastIntent);
   }
 
@@ -379,9 +388,11 @@ public class HGDOActivity
     Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "OnPause");
     LocalBroadcastManager.getInstance(this).unregisterReceiver(m_GeofenceReceiver);
     CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
+    CheckBox wfcb = (CheckBox) findViewById(R.id.DebugWiFi);
     SharedPreferences mPrefs = hgdoApp.getAppContext().getSharedPreferences(getString(R.string.PREFERENCES), MODE_PRIVATE);
     SharedPreferences.Editor ed = mPrefs.edit();
     ed.putBoolean("wifiState", cb.isChecked());
+    ed.putBoolean("debugWifi", wfcb.isChecked());
     ed.commit();
   }
 
