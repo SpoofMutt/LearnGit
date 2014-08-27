@@ -335,8 +335,18 @@
         android:layout_below="@+id/GPSLayout"
         android:background="#ff323232"
         android:choiceMode="none"
-        android:fastScrollAlwaysVisible="false"
-        tools:listitem="@layout/mylist"/>
+        android:fastScrollAlwaysVisible="false"/>
+
+  <!--<ListView-->
+  <!--android:id="@+id/Activity"-->
+  <!--android:layout_width="wrap_content"-->
+  <!--android:layout_height="100dp"-->
+  <!--android:choiceMode="none"-->
+  <!--android:fastScrollAlwaysVisible="false"-->
+  <!--android:layout_alignParentStart="true"-->
+  <!--android:layout_below="@+id/GPSLayout"-->
+  <!--tools:listitem="@android:layout/simple_list_item_1"-->
+  <!--android:textSize="8dp"/>-->
 
   <!--
           <fragment

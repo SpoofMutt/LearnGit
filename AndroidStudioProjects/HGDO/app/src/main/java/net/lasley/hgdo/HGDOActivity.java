@@ -244,7 +244,7 @@ public class HGDOActivity
 
     m_SimpleGeofence = new ArrayList<SimpleGeofence>();
     m_CurrentGeofences = new ArrayList<Geofence>();
-    List<String> mAreaVisits = new ArrayList<String>();
+    ArrayList<String> mAreaVisits = new ArrayList<String>();
 
     m_LocationClient = new LocationClient(this, this, this);
     m_LocationClient.connect();
@@ -302,7 +302,7 @@ public class HGDOActivity
     }
 
     ListView list = (ListView) findViewById(R.id.Activity);
-    m_Adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mAreaVisits);
+    m_Adapter = new MyListAdapter(this, mAreaVisits);
     list.setAdapter(m_Adapter);
 
     m_DoorProgressBar = (ProgressBar) findViewById(R.id.WaitForDoor);
