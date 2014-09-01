@@ -65,12 +65,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
 
               <action android:name="android.net.wifi.STATE_CHANGE"/>
-              <action android:name="android.intent.action.EXTERNAL_APPLICATIONS_AVAILABLE"/>
-              <action android:name="android.intent.action.BATTERY_LOW"/>
-              <action android:name="android.intent.action.BOOT_COMPLETED"/>
+              <!--<action android:name="android.intent.action.EXTERNAL_APPLICATIONS_AVAILABLE"/>-->
+              <!--<action android:name="android.intent.action.BATTERY_LOW"/>-->
+              <!--<action android:name="android.intent.action.BOOT_COMPLETED"/>-->
               <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
-              <action android:name="android.net.wifi.supplicant.CONNECTION_CHANGE"/>
-              <action android:name="android.net.wifi.supplicant.STATE_CHANGE"/>
+              <!--<action android:name="android.net.wifi.supplicant.CONNECTION_CHANGE"/>-->
+              <!--<action android:name="android.net.wifi.supplicant.STATE_CHANGE"/>-->
               <action android:name="net.lasley.hgdo.WIFI" />
               <action android:name="net.lasley.hgdo.REQ_INFO"/>
               <action android:name="net.lasley.hgdo.COMMAND"/>

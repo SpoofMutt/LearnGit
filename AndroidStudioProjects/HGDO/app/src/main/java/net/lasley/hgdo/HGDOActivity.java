@@ -29,6 +29,8 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,9 +65,12 @@ public class HGDOActivity
   private static final int  TIME_FOR_DOOR_TO_OPEN                 = 18;  // Seconds
   // Milliseconds
   private static final int  TIME_TO_WAIT_FOR_DOOR_TO_OPEN         = (int) (TIME_FOR_DOOR_TO_OPEN * 1000);
+  public boolean isDebuggable;
   // Add handlers
-  IntentFilter m_IntentFilter;
-  IntentFilter m_IntentFilter2;
+  IntentFilter             m_IntentFilter;
+  IntentFilter             m_IntentFilter2;
+  SharedPreferences        mPrefs;
+  SharedPreferences.Editor ed;
   // Store a list of geofences to add
   private List<Geofence>           m_CurrentGeofences;
   private List<SimpleGeofence>     m_SimpleGeofence;
@@ -86,54 +91,305 @@ public class HGDOActivity
   private Fences                   m_LastFence;
   private ProgressBar              m_DoorProgressBar;
   private ProgressBar              m_CommProgressBar;
-
-  @Override
-  protected void onDestroy() {
-    RemoveGeoFencing();
-    LocalBroadcastManager.getInstance(this).unregisterReceiver(m_GeofenceReceiver);
-    LocalBroadcastManager.getInstance(this).unregisterReceiver(m_ServiceReceiver);
-    stopService(new Intent(this,HGDOService.class));
-    Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "onDestroy()");
-    super.onDestroy();
-  }
-
-  void RemoveGeoFencing() {
-    m_RemoveType = GeofenceUtils.REMOVE_TYPE.INTENT;
-    if (!servicesConnected()) {
-      return;
-    }
-
-    try {
-      m_GeofenceRemover.removeGeofencesByIntent(m_GeofenceRequester.getRequestPendingIntent());
-    } catch (UnsupportedOperationException e) {
-      Toast.makeText(this, net.lasley.hgdo.R.string.remove_geofences_already_requested_error, Toast.LENGTH_LONG).show();
-    }
-  }
-
-  private boolean servicesConnected() {
-    int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-    if (ConnectionResult.SUCCESS == resultCode) {
-      return true;
-    } else {
-      Dialog dialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this, 0);
-      if (dialog != null) {
-        ErrorDialogFragment errorFragment = new ErrorDialogFragment();
-        errorFragment.setDialog(dialog);
-        errorFragment.show(getSupportFragmentManager(), hgdoApp.getAppContext().getString(R.string.app_name));
-      }
-      return false;
-    }
-  }
+  private CheckBox                 cb_checkWIFI;
+  private CheckBox                 cb_debugWIFI;
+  private CheckBox                 cb_checkGPS;
+  private RelativeLayout           rl_GPSLayout;
+  private TextView                 tv_label_lat_lng;
+  private TextView                 tv_lat_lng;
+  private Space                    s_space_lat_lng;
+  private TextView                 tv_label_fencearea;
+  private TextView                 tv_fencearea;
+  private Space                    s_space_area;
+  private TextView                 tv_AccuracyLabel;
+  private TextView                 tv_accuracy;
 
   @Override
   public void onConnected(Bundle dataBundle) {
     Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
-    CheckBox cb = (CheckBox) findViewById(R.id.checkGPS);
-    if (cb.isChecked()) {
+    if (cb_checkGPS.isChecked()) {
       Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "onResume - AddGeoFencing.");
       m_LocationClient.requestLocationUpdates(m_LocationRequest, this);
       AddGeoFencing();
     }
+  }
+
+  @Override
+  public void onDisconnected() {
+    Toast.makeText(this, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
+  }
+
+  @Override
+  public void onConnectionFailed(ConnectionResult connectionResult) {
+    if (connectionResult.hasResolution()) {
+      try {
+        connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
+      } catch (IntentSender.SendIntentException e) {
+        e.printStackTrace();
+      }
+    } else {
+      Log.d(hgdoApp.getAppContext().getString(R.string.app_name),
+            "ErrorCode: " + Integer.toString(connectionResult.getErrorCode()));
+    }
+  }
+
+  @Override
+  public void onLocationChanged(Location location) {
+    if (servicesConnected()) {
+      ((TextView) (findViewById(net.lasley.hgdo.R.id.lat_lng))).setText(GeofenceUtils.getLatLng(this, location));
+      (new GetAddressTask(this)).execute(location);
+      float meter = location.getAccuracy();
+      if (meter > 13.0) {
+        ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setTextColor(Color.RED);
+      } else if (meter > 10.0) {
+        ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setTextColor(Color.YELLOW);
+      } else {
+        ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setTextColor(Color.GREEN);
+        //                TypedArray themeArray = this.getTheme().obtainStyledAttributes(new int[] {android.R.attr.textColor});
+        //                int index = 0;
+        //                int defaultColorValue = 0;
+        //                int TextColor = themeArray.getColor(index, defaultColorValue);
+        //                ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setTextColor(TextColor);
+      }
+      float feet = meter * 3.2808f;
+      String feetstr = new DecimalFormat("0.0").format(feet);
+      ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setText(feetstr + " ft.");
+    }
+  }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+    switch (requestCode) {
+      case GeofenceUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST:
+        switch (resultCode) {
+          case Activity.RESULT_OK:
+            if (GeofenceUtils.REQUEST_TYPE.ADD == m_RequestType) {
+              m_GeofenceRequester.setInProgressFlag(false);
+              m_GeofenceRequester.addGeofences(m_CurrentGeofences);
+            } else if (GeofenceUtils.REQUEST_TYPE.REMOVE == m_RequestType) {
+              m_GeofenceRemover.setInProgressFlag(false);
+              if (GeofenceUtils.REMOVE_TYPE.INTENT == m_RemoveType) {
+                m_GeofenceRemover.removeGeofencesByIntent(m_GeofenceRequester.getRequestPendingIntent());
+              }
+            }
+            break;
+          default:
+            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), getString(net.lasley.hgdo.R.string.no_resolution));
+        }
+      default:
+        Log.d(hgdoApp.getAppContext().getString(R.string.app_name),
+              getString(net.lasley.hgdo.R.string.unknown_activity_request_code, requestCode));
+        break;
+    }
+  }
+
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
+
+    if (savedInstanceState != null) {
+      //      startTime = (Calendar) bundle.getSerializable("starttime");
+    }
+
+    LocationRequest mLocationRequestSlow = LocationRequest.create();
+    mLocationRequestSlow.setPriority(LocationRequest.PRIORITY_NO_POWER);
+    mLocationRequestSlow.setInterval(60 * 1000); // Milliseconds
+    mLocationRequestSlow.setFastestInterval(30 * 1000);
+
+    m_LocationRequest = LocationRequest.create();
+    m_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    m_LocationRequest.setInterval(5 * 1000); // Milliseconds
+    m_LocationRequest.setFastestInterval(1 * 1000);
+
+    m_LastFence = Fences.UNKNOWN;
+
+    m_SimpleGeofence = new ArrayList<SimpleGeofence>();
+    m_CurrentGeofences = new ArrayList<Geofence>();
+    ArrayList<String> mAreaVisits = new ArrayList<String>();
+
+    m_GeofenceReceiver = new GeofenceSampleReceiver();
+    m_GeofenceRequester = new GeofenceRequester(this);
+    m_GeofenceRemover = new GeofenceRemover(this);
+    m_ServiceReceiver = new ServiceReceiver();
+
+    m_IntentFilter = new IntentFilter();
+    m_IntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCES_ADDED);
+    m_IntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCES_REMOVED);
+    m_IntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCE_ERROR);
+    m_IntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCE_ENTER);
+    m_IntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCE_EXIT);
+    // All Location Services sample apps use this category
+    m_IntentFilter.addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES);
+
+    m_IntentFilter2 = new IntentFilter();
+    m_IntentFilter2.addAction(HGDOService.SERVICE_COMM_ACTIVITY);
+    m_IntentFilter2.addAction(HGDOService.SERVICE_COMM_DATA);
+    m_IntentFilter2.addAction(HGDOService.SERVICE_COMM_INFO);
+    m_IntentFilter2.addAction(HGDOService.SERVICE_COMM_STATE);
+    m_IntentFilter2.addAction(HGDOService.SERVICE_START_DOOR_TIMER);
+    m_IntentFilter2.addAction(HGDOService.SERVICE_WIFI_SELECTION);
+
+    m_CountDownTimer =
+            new ToggleDoorCountDownTimer(TIME_TO_WAIT_FOR_DOOR_TO_OPEN, (int) (TIME_TO_WAIT_FOR_DOOR_TO_OPEN / 100.0));
+    m_wifiTimer = new WiFiCountDownTimer(TIME_TO_WAIT_WIFI, (long) (TIME_TO_WAIT_WIFI / 100.0));
+
+    // Attach to the main UI
+    setContentView(R.layout.activity_hgdo);
+
+    cb_checkWIFI = (CheckBox) findViewById(R.id.checkWIFI);
+    cb_debugWIFI = (CheckBox) findViewById(R.id.DebugWiFi);
+    cb_checkGPS = (CheckBox) findViewById(R.id.checkGPS);
+    rl_GPSLayout = (RelativeLayout) findViewById(R.id.GPSLayout);
+    tv_label_lat_lng = (TextView) findViewById(R.id.label_lat_lng);
+    tv_lat_lng = (TextView) findViewById(R.id.lat_lng);
+    s_space_lat_lng = (Space) findViewById(R.id.space_lat_lng);
+    tv_label_fencearea = (TextView) findViewById(R.id.label_fencearea);
+    tv_fencearea = (TextView) findViewById(R.id.fencearea);
+    s_space_area = (Space) findViewById(R.id.space_area);
+    tv_AccuracyLabel = (TextView) findViewById(R.id.AccuracyLabel);
+    tv_accuracy = (TextView) findViewById(R.id.accuracy);
+
+    mPrefs = hgdoApp.getAppContext().getSharedPreferences(getString(R.string.PREFERENCES), MODE_PRIVATE);
+
+    getSharedPrefs();
+    SetWIFIState(null);
+    startMyServices();
+
+    if (isDebuggable) {
+      cb_debugWIFI.setVisibility(View.VISIBLE);
+      WifiManager Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+      if (Wifi.isWifiEnabled()) {
+        cb_debugWIFI.setChecked(true);
+      } else {
+        cb_debugWIFI.setChecked(false);
+      }
+    } else {
+      cb_debugWIFI.setVisibility(View.GONE);
+      cb_checkGPS.setVisibility(View.GONE);
+      rl_GPSLayout.setVisibility(View.GONE);
+      tv_label_lat_lng.setVisibility(View.GONE);
+      tv_lat_lng.setVisibility(View.GONE);
+      s_space_lat_lng.setVisibility(View.GONE);
+      tv_label_fencearea.setVisibility(View.GONE);
+      tv_fencearea.setVisibility(View.GONE);
+      s_space_area.setVisibility(View.GONE);
+      tv_AccuracyLabel.setVisibility(View.GONE);
+      tv_accuracy.setVisibility(View.GONE);
+
+    }
+
+    ListView list = (ListView) findViewById(R.id.Activity);
+    m_Adapter = new MyListAdapter(this, mAreaVisits);
+    list.setAdapter(m_Adapter);
+
+    m_DoorProgressBar = (ProgressBar) findViewById(R.id.WaitForDoor);
+    m_CommProgressBar = (ProgressBar) findViewById(R.id.WaitForComm);
+
+/*
+        map = ((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
+        map.setMyLocationEnabled(true);
+*/
+    sendStatusRequest();
+  }
+
+  @Override
+  protected void onStart() {
+    super.onStart();
+    startMyServices();
+  }
+
+  @Override
+  protected void onDestroy() {
+    RemoveGeoFencing();
+    stopMyServices();
+    Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "onDestroy()");
+    super.onDestroy();
+  }
+
+  @Override
+  protected void onResume() {
+    super.onResume();
+    getSharedPrefs();
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "OnPause");
+    saveSharedPrefs();
+  }
+
+  private void startMyServices() {
+    startService(new Intent(this, HGDOService.class));
+    if (cb_checkGPS.isChecked()) {
+      startLocationClient();
+      LocalBroadcastManager.getInstance(this).registerReceiver(m_GeofenceReceiver, m_IntentFilter);
+    }
+    LocalBroadcastManager.getInstance(this).registerReceiver(m_ServiceReceiver, m_IntentFilter2);
+  }
+
+  private void stopMyServices() {
+    if (cb_checkGPS.isChecked()) {
+      stopLocationClient();
+      LocalBroadcastManager.getInstance(this).unregisterReceiver(m_GeofenceReceiver);
+    }
+    LocalBroadcastManager.getInstance(this).unregisterReceiver(m_ServiceReceiver);
+    stopService(new Intent(this, HGDOService.class));
+  }
+
+  public void startLocationClient() {
+    if (m_LocationClient == null) {
+      m_LocationClient = new LocationClient(this, this, this);
+      m_LocationClient.connect();
+    }
+  }
+
+  public void stopLocationClient() {
+    if (m_LocationClient != null) {
+      m_LocationClient.removeLocationUpdates(this);
+      m_LocationClient.disconnect();
+      m_LocationClient = null;
+    }
+  }
+
+  public void getSharedPrefs() {
+    cb_checkWIFI.setChecked(mPrefs.getBoolean("wifiState", false));
+    cb_debugWIFI.setChecked(mPrefs.getBoolean("debugWifi", false));
+    cb_checkGPS.setChecked(mPrefs.getBoolean("checkGPS", false));
+  }
+
+  public void saveSharedPrefs() {
+    ed = mPrefs.edit();
+    ed.putBoolean("wifiState", cb_checkWIFI.isChecked());
+    ed.putBoolean("debugWifi", cb_debugWIFI.isChecked());
+    ed.putBoolean("checkGPS", cb_checkGPS.isChecked());
+    ed.commit();
+  }
+
+  public void sendStatusRequest() {
+    Intent broadcastIntent = new Intent(this, HGDOService.class);
+    broadcastIntent.setAction(HGDOService.SERVICE_COMMAND).putExtra(HGDOService.EXTRA_PARAM1, HGDOService.STATUSREQ);
+    startService(broadcastIntent);
+  }
+
+  public void SetWIFIState(View view) {
+    Intent broadcastIntent = new Intent(this, HGDOService.class);
+    broadcastIntent.setAction(HGDOService.SERVICE_WIFI_SELECTION);
+    if (cb_checkWIFI.isChecked()) {
+      cb_debugWIFI.setChecked(true);
+      broadcastIntent.putExtra(HGDOService.EXTRA_PARAM1, 1);
+      if (!m_wifiTimer.busy) {
+        m_wifiTimer.startTimer();
+      }
+      Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Checked.");
+    } else {
+      broadcastIntent.putExtra(HGDOService.EXTRA_PARAM1, 0);
+      Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Unchecked.");
+    }
+    saveSharedPrefs();
+    startService(broadcastIntent);
   }
 
   void AddGeoFencing() {
@@ -178,231 +434,75 @@ public class HGDOActivity
     }
   }
 
-  @Override
-  public void onDisconnected() {
-    Toast.makeText(this, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
+  void RemoveGeoFencing() {
+    m_RemoveType = GeofenceUtils.REMOVE_TYPE.INTENT;
+    if (!servicesConnected()) {
+      return;
+    }
+
+    try {
+      m_GeofenceRemover.removeGeofencesByIntent(m_GeofenceRequester.getRequestPendingIntent());
+    } catch (UnsupportedOperationException e) {
+      Toast.makeText(this, net.lasley.hgdo.R.string.remove_geofences_already_requested_error, Toast.LENGTH_LONG).show();
+    }
   }
 
-  @Override
-  public void onConnectionFailed(ConnectionResult connectionResult) {
-    if (connectionResult.hasResolution()) {
-      try {
-        connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
-      } catch (IntentSender.SendIntentException e) {
-        e.printStackTrace();
-      }
+  private boolean servicesConnected() {
+    int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+    if (ConnectionResult.SUCCESS == resultCode) {
+      return true;
     } else {
-      Log.d(hgdoApp.getAppContext().getString(R.string.app_name),
-            "ErrorCode: " + Integer.toString(connectionResult.getErrorCode()));
-    }
-  }
-
-  // Define the callback method that receives location updates
-  @Override
-  public void onLocationChanged(Location location) {
-    if (servicesConnected()) {
-      ((TextView) (findViewById(net.lasley.hgdo.R.id.lat_lng))).setText(GeofenceUtils.getLatLng(this, location));
-      (new GetAddressTask(this)).execute(location);
-      float meter = location.getAccuracy();
-      if (meter > 13.0) {
-        ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setTextColor(Color.RED);
-      } else if (meter > 10.0) {
-        ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setTextColor(Color.YELLOW);
-      } else {
-        ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setTextColor(Color.GREEN);
-        //                TypedArray themeArray = this.getTheme().obtainStyledAttributes(new int[] {android.R.attr.textColor});
-        //                int index = 0;
-        //                int defaultColorValue = 0;
-        //                int TextColor = themeArray.getColor(index, defaultColorValue);
-        //                ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setTextColor(TextColor);
+      Dialog dialog = GooglePlayServicesUtil.getErrorDialog(resultCode, this, 0);
+      if (dialog != null) {
+        ErrorDialogFragment errorFragment = new ErrorDialogFragment();
+        errorFragment.setDialog(dialog);
+        errorFragment.show(getSupportFragmentManager(), hgdoApp.getAppContext().getString(R.string.app_name));
       }
-      float feet = meter * 3.2808f;
-      String feetstr = new DecimalFormat("0.0").format(feet);
-      ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setText(feetstr + " ft.");
+      return false;
     }
-  }
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    if (savedInstanceState != null) {
-      //      startTime = (Calendar) bundle.getSerializable("starttime");
-    }
-
-    LocationRequest mLocationRequestSlow = LocationRequest.create();
-    mLocationRequestSlow.setPriority(LocationRequest.PRIORITY_NO_POWER);
-    mLocationRequestSlow.setInterval(60 * 1000); // Milliseconds
-    mLocationRequestSlow.setFastestInterval(30 * 1000);
-
-    m_LocationRequest = LocationRequest.create();
-    m_LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-    m_LocationRequest.setInterval(5 * 1000); // Milliseconds
-    m_LocationRequest.setFastestInterval(1 * 1000);
-
-    m_LastFence = Fences.UNKNOWN;
-
-    m_SimpleGeofence = new ArrayList<SimpleGeofence>();
-    m_CurrentGeofences = new ArrayList<Geofence>();
-    ArrayList<String> mAreaVisits = new ArrayList<String>();
-
-    m_LocationClient = new LocationClient(this, this, this);
-    m_LocationClient.connect();
-
-    m_GeofenceReceiver = new GeofenceSampleReceiver();
-    m_GeofenceRequester = new GeofenceRequester(this);
-    m_GeofenceRemover = new GeofenceRemover(this);
-    m_ServiceReceiver = new ServiceReceiver();
-
-    m_IntentFilter = new IntentFilter();
-    m_IntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCES_ADDED);
-    m_IntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCES_REMOVED);
-    m_IntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCE_ERROR);
-    m_IntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCE_ENTER);
-    m_IntentFilter.addAction(GeofenceUtils.ACTION_GEOFENCE_EXIT);
-    // All Location Services sample apps use this category
-    m_IntentFilter.addCategory(GeofenceUtils.CATEGORY_LOCATION_SERVICES);
-    LocalBroadcastManager.getInstance(this).registerReceiver(m_GeofenceReceiver, m_IntentFilter);
-
-    m_IntentFilter2 = new IntentFilter();
-    m_IntentFilter2.addAction(HGDOService.SERVICE_COMM_ACTIVITY);
-    m_IntentFilter2.addAction(HGDOService.SERVICE_COMM_DATA);
-    m_IntentFilter2.addAction(HGDOService.SERVICE_COMM_INFO);
-    m_IntentFilter2.addAction(HGDOService.SERVICE_COMM_STATE);
-    m_IntentFilter2.addAction(HGDOService.SERVICE_START_DOOR_TIMER);
-    m_IntentFilter2.addAction(HGDOService.SERVICE_WIFI_SELECTION);
-    LocalBroadcastManager.getInstance(this).registerReceiver(m_ServiceReceiver, m_IntentFilter2);
-
-    m_CountDownTimer =
-            new ToggleDoorCountDownTimer(TIME_TO_WAIT_FOR_DOOR_TO_OPEN, (int) (TIME_TO_WAIT_FOR_DOOR_TO_OPEN / 100.0));
-    m_wifiTimer = new WiFiCountDownTimer(TIME_TO_WAIT_WIFI, (long) (TIME_TO_WAIT_WIFI / 100.0));
-
-    // Attach to the main UI
-    setContentView(R.layout.activity_hgdo);
-
-    CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
-    CheckBox wfcb = (CheckBox) findViewById(R.id.DebugWiFi);
-    SharedPreferences mPrefs = hgdoApp.getAppContext().getSharedPreferences(getString(R.string.PREFERENCES), MODE_PRIVATE);
-    cb.setChecked(mPrefs.getBoolean("wifiState", false));
-    wfcb.setChecked(mPrefs.getBoolean("debugWifi", false));
-    SetWIFIState(null);
-
-    boolean isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
-    cb = (CheckBox) findViewById(R.id.DebugWiFi);
-    if (isDebuggable) {
-      cb.setVisibility(View.VISIBLE);
-      WifiManager Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-      if (Wifi.isWifiEnabled()) {
-        cb.setChecked(true);
-      } else {
-        cb.setChecked(false);
-      }
-    } else {
-      cb.setVisibility(View.INVISIBLE);
-    }
-
-    ListView list = (ListView) findViewById(R.id.Activity);
-    m_Adapter = new MyListAdapter(this, mAreaVisits);
-    list.setAdapter(m_Adapter);
-
-    m_DoorProgressBar = (ProgressBar) findViewById(R.id.WaitForDoor);
-    m_CommProgressBar = (ProgressBar) findViewById(R.id.WaitForComm);
-
-/*
-        map = ((MapFragment)getFragmentManager().findFragmentById(R.id.map)).getMap();
-        map.setMyLocationEnabled(true);
-*/
-    sendStatusRequest();
-  }
-
-  public void sendStatusRequest() {
-    Intent broadcastIntent = new Intent(this,HGDOService.class);
-    broadcastIntent.setAction(HGDOService.SERVICE_COMMAND).putExtra(HGDOService.EXTRA_PARAM1, HGDOService.STATUSREQ);
-    startService(broadcastIntent);
-  }
-
-  public void SetWIFIState(View view) {
-    Intent broadcastIntent = new Intent(this, HGDOService.class);
-    broadcastIntent.setAction(HGDOService.SERVICE_WIFI_SELECTION);
-    CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
-    CheckBox wfcb = (CheckBox) findViewById(R.id.DebugWiFi);
-    if (cb.isChecked()) {
-      wfcb.setChecked(true);
-      broadcastIntent.putExtra(HGDOService.EXTRA_PARAM1, 1);
-      m_wifiTimer.start();
-      Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Checked.");
-    } else {
-      broadcastIntent.putExtra(HGDOService.EXTRA_PARAM1, 0);
-      Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetWIFIState - Unchecked.");
-    }
-    SharedPreferences mPrefs = hgdoApp.getAppContext().getSharedPreferences(getString(R.string.PREFERENCES), MODE_PRIVATE);
-    SharedPreferences.Editor ed = mPrefs.edit();
-    ed.putBoolean("wifiState", cb.isChecked());
-    ed.putBoolean("debugWifi", wfcb.isChecked());
-    ed.commit();
-    startService(broadcastIntent);
-  }
-
-  @Override
-  protected void onStart() {
-    super.onStart();
-    startService(new Intent(this, HGDOService.class));
-  }
-
-  @Override
-  protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-    switch (requestCode) {
-      case GeofenceUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST:
-        switch (resultCode) {
-          case Activity.RESULT_OK:
-            if (GeofenceUtils.REQUEST_TYPE.ADD == m_RequestType) {
-              m_GeofenceRequester.setInProgressFlag(false);
-              m_GeofenceRequester.addGeofences(m_CurrentGeofences);
-            } else if (GeofenceUtils.REQUEST_TYPE.REMOVE == m_RequestType) {
-              m_GeofenceRemover.setInProgressFlag(false);
-              if (GeofenceUtils.REMOVE_TYPE.INTENT == m_RemoveType) {
-                m_GeofenceRemover.removeGeofencesByIntent(m_GeofenceRequester.getRequestPendingIntent());
-              }
-            }
-            break;
-          default:
-            Log.d(hgdoApp.getAppContext().getString(R.string.app_name), getString(net.lasley.hgdo.R.string.no_resolution));
-        }
-      default:
-        Log.d(hgdoApp.getAppContext().getString(R.string.app_name),
-              getString(net.lasley.hgdo.R.string.unknown_activity_request_code, requestCode));
-        break;
-    }
-  }
-
-  @Override
-  protected void onResume() {
-    super.onResume();
-    // Register the broadcast receiver to receive status updates
-    LocalBroadcastManager.getInstance(this).registerReceiver(m_GeofenceReceiver, m_IntentFilter);
-  }
-
-  @Override
-  protected void onPause() {
-    super.onPause();
-    Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "OnPause");
-    LocalBroadcastManager.getInstance(this).unregisterReceiver(m_GeofenceReceiver);
-    CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
-    CheckBox wfcb = (CheckBox) findViewById(R.id.DebugWiFi);
-    SharedPreferences mPrefs = hgdoApp.getAppContext().getSharedPreferences(getString(R.string.PREFERENCES), MODE_PRIVATE);
-    SharedPreferences.Editor ed = mPrefs.edit();
-    ed.putBoolean("wifiState", cb.isChecked());
-    ed.putBoolean("debugWifi", wfcb.isChecked());
-    ed.commit();
   }
 
   public void toggleWiFi(View view) {
     WifiManager Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-    CheckBox cb = (CheckBox) findViewById(R.id.DebugWiFi);
-    if (cb.isChecked()) {
+    if (cb_debugWIFI.isChecked()) {
       Wifi.setWifiEnabled(true);
     } else {
       Wifi.setWifiEnabled(false);
+    }
+  }
+
+  public void SetGPSState(View view) {
+    if (cb_checkGPS.isChecked()) {
+      LocalBroadcastManager.getInstance(this).registerReceiver(m_GeofenceReceiver, m_IntentFilter);
+      Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetGPSState - Checked.");
+      startLocationClient();
+      while (m_LocationClient.isConnecting()) {
+        try {
+          Thread.sleep(500);
+        } catch (Exception e) {
+          // Do nothing
+        }
+      }
+      if (m_LocationClient.isConnected()) {
+        m_LocationClient.requestLocationUpdates(m_LocationRequest, this);
+        getLocation();
+        AddGeoFencing();
+      }
+    } else {
+      LocalBroadcastManager.getInstance(this).unregisterReceiver(m_GeofenceReceiver);
+      Log.d(this.getString(R.string.app_name), "SetGPSState - Unchecked.");
+      stopLocationClient();
+      ((TextView) findViewById(R.id.lat_lng)).setText("Indeterminate");
+      ((TextView) findViewById(R.id.fencearea)).setText("Indeterminate");
+
+      TypedArray themeArray = this.getTheme().obtainStyledAttributes(new int[] {android.R.attr.textColorPrimary});
+      int index = 0;
+      int defaultColorValue = 0;
+      int TextColor = themeArray.getColor(index, defaultColorValue);
+      ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setTextColor(TextColor);
+      ((TextView) findViewById(R.id.accuracy)).setText("Indeterminate");
+      m_Adapter.clear();
+      RemoveGeoFencing();
     }
   }
 
@@ -480,37 +580,27 @@ public class HGDOActivity
   }
 
   public void toggleDoor(View view) {
-    Intent broadcastIntent = new Intent(this,HGDOService.class);
+    Intent broadcastIntent = new Intent(this, HGDOService.class);
     broadcastIntent.setAction(HGDOService.SERVICE_COMMAND).putExtra(HGDOService.EXTRA_PARAM1, HGDOService.TOGGLE_DOOR);
     startService(broadcastIntent);
     m_CountDownTimer.start();
   }
 
-  public void SetGPSState(View view) {
-    CheckBox cb = (CheckBox) findViewById(R.id.checkGPS);
-    if (cb.isChecked()) {
-      Log.d(hgdoApp.getAppContext().getString(R.string.app_name), "SetGPSState - Checked.");
-      m_LocationClient.requestLocationUpdates(m_LocationRequest, this);
-      getLocation();
-      AddGeoFencing();
-    } else {
-      Log.d(this.getString(R.string.app_name), "SetGPSState - Unchecked.");
-      m_LocationClient.removeLocationUpdates(this);
-      //            m_LocationClient.requestLocationUpdates(mLocationRequestSlow, this);
-      ((TextView) findViewById(R.id.lat_lng)).setText("Indeterminate");
-      ((TextView) findViewById(R.id.fencearea)).setText("Indeterminate");
-
-      TypedArray themeArray = this.getTheme().obtainStyledAttributes(new int[] {android.R.attr.textColorPrimary});
-      int index = 0;
-      int defaultColorValue = 0;
-      int TextColor = themeArray.getColor(index, defaultColorValue);
-      ((TextView) (findViewById(net.lasley.hgdo.R.id.accuracy))).setTextColor(TextColor);
-      ((TextView) findViewById(R.id.accuracy)).setText("Indeterminate");
-      m_Adapter.clear();
-      RemoveGeoFencing();
-    }
+  public void openDoor(View view) {
+    Intent broadcastIntent = new Intent(this, HGDOService.class);
+    broadcastIntent.setAction(HGDOService.SERVICE_COMMAND).putExtra(HGDOService.EXTRA_PARAM1, HGDOService.OPEN_DOOR);
+    startService(broadcastIntent);
+    m_CountDownTimer.start();
   }
 
+  public void closeDoor(View view) {
+    Intent broadcastIntent = new Intent(this, HGDOService.class);
+    broadcastIntent.setAction(HGDOService.SERVICE_COMMAND).putExtra(HGDOService.EXTRA_PARAM1, HGDOService.CLOSE_DOOR);
+    startService(broadcastIntent);
+    m_CountDownTimer.start();
+  }
+
+  // Define the callback method that receives location updates
   void getLocation() {
     if (servicesConnected()) {
       Location currentLocation = m_LocationClient.getLastLocation();
@@ -552,24 +642,30 @@ public class HGDOActivity
     }
 
     @Override
+    public void onTick(long millisUntilFinished) {
+      m_DoorProgressBar.setProgress((int) ((float) (st - millisUntilFinished) * 100. / (float) st));
+    }    @Override
     public void onFinish() {
       m_DoorProgressBar.setProgress(0);
       sendStatusRequest();
     }
 
-    @Override
-    public void onTick(long millisUntilFinished) {
-      m_DoorProgressBar.setProgress((int) ((float) (st - millisUntilFinished) * 100. / (float) st));
-    }
+
   }
 
   public class WiFiCountDownTimer
           extends CountDownTimer {
+    public boolean busy;
     long st;
 
     public WiFiCountDownTimer(long startTime, long interval) {
       super(startTime, interval);
       st = startTime;
+      busy = false;
+    }
+
+    public void startTimer() {
+      busy = true;
     }
 
     @Override
@@ -579,6 +675,7 @@ public class HGDOActivity
 
     @Override
     public void onFinish() {
+      busy = false;
       m_DoorProgressBar.setSecondaryProgress(0);
     }
   }
@@ -668,8 +765,7 @@ public class HGDOActivity
         }
       } else if (action.equals(HGDOService.SERVICE_COMM_INFO)) {
         boolean wifi = intent.getBooleanExtra(HGDOService.SERVICE_WIFI_STATE, false);
-        CheckBox cb = (CheckBox) findViewById(R.id.checkWIFI);
-        cb.setChecked(wifi);
+        cb_checkWIFI.setChecked(wifi);
       } else if (action.equals(HGDOService.SERVICE_COMM_DATA)) {
         byte[] data = intent.getByteArrayExtra(HGDOService.EXTRA_PARAM1);
         decodeReply(data);

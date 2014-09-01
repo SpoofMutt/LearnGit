@@ -86,6 +86,26 @@ public class GeofenceRemover
   }
 
   @Override
+  public void onRemoveGeofencesByRequestIdsResult(int statusCode, String[] geofenceRequestIds) {
+    Intent broadcastIntent = new Intent();
+    String msg;
+    if (LocationStatusCodes.SUCCESS == statusCode) {
+      msg = mContext.getString(net.lasley.hgdo.R.string.remove_geofences_id_success, Arrays.toString(geofenceRequestIds));
+      Log.d(mContext.getString(R.string.app_name), msg);
+      broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCES_REMOVED).addCategory(
+              GeofenceUtils.CATEGORY_LOCATION_SERVICES).putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
+    } else {
+      msg = mContext.getString(net.lasley.hgdo.R.string.remove_geofences_id_failure, statusCode,
+                               Arrays.toString(geofenceRequestIds));
+      Log.e(mContext.getString(R.string.app_name), msg);
+      broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_ERROR).addCategory(
+              GeofenceUtils.CATEGORY_LOCATION_SERVICES).putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
+    }
+    LocalBroadcastManager.getInstance(mContext).sendBroadcast(broadcastIntent);
+    requestDisconnection();
+  }
+
+  @Override
   public void onRemoveGeofencesByPendingIntentResult(int statusCode, PendingIntent requestIntent) {
     Intent broadcastIntent = new Intent();
     if (statusCode == LocationStatusCodes.SUCCESS) {
@@ -108,26 +128,6 @@ public class GeofenceRemover
   private void requestDisconnection() {
     mInProgress = false;
     getLocationClient().disconnect();
-  }
-
-  @Override
-  public void onRemoveGeofencesByRequestIdsResult(int statusCode, String[] geofenceRequestIds) {
-    Intent broadcastIntent = new Intent();
-    String msg;
-    if (LocationStatusCodes.SUCCESS == statusCode) {
-      msg = mContext.getString(net.lasley.hgdo.R.string.remove_geofences_id_success, Arrays.toString(geofenceRequestIds));
-      Log.d(mContext.getString(R.string.app_name), msg);
-      broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCES_REMOVED).addCategory(
-              GeofenceUtils.CATEGORY_LOCATION_SERVICES).putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
-    } else {
-      msg = mContext.getString(net.lasley.hgdo.R.string.remove_geofences_id_failure, statusCode,
-                               Arrays.toString(geofenceRequestIds));
-      Log.e(mContext.getString(R.string.app_name), msg);
-      broadcastIntent.setAction(GeofenceUtils.ACTION_GEOFENCE_ERROR).addCategory(
-              GeofenceUtils.CATEGORY_LOCATION_SERVICES).putExtra(GeofenceUtils.EXTRA_GEOFENCE_STATUS, msg);
-    }
-    LocalBroadcastManager.getInstance(mContext).sendBroadcast(broadcastIntent);
-    requestDisconnection();
   }
 
   @Override

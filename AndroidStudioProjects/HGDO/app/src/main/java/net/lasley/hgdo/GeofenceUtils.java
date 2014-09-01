@@ -42,7 +42,7 @@ public final class GeofenceUtils {
 
   public static final float INVALID_FLOAT_VALUE = -999.0f;
 
-  public static final int INVALID_INT_VALUE = -999;
+  public static final  int          INVALID_INT_VALUE                     = -999;
   public final static  int          CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
   public static final  CharSequence GEOFENCE_ID_DELIMITER                 = ",";
   private static final String       EMPTY_STRING                          = "";

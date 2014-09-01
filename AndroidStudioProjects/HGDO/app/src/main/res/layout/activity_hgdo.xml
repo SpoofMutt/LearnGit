@@ -130,32 +130,60 @@
         android:layout_centerHorizontal="true"
         android:background="#ff000a64" />
 
-    <ProgressBar
+  <Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Open"
+    android:id="@+id/GarageDoorOpenButton"
+    android:layout_below="@+id/Space_Table"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentStart="true"
+    android:onClick="openDoor"/>
+
+  <ProgressBar
         android:id="@+id/WaitForDoor"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/GarageDoorToggleButton"
-        android:layout_alignStart="@+id/GarageDoorToggleButton"
-        android:layout_below="@+id/Space_Table"
+        android:layout_below="@+id/GarageDoorOpenButton"
         android:indeterminate="false"
         android:minHeight="20dp"
         android:progress="0"
         android:secondaryProgress="0"
-        android:visibility="visible" />
+        android:visibility="visible"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"/>
 
-    <Button
+  <Space
+      android:id="@+id/SpaceDoorCommands"
+      android:layout_width="fill_parent"
+      android:layout_height="20dp"
+      android:layout_below="@+id/WaitForDoor"
+      android:layout_alignParentStart="true"/>
+
+  <Button
         android:id="@+id/GarageDoorToggleButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/Activity"
-        android:layout_alignStart="@+id/Activity"
-        android:layout_below="@+id/WaitForDoor"
+        android:layout_below="@+id/SpaceDoorCommands"
         android:longClickable="false"
         android:onClick="toggleDoor"
-        android:text="Garage Door Button" />
+        android:text="Toggle"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/Space_Table"
+        android:layout_alignEnd="@+id/Space_Table"/>
 
-    <RelativeLayout
+  <Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Close"
+    android:id="@+id/GarageDoorCloseButton"
+    android:layout_alignBottom="@+id/GarageDoorToggleButton"
+    android:layout_toEndOf="@+id/GarageDoorToggleButton"
+    android:layout_alignParentEnd="true"
+    android:onClick="closeDoor"/>
+
+  <RelativeLayout
         android:id="@+id/WIFI"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -163,20 +191,11 @@
         android:layout_alignStart="@+id/TableLayout"
         android:layout_below="@+id/GarageDoorToggleButton">
 
-        <Space
-            android:id="@+id/Space_WiFi"
-            android:layout_width="fill_parent"
-            android:layout_height="20dp"
-            android:layout_alignEnd="@+id/checkWIFI"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true" />
-
-        <ProgressBar
+    <ProgressBar
             android:id="@+id/WaitForComm"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/Space_WiFi"
             android:indeterminate="true"
             android:max="100"
             android:progress="0"
@@ -212,7 +231,7 @@
         android:onClick="toggleWiFi"
         android:text="Enable WiFi"/>
 
-    </RelativeLayout>
+  </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/GPSLayout"
