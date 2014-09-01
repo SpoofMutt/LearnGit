@@ -94,15 +94,17 @@ public class HGDOService
   protected void onHandleIntent(Intent intent) {
     if (intent != null && intent.getAction() != null) {
       getSharedPrefs();
-      String strmsg = "Service: R/M: " + Boolean.toString(m_ReadyToMonitorWifi) + "/" + Boolean.toString(m_MonitorWifi);
-      Intent dataIntent = new Intent();
-      dataIntent.setAction(HGDOService.SERVICE_COMM_ACTIVITY).putExtra(HGDOService.EXTRA_PARAM1, strmsg);
-      LocalBroadcastManager.getInstance(hgdoApp.getAppContext()).sendBroadcast(dataIntent);
-
       final String action = intent.getAction();
       Log.d("HGDOService", action);
       if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
         NetworkInfo ni = (NetworkInfo) intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+        String strmsg = "Service: " + action.toString();
+        if(ni != null) {
+          strmsg += " / " + ni.getState().toString();
+        }
+        Intent dataIntent = new Intent();
+        dataIntent.setAction(HGDOService.SERVICE_COMM_ACTIVITY).putExtra(HGDOService.EXTRA_PARAM1, strmsg);
+        LocalBroadcastManager.getInstance(hgdoApp.getAppContext()).sendBroadcast(dataIntent);
         if (ni != null && ni.isConnected()) {
           if (m_ReadyToMonitorWifi) {
             //do stuff
