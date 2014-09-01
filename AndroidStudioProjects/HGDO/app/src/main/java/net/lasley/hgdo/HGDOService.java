@@ -4,12 +4,14 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
+import android.provider.ContactsContract;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
@@ -73,6 +75,7 @@ public class HGDOService
   private WiFiCountDownTimer m_wifiTimer;
   private boolean            m_MonitorWifi;
   private boolean            m_ReadyToMonitorWifi;
+  public  byte userFirstInitial;
 
   public HGDOService() {
     super("HGDOService");
@@ -83,6 +86,7 @@ public class HGDOService
     super.onCreate();
     m_Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
     m_wifiTimer = new WiFiCountDownTimer(HGDOActivity.TIME_TO_WAIT_WIFI, HGDOActivity.TIME_TO_WAIT_WIFI + 1);
+    getName();
   }
 
   @Override
@@ -154,6 +158,27 @@ public class HGDOService
     }
   }
 
+  public void getName() {
+    Cursor c = getContentResolver().query(ContactsContract.Profile.CONTENT_URI, null, null, null, null);
+    int count = c.getCount();
+    String[] columnNames = c.getColumnNames();
+    boolean b = c.moveToFirst();
+    int position = c.getPosition();
+    if (count == 1 && position == 0) {
+      for (int j = 0; j < columnNames.length; j++) {
+        String columnName = columnNames[j];
+        if(columnName.equals("display_name")) {
+          String columnValue = c.getString(c.getColumnIndex(columnName));
+          if (columnValue != null) {
+            Log.d("getName()", columnValue);
+            userFirstInitial = columnValue.getBytes()[0];
+          }
+        }
+      }
+    }
+    c.close();
+  }
+
   public void commandDoor(byte cmd) {
     byte[] msg = new byte[8];
     msg[LENGTH_V1_NDX] = COMMAND_LENGTH_V1;
@@ -170,7 +195,7 @@ public class HGDOService
       msg[COMMAND_V1_NDX] = TOGGLE_DOOR;
       strmsg += "toggle";
     }
-    msg[COMMAND_LENGTH_V1 - 4] = 1;
+    msg[COMMAND_LENGTH_V1 - 4] = userFirstInitial;
     msg[COMMAND_LENGTH_V1 - 3] = 2;
     msg[COMMAND_LENGTH_V1 - 2] = 3;
     msg[COMMAND_LENGTH_V1 - 1] = 4;
@@ -191,7 +216,7 @@ public class HGDOService
     msg[LENGTH_V1_NDX] = STATUS_REQUEST_LENGTH_V1;
     msg[VERSION_V1_NDX] = VERSION;
     msg[ACTION_V1_NDX] = STATUSREQ;
-    msg[STATUS_REQUEST_LENGTH_V1 - 4] = 1;
+    msg[STATUS_REQUEST_LENGTH_V1 - 4] = userFirstInitial;
     msg[STATUS_REQUEST_LENGTH_V1 - 3] = 2;
     msg[STATUS_REQUEST_LENGTH_V1 - 2] = 3;
     msg[STATUS_REQUEST_LENGTH_V1 - 1] = 4;
@@ -206,6 +231,7 @@ public class HGDOService
     SharedPreferences mPrefs = hgdoApp.getAppContext().getSharedPreferences(getString(R.string.PREFERENCES), MODE_PRIVATE);
     m_MonitorWifi = mPrefs.getBoolean("wifiState", false);
     m_ReadyToMonitorWifi = mPrefs.getBoolean("readyToMonitor", false);
+    userFirstInitial = mPrefs.getString("FirstInitial"," ").getBytes()[0];;
   }
 
   public void saveSharedPrefs() {
@@ -213,6 +239,7 @@ public class HGDOService
     SharedPreferences.Editor ed = mPrefs.edit();
     ed.putBoolean("wifiState", m_MonitorWifi);
     ed.putBoolean("readyToMonitor", m_ReadyToMonitorWifi);
+    ed.putString("FirstInitial",Byte.toString(userFirstInitial));
     ed.commit();
   }
 

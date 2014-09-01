@@ -644,7 +644,9 @@ public class HGDOActivity
     @Override
     public void onTick(long millisUntilFinished) {
       m_DoorProgressBar.setProgress((int) ((float) (st - millisUntilFinished) * 100. / (float) st));
-    }    @Override
+    }
+
+    @Override
     public void onFinish() {
       m_DoorProgressBar.setProgress(0);
       sendStatusRequest();
