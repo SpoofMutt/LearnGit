@@ -51,7 +51,8 @@
                 android:clickable="true"
                 android:enabled="true"
                 android:onClick="RefreshState"
-                android:text="Refresh Status" />
+                android:text="Refresh Status"
+                android:longClickable="true"/>
 
         </TableRow>
 

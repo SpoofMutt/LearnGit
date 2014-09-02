@@ -4,10 +4,10 @@ import java.util.regex.Pattern
 android {
     signingConfigs {
         config {
-            keyAlias 'HGDO'
-            keyPassword 'lasley42'
-            storeFile file('E:/Kent/Documents/Android/GooglePrivateKey.jks')
-            storePassword 'lasley42'
+//            keyAlias 'HGDO'
+//            keyPassword 'lasley42'
+//            storeFile file('E:/Kent/Documents/Android/GooglePrivateKey.jks')
+//            storePassword 'lasley42'
         }
     }
     compileSdkVersion 19

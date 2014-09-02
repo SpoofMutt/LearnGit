@@ -26,6 +26,7 @@ import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -237,6 +238,15 @@ public class HGDOActivity
 
     // Attach to the main UI
     setContentView(R.layout.activity_hgdo);
+
+    ((Button)findViewById(R.id.RefreshStatus)).setOnLongClickListener(new Button.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+            Intent broadcastIntent = new Intent(v, HGDOService.class);
+            broadcastIntent.setAction(HGDOService.SERVICE_COMMAND).putExtra(HGDOService.EXTRA_PARAM1, HGDOService.DATAREQ);
+            startService(broadcastIntent);
+        }
+    });
 
     cb_checkWIFI = (CheckBox) findViewById(R.id.checkWIFI);
     cb_debugWIFI = (CheckBox) findViewById(R.id.DebugWiFi);

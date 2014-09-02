@@ -14,7 +14,7 @@
 int lightPin = 0;  //define a pin for Photo resistor
 
 // Sonic Ranging
-#define TRIGGER_PIN  12
+#define TRIGGER_PIN  12 // Move this to 8 or 6...
 #define ECHO_PIN     9
 
 // Door opener relay
@@ -27,7 +27,9 @@ int lightPin = 0;  //define a pin for Photo resistor
 #define ADAFRUIT_CC3000_IRQ    3  // MUST be an interrupt pin!
 #define ADAFRUIT_CC3000_VBAT   5  // These can be any pins
 #define ADAFRUIT_CC3000_CS     10 // These can be any pins
-#define ADAFRUIT_REMAINING_PIN 13 // Use hardware SPI for the remaining pins. On an UNO, SCK = 13, MISO = 12, and MOSI = 11
+#define ADAFRUIT_MOSI          11 //
+#define ADAFRUIT_MISO          12 // MISO
+#define ADAFRUIT_SCK           13 // Use hardware SPI for the remaining pins. On an UNO, SCK = 13, MISO = 12, and MOSI = 11
 
 
 #define WLAN_SSID       "WHITESPRUCE2"        // cannot be longer than 32 characters!

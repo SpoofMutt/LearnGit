@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.util.Calendar;
 
 public class HGDOService
         extends IntentService {
@@ -56,6 +57,8 @@ public class HGDOService
   public static final byte COMMANDREPLY             = 45;
   public static final byte STATUSREQ                = 21;
   public static final byte STATUSREPLY              = 33;
+  public static final byte DATAREQ                  = 87;
+
   public static final byte DOOR_CLOSED              = 0;
   public static final byte DOOR_OPEN                = 1;
   public static final byte DOOR_OPENING             = 2;
@@ -179,8 +182,19 @@ public class HGDOService
     c.close();
   }
 
+  public byte[] add_suffix(byte[] temp) {
+      int len = temp.length;
+      Calendar rightNow = Calendar.getInstance();
+      temp[len - 4] = userFirstInitial;
+      temp[len - 3] = (byte)rightNow.get(Calendar.HOUR_OF_DAY);
+      temp[len - 2] = (byte)rightNow.get(Calendar.MINUTE);
+      temp[len - 1] = (byte)rightNow.get(Calendar.SECOND);
+      return temp;
+  }
+
   public void commandDoor(byte cmd) {
     byte[] msg = new byte[8];
+
     msg[LENGTH_V1_NDX] = COMMAND_LENGTH_V1;
     msg[VERSION_V1_NDX] = VERSION;
     msg[ACTION_V1_NDX] = COMMAND;
@@ -195,10 +209,7 @@ public class HGDOService
       msg[COMMAND_V1_NDX] = TOGGLE_DOOR;
       strmsg += "toggle";
     }
-    msg[COMMAND_LENGTH_V1 - 4] = userFirstInitial;
-    msg[COMMAND_LENGTH_V1 - 3] = 2;
-    msg[COMMAND_LENGTH_V1 - 2] = 3;
-    msg[COMMAND_LENGTH_V1 - 1] = 4;
+    msg = add_suffix(msg);
     strmsg += ")";
     Intent dataIntent = new Intent();
     dataIntent.setAction(HGDOService.SERVICE_START_DOOR_TIMER);
@@ -213,13 +224,11 @@ public class HGDOService
 
   void sendStatusRequest() {
     byte[] msg = new byte[7];
+
     msg[LENGTH_V1_NDX] = STATUS_REQUEST_LENGTH_V1;
     msg[VERSION_V1_NDX] = VERSION;
     msg[ACTION_V1_NDX] = STATUSREQ;
-    msg[STATUS_REQUEST_LENGTH_V1 - 4] = userFirstInitial;
-    msg[STATUS_REQUEST_LENGTH_V1 - 3] = 2;
-    msg[STATUS_REQUEST_LENGTH_V1 - 2] = 3;
-    msg[STATUS_REQUEST_LENGTH_V1 - 1] = 4;
+    msg = add_suffix(msg);
     new AsyncGarage().execute(msg);
     String strmsg = "Service: StatusRequest()";
     Intent dataIntent = new Intent();
@@ -239,7 +248,7 @@ public class HGDOService
     SharedPreferences.Editor ed = mPrefs.edit();
     ed.putBoolean("wifiState", m_MonitorWifi);
     ed.putBoolean("readyToMonitor", m_ReadyToMonitorWifi);
-    ed.putString("FirstInitial",Byte.toString(userFirstInitial));
+    ed.putString("FirstInitial", Byte.toString(userFirstInitial));
     ed.commit();
   }
 
