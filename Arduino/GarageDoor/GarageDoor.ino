@@ -93,6 +93,7 @@ long range_read;
 #define STATUSREQ   21
 #define STATUSREPLY 33
 #define STRING      16
+#define DATAREQ     87
 
 // Status Byte1
 #define DOOR_CLOSED  0
