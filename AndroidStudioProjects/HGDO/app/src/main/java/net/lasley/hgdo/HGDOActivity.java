@@ -190,6 +190,7 @@ public class HGDOActivity
     super.onCreate(savedInstanceState);
 
     isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
+//    history = new byte[HGDOService.HISTORY_SIZE][HGDOService.MAX_SIZE];
 
     if (savedInstanceState != null) {
       //      startTime = (Calendar) bundle.getSerializable("starttime");
@@ -582,9 +583,34 @@ public class HGDOActivity
       }
     } else if (reply[HGDOService.ACTION_V1_NDX] == HGDOService.DATAREQ) {
       int length = (reply[HGDOService.LENGTH_V1_NDX] & 0xFF);
-      ByteBuffer bb = ByteBuffer.wrap(reply,HGDOService.STR_START_V1_NDX,length - HGDOService.STR_START_V1_NDX - 3);
-      String msg = bb.toString();
-      m_Adapter.insert(msg,0);
+      for(int x=0; x<HGDOService.HISTORY_SIZE; x++) {
+        ByteBuffer bb = ByteBuffer.wrap(reply,HGDOService.STR_START_V1_NDX + x*HGDOService.MAX_SIZE, HGDOService.MAX_SIZE);
+        byte [] data = bb.array();
+        String msg;
+        msg =  Integer.toString(data[HGDOService.LENGTH_V1_NDX-3] & 0xFF);
+        msg += ":";
+        msg += Integer.toString(data[HGDOService.LENGTH_V1_NDX-2] & 0xFF);
+        msg += ":";
+        msg += Integer.toString(data[HGDOService.LENGTH_V1_NDX-1] & 0xFF);
+        msg += " ";
+        msg += data[data[HGDOService.LENGTH_V1_NDX-4]];
+        msg += " - ";
+        switch(data[HGDOService.ACTION_V1_NDX]) {
+            case HGDOService.COMMAND:    msg += "CMD: ";
+                switch(data[HGDOService.COMMAND_V1_NDX]) {
+                    case HGDOService.OPEN_DOOR:   msg += "OPEN"; break;
+                    case HGDOService.CLOSE_DOOR:  msg += "CLOSE"; break;
+                    case HGDOService.TOGGLE_DOOR: msg += "TOGGLE"; break;
+                    default:                 msg += Integer.toString((data[HGDOService.COMMAND_V1_NDX] & 0xFF)); break;
+                }
+                break;
+            case HGDOService.STRING:     msg += "STRING: "; break;
+            case HGDOService.STATUSREQ:  msg += "STATREQ: "; break;
+            case HGDOService.DATAREQ:    msg += "DATAREQ: "; break;
+            default:                     msg += Integer.toString((data[HGDOService.ACTION_V1_NDX] & 0xFF)); break;
+        }
+        m_Adapter.insert(msg,0);
+      }
     }
   }
 

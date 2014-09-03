@@ -51,6 +51,13 @@ public class HGDOService
   public static final int  COMMAND_REPLY_LENGTH_V1  = 8;
   public static final int  STATUS_REQUEST_LENGTH_V1 = 7;
   public static final int  STATUS_REPLY_LENGTH_V1   = 10;
+
+// Not including STRING commands.
+  public static final int MAX_SIZE = 10;
+  public static final int HISTORY_SIZE = 20;
+// Msg Prefix, body, postfix
+  public static final int DATA_SIZE = (HISTORY_SIZE*MAX_SIZE+3+4);
+
   public static final byte VERSION                  = 1;
   public static final byte STRING                   = 16;
   public static final byte COMMAND                  = 10;
