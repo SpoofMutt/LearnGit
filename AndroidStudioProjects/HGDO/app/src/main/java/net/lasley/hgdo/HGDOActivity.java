@@ -47,6 +47,7 @@ import net.lasley.hgdo.GeofenceUtils.REMOVE_TYPE;
 import net.lasley.hgdo.GeofenceUtils.REQUEST_TYPE;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -239,13 +240,14 @@ public class HGDOActivity
     // Attach to the main UI
     setContentView(R.layout.activity_hgdo);
 
-    ((Button)findViewById(R.id.RefreshStatus)).setOnLongClickListener(new Button.OnLongClickListener() {
-        @Override
-        public boolean onLongClick(View v) {
-            Intent broadcastIntent = new Intent(v, HGDOService.class);
-            broadcastIntent.setAction(HGDOService.SERVICE_COMMAND).putExtra(HGDOService.EXTRA_PARAM1, HGDOService.DATAREQ);
-            startService(broadcastIntent);
-        }
+    ((Button) findViewById(R.id.RefreshStatus)).setOnLongClickListener(new Button.OnLongClickListener() {
+      @Override
+      public boolean onLongClick(View v) {
+        Intent broadcastIntent = new Intent(hgdoApp.getAppContext(), HGDOService.class);
+        broadcastIntent.setAction(HGDOService.SERVICE_COMMAND).putExtra(HGDOService.EXTRA_PARAM1, HGDOService.DATAREQ);
+        startService(broadcastIntent);
+        return true;
+      }
     });
 
     cb_checkWIFI = (CheckBox) findViewById(R.id.checkWIFI);
@@ -578,6 +580,11 @@ public class HGDOActivity
       } else if (reply[HGDOService.STATUS_LIGHT_V1_NDX] == HGDOService.LIGHT_OFF) {
         t.setText("Off");
       }
+    } else if (reply[HGDOService.ACTION_V1_NDX] == HGDOService.DATAREQ) {
+      int length = (reply[HGDOService.LENGTH_V1_NDX] & 0xFF);
+      ByteBuffer bb = ByteBuffer.wrap(reply,HGDOService.STR_START_V1_NDX,length - HGDOService.STR_START_V1_NDX - 3);
+      String msg = bb.toString();
+      m_Adapter.insert(msg,0);
     }
   }
 

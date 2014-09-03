@@ -236,6 +236,20 @@ public class HGDOService
     LocalBroadcastManager.getInstance(hgdoApp.getAppContext()).sendBroadcast(dataIntent);
   }
 
+  void sendDataRequest() {
+    byte[] msg = new byte[7];
+
+    msg[LENGTH_V1_NDX] = STATUS_REQUEST_LENGTH_V1;
+    msg[VERSION_V1_NDX] = VERSION;
+    msg[ACTION_V1_NDX] = DATAREQ;
+    msg = add_suffix(msg);
+    new AsyncGarage().execute(msg);
+    String strmsg = "Service: DataRequest()";
+    Intent dataIntent = new Intent();
+    dataIntent.setAction(HGDOService.SERVICE_COMM_ACTIVITY).putExtra(HGDOService.EXTRA_PARAM1, strmsg);
+    LocalBroadcastManager.getInstance(hgdoApp.getAppContext()).sendBroadcast(dataIntent);
+  }
+
   public void getSharedPrefs() {
     SharedPreferences mPrefs = hgdoApp.getAppContext().getSharedPreferences(getString(R.string.PREFERENCES), MODE_PRIVATE);
     m_MonitorWifi = mPrefs.getBoolean("wifiState", false);
