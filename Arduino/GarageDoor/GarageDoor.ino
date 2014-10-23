@@ -107,7 +107,7 @@ long range_read;
 #define MAX_SIZE                                       10 
 #define HISTORY_SIZE                                   20
 // Msg Prefix, body, postfix
-#define DATA_SIZE                                      (HISTORY_SIZE*MAX_SIZE+3+4)
+#define HISTORY_BUF_SIZE                                      (HISTORY_SIZE*(MAX_SIZE+3+4))
 // Action Byte
 #define COMMAND     10
 #define COMMANDREPLY 45
@@ -135,7 +135,7 @@ long range_read;
 #define TIME_TO_OPEN 15 // Seconds
 unsigned long time_of_last_door_command = 0;
 uint8_t       last_door_command = CLOSE_DOOR;
-uint8_t       data[DATA_SIZE]; 
+uint8_t       data[HISTORY_BUF_SIZE]; 
 int   toggle = 0;
 float inMsec;
 uint8_t       major, minor;
@@ -560,7 +560,7 @@ void sendData() {
 #endif
     }
   } else if(data[ACTION_V1_NDX] == DATAREQ) {
-    data[LENGTH_V1_NDX] = DATA_SIZE;
+    data[LENGTH_V1_NDX] = HISTORY_BUF_SIZE;
     uint8_t pos = STR_START_V1_NDX;
     for(int x = next_ndx + 1; x < HISTORY_SIZE; x++) {
       for(int y = 0; y < MAX_SIZE; y++) {
