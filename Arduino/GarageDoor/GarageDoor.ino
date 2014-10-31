@@ -6,6 +6,7 @@
 #include <Timezone.h>
 //#include "utility/debug.h"
 #include "utility/socket.h"
+#include "utility/sntp.h"
 //#include "crc.h";
 
 //#define ENABLE_NTP    1
@@ -44,8 +45,17 @@ int lightPin = 0;  //define a pin for Photo resistor
 // Security can be WLAN_SEC_UNSEC, WLAN_SEC_WEP, WLAN_SEC_WPA or WLAN_SEC_WPA2
 #define WLAN_SECURITY   WLAN_SEC_WPA2
 #define GARAGE_PORT 55555
-Adafruit_CC3000_Client client;
-Adafruit_CC3000_Server server(GARAGE_PORT);
+Adafruit_CC3000_Client HgdoClient;
+Adafruit_CC3000_Server HgdoServer(GARAGE_PORT);
+
+//Arguments to SNTP client constructor:
+//	1 - Primary Network Time Server URL (can be NULL)
+//	2 - Secondary Network Time Server URL (also can be NULL)
+//	3 - Local UTC offset in minutes (US Eastern Time is UTC - 5:00
+//	4 - Local UTC offset in minutes for Daylight Savings Time (US Eastern DST is UTC - 4:00
+//	5 - Enable Daylight Savings Time adjustment (not implemented yet)
+//
+sntp mysntp = sntp(NULL, "time.nist.gov", 0, 0, false);
 
 /*
 Duration to close the switch on the door opener. This should be long
@@ -128,6 +138,7 @@ uint8_t       last_door_command = CLOSE_DOOR;
 uint8_t       data[DATA_SIZE]; 
 int   toggle = 0;
 float inMsec;
+uint8_t       major, minor;
 
 #ifdef EMULATOR_MODE
 int door_state  = DOOR_CLOSED;
@@ -146,6 +157,17 @@ void setup(void)
   Serial.begin(9600);
   Serial.println(F("Garage Here!"));
   Serial.println(F("Configuring pinouts."));
+
+  // Get firmware version
+  if(!cc3000.getFirmwareVersion(&major, &minor))
+  {
+    Serial.println(F("Unable to retrieve the firmware version!\r\n"));
+  }
+  else
+  {
+    Serial.print(F("Firmware V. : "));
+    Serial.print(major); Serial.print(F(".")); Serial.println(minor);
+  }
 #endif
 
   SetupDoorControl();
@@ -229,21 +251,13 @@ void setup(void)
   while (!displayConnectionDetails()) {
     delay(1000);
   }
-  server.begin();
+  HgdoServer.begin();
 
 #ifdef ENABLE_NTP
-  setSyncProvider(getServerTime);
-  setSyncInterval(24*60*60);
-  int count = 0;
-  while(timeStatus() == timeNotSet && count < 3) {
-#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
-    Serial.println("Waiting 5 secs to try again.");
-#endif
-
-    delay(5000L);
-    now();
-    count++;
-  }
+  Serial.println(F("UpdateNTPTime"));
+  mysntp.UpdateNTPTime();
+  mysntp.NTPGetTime(&utc,false);
+  setTime(utc);
 #endif
 
 #if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
@@ -261,37 +275,34 @@ void setup(void)
 
 }
 
-
-// To reduce load on NTP servers, time is polled once per roughly 24 hour period.
-// Otherwise use millis() to estimate time since last query.  Plenty accurate.
 void loop(void) {
-  // Try to get a client which is connected.
+  // Try to get a HgdoClient which is connected.
 #if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
-  Serial.println(":  Looking for clients.");
+  Serial.println(":  Looking for HgdoClients.");
 #endif
 
-  //  if (client) {
+  //  if (HgdoClient) {
 #if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
   Serial.print("Toggle: ");
   Serial.println(toggle);
 #endif
 
   if (toggle) {
-    Adafruit_CC3000_ClientRef client = server.available();
+    Adafruit_CC3000_ClientRef HgdoClient = HgdoServer.available();
     
-    if(client) {
+    if(HgdoClient) {
       utc = now();
       local = myTZ.toLocal(utc, &tcr);
       printTime(local, tcr -> abbrev);
 #if defined ENABLE_DEBUG_LEVEL
-      Serial.println("Found client");
+      Serial.println("Found HgdoClient");
 #endif
 
       // Check if there is data available to read.
-      if (client.available() > 0) {
+      if (HgdoClient.available() > 0) {
         digitalWrite(LED2, HIGH);
-        // Read a byte and write it to all clients.
-        int size_read = client.read(data,80,0);
+        // Read a byte and write it to all HgdoClients.
+        int size_read = HgdoClient.read(data,80,0);
         digitalWrite(LED2, LOW);
         if(size_read == data[LENGTH_V1_NDX]) {
           if(data[ACTION_V1_NDX] != STRING) {
@@ -409,15 +420,16 @@ void loop(void) {
         }
       } else {
 #if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
-        Serial.println("There are 0 clients.");
+        Serial.println("There are 0 HgdoClients.");
 #endif
       }
     } else {
 #if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
-      Serial.println("Unable to acquire client.");
+      Serial.println("Unable to acquire HgdoClient.");
 #endif
     }
   } else {
+    digitalWrite(LED1,HIGH);
     range_read = ultrasonic.timing();
     inMsec = ultrasonic.convert(range_read, Ultrasonic::IN);
 #if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
@@ -426,6 +438,7 @@ void loop(void) {
     Serial.print(", IN: ");
     Serial.println(inMsec);
 #endif
+    digitalWrite(LED1,LOW);
   }
   toggle++;
   if(toggle > 4) {
@@ -570,7 +583,7 @@ void sendData() {
   data[data[LENGTH_V1_NDX]-3] = 2;
   data[data[LENGTH_V1_NDX]-2] = 3;
   data[data[LENGTH_V1_NDX]-1] = 4;
-  server.write(data,data[LENGTH_V1_NDX]);   // Just echo string.
+  HgdoServer.write(data,data[LENGTH_V1_NDX]);   // Just echo string.
   digitalWrite(LED2, LOW);
 }
 
@@ -668,87 +681,6 @@ bool displayConnectionDetails(void)
 
     return true;
   }
-}
-
-// Minimalist time server query; adapted from Adafruit Gutenbird sketch,
-// which in turn has roots in Arduino UdpNTPClient tutorial.
-unsigned long getServerTime(void) {
-
-  uint8_t       buf[48];
-  unsigned long ip, startTime, t = 0L;
-
-#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
-  Serial.print(F("Locating time server..."));
-#endif
-
-  // Hostname to IP lookup; use NTP pool (rotates through servers)
-  if(cc3000.getHostByName("0.pool.ntp.org", &ip)) {
-    static const char PROGMEM
-    timeReqA[] = { 227,  0,  6, 236 },
-    timeReqB[] = {  49, 78, 49,  52 };
-
-#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
-    Serial.println(F("\r\nAttempting connection..."));
-#endif
-
-    startTime = millis();
-    do {
-      client = cc3000.connectUDP(ip, 123);
-    } while((!client.connected()) &&
-    ((millis() - startTime) < connectTimeout));
-
-    if(client.connected()) {
-#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
-      Serial.print(F("connected!\r\nIssuing request..."));
-#endif
-
-      // Assemble and issue request packet
-      memset(buf, 0, sizeof(buf));
-      memcpy_P( buf    , timeReqA, sizeof(timeReqA));
-      memcpy_P(&buf[12], timeReqB, sizeof(timeReqB));
-      client.write(buf, sizeof(buf));
-
-#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
-      Serial.print(F("\r\nAwaiting response..."));
-#endif
-      memset(buf, 0, sizeof(buf));
-      startTime = millis();
-      int count = 1;
-      while((!client.available()) &&
-      ((millis() - startTime) < responseTimeout)) {
-        count++;
-#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
-        Serial.print("Client availibility is ");
-        Serial.print(client.available()); 
-        Serial.println();
-        Serial.print("Elapsed time is: ");
-        Serial.print((millis()-startTime)); 
-        Serial.println();
-        Serial.print("Timeout is     : ");
-        Serial.print(responseTimeout); 
-        Serial.println();
-#endif
-        delay(100);
-      }
-      if(client.available()) {
-        client.read(buf, sizeof(buf));
-        t = (((unsigned long)buf[40] << 24) |
-        ((unsigned long)buf[41] << 16) |
-        ((unsigned long)buf[42] <<  8) |
-        (unsigned long)buf[43]) - 2208988800UL;
-#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
-        Serial.print(F("OK\r\n"));
-#endif
-      }
-      client.close();
-    }
-  }
-  if(!t) {
-#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
-  Serial.println(F("error"));
-#endif
-  }
-  return t;
 }
 
 /*
