@@ -8,8 +8,14 @@
 #include "utility/socket.h"
 //#include "crc.h";
 
-//#define ENABLE_NTP 1
+//#define ENABLE_NTP    1
 //#define EMULATOR_MODE 1
+#define ENABLE_DEBUG_LEVEL  1 
+#define ENABLE_DEVUG_LEVEL_1 1
+#define ENABLE_DEVUG_LEVEL_2 1
+#define ENABLE_DEVUG_LEVEL_3 1
+//#define ENABLE_DEVUG_LEVEL_4 1
+//#define ENABLE_DEVUG_LEVEL_5 1
 
 int lightPin = 0;  //define a pin for Photo resistor
 
@@ -136,23 +142,36 @@ const unsigned long connectTimeout  = 5L * 1000L; // Max time to wait for server
 
 void setup(void)
 {
+#ifdef ENABLE_DEBUG_LEVEL
   Serial.begin(9600);
-  Serial.println(F("Garage Here!")); 
-
+  Serial.println(F("Garage Here!"));
   Serial.println(F("Configuring pinouts."));
+#endif
+
   SetupDoorControl();
 
+#if defined (ENABLE_DEBUG_LEVEL) && defined (ENABLE_DEBUG_LEVEL_4)
   Serial.println(F("\nInitialising the CC3000 ..."));
+#endif
+
   if (!cc3000.begin()) {
+#ifdef ENABLE_DEBUG_LEVEL
     Serial.println(F("Unable to initialise the CC3000! Check your wiring?"));
+#endif
     for(;;);
   }
 
   displayMACAddress();
 
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
   Serial.println(F("\nDeleting old connection profiles"));
+#endif
+
   if (!cc3000.deleteProfiles()) {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
     Serial.println(F("Failed!"));
+#endif
+
     while(1);
   }
 
@@ -171,24 +190,37 @@ void setup(void)
   uint32_t defaultGateway = cc3000.IP2U32(192, 168, 1, 1);
   uint32_t dns = cc3000.IP2U32(192, 168, 1, 1);
   if (!cc3000.setStaticIPAddress(ipAddress, netMask, defaultGateway, dns)) {
+#if defined ENABLE_DEBUG_LEVEL
     Serial.println(F("Failed to set static IP!"));
+#endif
+
     while(1);
   }
 
   /* Attempt to connect to an access point */
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
   char *ssid = WLAN_SSID;             /* Max 32 chars */
-  Serial.print(F("\nAttempting to connect to ")); Serial.println(ssid);
+  Serial.print(F("\nAttempting to connect to ")); 
+  Serial.println(ssid);
+#endif
+
 
   /* NOTE: Secure connections are not available in 'Tiny' mode! */
   if (!cc3000.connectToAP(WLAN_SSID, WLAN_PASS, WLAN_SECURITY)) {
-    Serial.println(F("Failed!"));
+#if defined ENABLE_DEBUG_LEVEL
+    Serial.println(F("Failed Secure Connection!"));
+#endif
+
     while(1);
   }
 
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
   Serial.println(F("Connected!"));
+  Serial.println(F("Request DHCP"));
+#endif
+
 
   /* Wait for DHCP to complete */
-  Serial.println(F("Request DHCP"));
   while (!cc3000.checkDHCP()) {
     delay(100); // ToDo: Insert a DHCP timeout!
   }
@@ -204,19 +236,29 @@ void setup(void)
   setSyncInterval(24*60*60);
   int count = 0;
   while(timeStatus() == timeNotSet && count < 3) {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
     Serial.println("Waiting 5 secs to try again.");
+#endif
+
     delay(5000L);
     now();
     count++;
   }
 #endif
+
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
   Serial.println(F("Empty history buffer"));
+#endif
+
   for(int x = 0; x < HISTORY_SIZE; x++) {
     for(int y = 0; y < MAX_SIZE; y++) {
       saved_commands[x][y] = 0;
     }
   }
+#if defined ENABLE_DEBUG_LEVEL
   Serial.println(F("Listening..."));
+#endif
+
 }
 
 
@@ -224,11 +266,16 @@ void setup(void)
 // Otherwise use millis() to estimate time since last query.  Plenty accurate.
 void loop(void) {
   // Try to get a client which is connected.
-  //  Serial.print(utc);
-  //  Serial.println(":  Looking for clients.");
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
+  Serial.println(":  Looking for clients.");
+#endif
+
   //  if (client) {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
   Serial.print("Toggle: ");
   Serial.println(toggle);
+#endif
+
   if (toggle) {
     Adafruit_CC3000_ClientRef client = server.available();
     
@@ -236,7 +283,10 @@ void loop(void) {
       utc = now();
       local = myTZ.toLocal(utc, &tcr);
       printTime(local, tcr -> abbrev);
+#if defined ENABLE_DEBUG_LEVEL
       Serial.println("Found client");
+#endif
+
       // Check if there is data available to read.
       if (client.available() > 0) {
         digitalWrite(LED2, HIGH);
@@ -257,22 +307,32 @@ void loop(void) {
               next_ndx = 0;
             }
           }
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
           Serial.print("Size: ");
           Serial.println(data[LENGTH_V1_NDX]);
           Serial.print("Version: ");
           Serial.println(data[VERSION_V1_NDX]);
           Serial.print("Action: ");
+#endif
           if(data[ACTION_V1_NDX] == STRING) {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
             Serial.println("STRING");
+#endif
             VERSION;
             sendData(); // Just echo
           } else if(data[ACTION_V1_NDX] == COMMAND) { // Door command.
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
             Serial.println("COMMAND");
             Serial.print("Order: ");
+#endif
             if(data[COMMAND_V1_NDX] == OPEN_DOOR) {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
               Serial.println("OPEN_DOOR");
+#endif
             } else {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
               Serial.println("CLOSE_DOOR");
+#endif
             }
             if(time_of_last_door_command + TIME_TO_OPEN < now()) { // Door is static.
               COMMAND_REPLY_LENGTH_V1;
@@ -316,17 +376,24 @@ void loop(void) {
               sendStatusReply();
             }
           } else if(data[ACTION_V1_NDX] == STATUSREQ) {    // Status Request
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
             Serial.println("STATUSREQ");
+#endif
             sendStatusReply();
           } else if(data[ACTION_V1_NDX] == DATAREQ) {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
             Serial.println("DATAREQ");
+#endif
+
             sendData();
           }
         } else {
+#if defined ENABLE_DEBUG_LEVEL
           Serial.print("Bad Read: ");
           Serial.print(size_read);
           Serial.print(" vs ");
           Serial.println(data[LENGTH_V1_NDX]);
+#endif
           VERSION;
           data[ACTION_V1_NDX] = STRING;
           data[STR_START_V1_NDX]   = 'B';
@@ -341,18 +408,24 @@ void loop(void) {
           sendData();
         }
       } else {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
         Serial.println("There are 0 clients.");
+#endif
       }
     } else {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
       Serial.println("Unable to acquire client.");
+#endif
     }
   } else {
     range_read = ultrasonic.timing();
     inMsec = ultrasonic.convert(range_read, Ultrasonic::IN);
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
     Serial.print("MS: ");
     Serial.print(range_read);
     Serial.print(", IN: ");
     Serial.println(inMsec);
+#endif
   }
   toggle++;
   if(toggle > 4) {
@@ -389,6 +462,7 @@ void sendStatusReply() {
 
 void sendData() {
   digitalWrite(LED2, HIGH);	
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
   Serial.println();
   Serial.println("Response:");
   Serial.print("Size: ");
@@ -396,45 +470,81 @@ void sendData() {
   Serial.print("Version: ");
   Serial.println(data[VERSION_V1_NDX]);
   Serial.print("Action: ");
+#endif
   if(data[ACTION_V1_NDX] == STRING) {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
     Serial.println("STRING");
+#endif
   } else if(data[ACTION_V1_NDX] == COMMAND) { // Door command.
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
     Serial.println("COMMAND");
     Serial.print("Order: ");
+#endif
     if(data[COMMAND_V1_NDX] == OPEN_DOOR) {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
       Serial.println("OPEN_DOOR");
+#endif
     } else if(data[COMMAND_V1_NDX] == CLOSE_DOOR){
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
       Serial.println("CLOSE_DOOR");
+#endif
     } else {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
       Serial.println("DOOR_ORDER_UNKNOWN");
-    }
+#endif
+   }
   } else if(data[ACTION_V1_NDX] == COMMANDREPLY) {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
     Serial.println("COMMANDREPLY");
     Serial.print("Reply: ");
+#endif
     if(data[COMMAND_REPLY_V1_NDX] == DOOR_OPENING) {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
       Serial.println("DOOR_OPENING");
+#endif
     } else if(data[COMMAND_REPLY_V1_NDX] == DOOR_CLOSING) {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
       Serial.println("DOOR_CLOSING");
+#endif
     } else {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
       Serial.println("DOOR_REPLY_UNKNOWN");
+#endif
     }
   } else if(data[ACTION_V1_NDX] == STATUSREPLY) {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
     Serial.println("STATUSREPLY");
+#endif
     if(data[STATUS_DOOR_V1_NDX] == DOOR_OPEN) {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
       Serial.println("DOOR_OPEN");
+#endif
     } else if(data[STATUS_DOOR_V1_NDX] == DOOR_CLOSED){
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
       Serial.println("DOOR_CLOSED");
+#endif
     } else if(data[STATUS_DOOR_V1_NDX] == DOOR_BUSY){
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
       Serial.println("DOOR_BUSY");
+#endif
     } else {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
       Serial.println("DOOR_STATUS_UNKNOWN");
+#endif
+
     }
     if(data[STATUS_LIGHT_V1_NDX] == LIGHT_ON) {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
       Serial.println("LIGHT_ON");
+#endif
     } else if(data[STATUS_LIGHT_V1_NDX] == LIGHT_OFF) {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
       Serial.println("LIGHT_OFF");
+#endif
     } else {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
       Serial.println("LIGHT_STATUS_UNKNOWN");
+#endif
     }
   } else if(data[ACTION_V1_NDX] == DATAREQ) {
     data[LENGTH_V1_NDX] = DATA_SIZE;
@@ -452,7 +562,9 @@ void sendData() {
       }
     }
   }
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
   Serial.println("===================================");
+#endif
 
   data[data[LENGTH_V1_NDX]-4] = 1;           // Bogus CRC
   data[data[LENGTH_V1_NDX]-3] = 2;
@@ -465,6 +577,7 @@ void sendData() {
 //Function to print time with time zone
 void printTime(time_t t, char *tz)
 {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_1
   sPrintI00(hour(t));
   sPrintDigits(minute(t));
   sPrintDigits(second(t));
@@ -479,14 +592,17 @@ void printTime(time_t t, char *tz)
   Serial.print(' ');
   Serial.print(tz);
   Serial.println();
+#endif
 }
 
 //Print an integer in "00" format (with leading zero).
 //Input value assumed to be between 0 and 99.
 void sPrintI00(int val)
 {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_1
   if (val < 10) Serial.print('0');
   Serial.print(val, DEC);
+#endif
   return;
 }
 
@@ -494,9 +610,11 @@ void sPrintI00(int val)
 //Input value assumed to be between 0 and 99.
 void sPrintDigits(int val)
 {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_1
   Serial.print(':');
   if(val < 10) Serial.print('0');
   Serial.print(val, DEC);
+#endif
 }
 
 /**************************************************************************/
@@ -510,12 +628,16 @@ void displayMACAddress(void)
 
   if(!cc3000.getMacAddress(macAddress))
   {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
     Serial.println(F("Unable to retrieve MAC Address!\r\n"));
+#endif
   }
   else
   {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
     Serial.print(F("MAC Address : "));
     cc3000.printHex((byte*)&macAddress, 6);
+#endif
   }
 }
 
@@ -531,13 +653,19 @@ bool displayConnectionDetails(void)
 
   if(!cc3000.getIPAddress(&ipAddress, &netmask, &gateway, &dhcpserv, &dnsserv))
   {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
     Serial.println(F("Unable to retrieve the IP Address!\r\n"));
+#endif
+
     return false;
   }
   else
   {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
     Serial.print(F("\nIP Addr: ")); cc3000.printIPdotsRev(ipAddress);
     Serial.println();
+#endif
+
     return true;
   }
 }
@@ -549,7 +677,9 @@ unsigned long getServerTime(void) {
   uint8_t       buf[48];
   unsigned long ip, startTime, t = 0L;
 
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
   Serial.print(F("Locating time server..."));
+#endif
 
   // Hostname to IP lookup; use NTP pool (rotates through servers)
   if(cc3000.getHostByName("0.pool.ntp.org", &ip)) {
@@ -557,7 +687,10 @@ unsigned long getServerTime(void) {
     timeReqA[] = { 227,  0,  6, 236 },
     timeReqB[] = {  49, 78, 49,  52 };
 
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
     Serial.println(F("\r\nAttempting connection..."));
+#endif
+
     startTime = millis();
     do {
       client = cc3000.connectUDP(ip, 123);
@@ -565,7 +698,9 @@ unsigned long getServerTime(void) {
     ((millis() - startTime) < connectTimeout));
 
     if(client.connected()) {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
       Serial.print(F("connected!\r\nIssuing request..."));
+#endif
 
       // Assemble and issue request packet
       memset(buf, 0, sizeof(buf));
@@ -573,19 +708,26 @@ unsigned long getServerTime(void) {
       memcpy_P(&buf[12], timeReqB, sizeof(timeReqB));
       client.write(buf, sizeof(buf));
 
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
       Serial.print(F("\r\nAwaiting response..."));
+#endif
       memset(buf, 0, sizeof(buf));
       startTime = millis();
       int count = 1;
       while((!client.available()) &&
       ((millis() - startTime) < responseTimeout)) {
         count++;
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
         Serial.print("Client availibility is ");
-        Serial.print(client.available()); Serial.println();
+        Serial.print(client.available()); 
+        Serial.println();
         Serial.print("Elapsed time is: ");
-        Serial.print((millis()-startTime)); Serial.println();
+        Serial.print((millis()-startTime)); 
+        Serial.println();
         Serial.print("Timeout is     : ");
-        Serial.print(responseTimeout); Serial.println();
+        Serial.print(responseTimeout); 
+        Serial.println();
+#endif
         delay(100);
       }
       if(client.available()) {
@@ -594,12 +736,18 @@ unsigned long getServerTime(void) {
         ((unsigned long)buf[41] << 16) |
         ((unsigned long)buf[42] <<  8) |
         (unsigned long)buf[43]) - 2208988800UL;
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
         Serial.print(F("OK\r\n"));
+#endif
       }
       client.close();
     }
   }
-  if(!t) Serial.println(F("error"));
+  if(!t) {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
+  Serial.println(F("error"));
+#endif
+  }
   return t;
 }
 
@@ -623,7 +771,10 @@ Briefly triggers the garage door opener & flashes the indicator.
 */
 void ActivateGarageDoor()
 {
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
   Serial.println(F("Door activated."));
+#endif
+
 
 #ifndef EMULATOR_MODE
   digitalWrite(LED1, HIGH);   // set the LED on
