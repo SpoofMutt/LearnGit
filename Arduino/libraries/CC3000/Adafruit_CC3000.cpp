@@ -2,22 +2,22 @@
 /*!
   @file     Adafruit_CC3000.cpp
   @author   KTOWN (Kevin Townsend for Adafruit Industries)
-	@license  BSD (see license.txt)
+  @license  BSD (see license.txt)
 
-	This is a library for the Adafruit CC3000 WiFi breakout board
-	This library works with the Adafruit CC3000 breakout
-	----> https://www.adafruit.com/products/1469
+  This is a library for the Adafruit CC3000 WiFi breakout board
+  This library works with the Adafruit CC3000 breakout
+  ----> https://www.adafruit.com/products/1469
 
-	Check out the links above for our tutorials and wiring diagrams
-	These chips use SPI to communicate.
+  Check out the links above for our tutorials and wiring diagrams
+  These chips use SPI to communicate.
 
-	Adafruit invests time and resources providing this open source code,
-	please support Adafruit and open-source hardware by purchasing
-	products from Adafruit!
+  Adafruit invests time and resources providing this open source code,
+  please support Adafruit and open-source hardware by purchasing
+  products from Adafruit!
 
-	@section  HISTORY
+  @section  HISTORY
 
-	v1.0    - Initial release
+  v1.0    - Initial release
 */
 /**************************************************************************/
 #include "Adafruit_CC3000.h"
@@ -102,8 +102,8 @@ netapp_pingreport_args_t pingReport;
 #define CC3000_SUCCESS                        (0)
 #define CHECK_SUCCESS(func,Notify,errorCode)  {if ((func) != CC3000_SUCCESS) { CHECK_PRINTER CC3KPrinter->println(F(Notify)); return errorCode;}}
 
-#define MAXSSID					  (32)
-#define MAXLENGTHKEY 			(32)  /* Cleared for 32 bytes by TI engineering 29/08/13 */
+#define MAXSSID           (32)
+#define MAXLENGTHKEY      (32)  /* Cleared for 32 bytes by TI engineering 29/08/13 */
 
 #define MAX_SOCKETS 32  // can change this
 boolean closed_sockets[MAX_SOCKETS] = {false, false, false, false};
@@ -137,7 +137,7 @@ public:
     flags &= ~flag;
   }
 private:
-	volatile byte flags;
+  volatile byte flags;
 }cc3000Bitset;
 
 volatile long ulSocket;
@@ -197,10 +197,13 @@ bool Adafruit_CC3000::scanSSIDs(uint32_t time)
 
 /**************************************************************************/
 /*!
-    @brief  Instantiates a new CC3000 class
+    @brief  Instantiates a new CC3000 class.
+            Note that by default this class will assume the first hardware 
+            serial should be used for debug output.  This behavior can be
+            changed by explicitly specifying a cc3kPrinter parameter.
 */
 /**************************************************************************/
-Adafruit_CC3000::Adafruit_CC3000(uint8_t csPin, uint8_t irqPin, uint8_t vbatPin, uint8_t SPIspeed)
+Adafruit_CC3000::Adafruit_CC3000(uint8_t csPin, uint8_t irqPin, uint8_t vbatPin, uint8_t SPIspeed, Print* cc3kPrinter)
 {
   _initialised = false;
   g_csPin = csPin;
@@ -211,12 +214,7 @@ Adafruit_CC3000::Adafruit_CC3000(uint8_t csPin, uint8_t irqPin, uint8_t vbatPin,
 
   cc3000Bitset.clear();
 
-  #if defined(UDR0) || defined(UDR1) || defined(CORE_TEENSY) || ( defined (__arm__) && defined (__SAM3X8E__) )
-  CC3KPrinter = &Serial;
-  #else
-  CC3KPrinter = 0;
-  // no default serial port found
-  #endif
+  CC3KPrinter = cc3kPrinter;
 }
 
 /* *********************************************************************** */
@@ -747,9 +745,7 @@ status_t Adafruit_CC3000::getStatus()
 ResultStruct_t SSIDScanResultBuff;
 
 
-uint16_t Adafruit_CC3000::startSSIDscan() {
-  uint16_t   index = 0;
-
+bool Adafruit_CC3000::startSSIDscan(uint32_t *index) {
   if (!_initialised)
   {
     return false;
@@ -768,8 +764,8 @@ uint16_t Adafruit_CC3000::startSSIDscan() {
   CHECK_SUCCESS(wlan_ioctl_get_scan_results(0, (uint8_t* ) &SSIDScanResultBuff),
                 "SSID scan failed!", false);
 
-  index = SSIDScanResultBuff.num_networks;
-  return index;
+  *index = SSIDScanResultBuff.num_networks;
+  return true;
 }
 
 void Adafruit_CC3000::stopSSIDscan(void) {
@@ -803,12 +799,12 @@ uint8_t Adafruit_CC3000::getNextSSID(uint8_t *rssi, uint8_t *secMode, char *ssid
 */
 /**************************************************************************/
 #ifndef CC3000_TINY_DRIVER
-bool Adafruit_CC3000::startSmartConfig(const char *_deviceName, const char *smartConfigKey)
+bool Adafruit_CC3000::startSmartConfig(const char *_deviceName, const char *smartConfigKey, uint32_t timeout)
 {
   bool enableAES = smartConfigKey != NULL;
   cc3000Bitset.clear();
 
-  uint32_t   timeout = 0;
+  uint32_t   time = 0;
 
   if (!_initialised) {
     return false;
@@ -862,8 +858,8 @@ bool Adafruit_CC3000::startSmartConfig(const char *_deviceName, const char *smar
   {
     cc3k_int_poll();
     // waiting here for event SIMPLE_CONFIG_DONE
-    timeout+=10;
-    if (timeout > 60000)   // ~60s
+    time+=10;
+    if (time > timeout)   // default of 60s
     {
       return false;
     }
@@ -872,7 +868,7 @@ bool Adafruit_CC3000::startSmartConfig(const char *_deviceName, const char *smar
   }
 
   CHECK_PRINTER {
-	CC3KPrinter->println(F("Got smart config data"));
+    CC3KPrinter->println(F("Got smart config data"));
   }
   if (enableAES) {
     CHECK_SUCCESS(wlan_smart_config_process(),
@@ -905,18 +901,18 @@ bool Adafruit_CC3000::startSmartConfig(const char *_deviceName, const char *smar
                 "Failed setting event mask", false);  
 
   // Wait for a connection
-  timeout = 0;
+  time = 0;
   while(!cc3000Bitset.test(CC3000BitSet::IsConnected))
   {
     cc3k_int_poll();
-    if(timeout > WLAN_CONNECT_TIMEOUT) // ~20s
+    if (time > WLAN_CONNECT_TIMEOUT) // default of 10s
     {
       CHECK_PRINTER {
         CC3KPrinter->println(F("Timed out waiting to connect"));
       }
       return false;
     }
-    timeout += 10;
+    time += 10;
     delay(10);
   }
   
@@ -936,7 +932,6 @@ bool Adafruit_CC3000::startSmartConfig(const char *_deviceName, const char *smar
     Connect to an unsecured SSID/AP(security)
 
     @param  ssid      The named of the AP to connect to (max 32 chars)
-    @param  ssidLen   The size of the ssid name
 
     @returns  False if an error occured!
 */
@@ -952,11 +947,11 @@ bool Adafruit_CC3000::connectOpen(const char *ssid)
                  "Failed to set connection policy", false);
     delay(500);
     CHECK_SUCCESS(wlan_connect(WLAN_SEC_UNSEC,
-					(const char*)ssid, strlen(ssid),
-					0 ,NULL,0),
-					"SSID connection failed", false);
+          (const char*)ssid, strlen(ssid),
+          0 ,NULL,0),
+          "SSID connection failed", false);
   #else
-    wlan_connect(ssid, ssidLen);
+    wlan_connect(ssid, strlen(ssid));
   #endif
 
   return true;
@@ -990,7 +985,7 @@ void CC3000_UsynchCallback(long lEventType, char * data, unsigned char length)
 
   if (lEventType == HCI_EVNT_WLAN_UNSOL_DISCONNECT)
   {
-	cc3000Bitset.reset(CC3000BitSet::IsConnected | CC3000BitSet::HasDHCP);
+    cc3000Bitset.reset(CC3000BitSet::IsConnected | CC3000BitSet::HasDHCP);
   }
   
   if (lEventType == HCI_EVNT_WLAN_UNSOL_DHCP)
@@ -1038,8 +1033,8 @@ bool Adafruit_CC3000::connectSecure(const char *ssid, const char *key, int32_t s
   
   if ( (secMode < 0) || (secMode > 3)) {
     CHECK_PRINTER {
-		CC3KPrinter->println(F("Security mode must be between 0 and 3"));
-	}
+      CC3KPrinter->println(F("Security mode must be between 0 and 3"));
+    }
     return false;
   }
 
@@ -1113,8 +1108,8 @@ bool Adafruit_CC3000::connectToAP(const char *ssid, const char *key, uint8_t sec
       /* Connect to an unsecured network */
       if (! connectOpen(ssid)) {
         CHECK_PRINTER {
-			    CC3KPrinter->println(F("Failed!"));
-		    }
+          CC3KPrinter->println(F("Failed!"));
+        }
         continue;
       }
     } else {
@@ -1123,19 +1118,19 @@ bool Adafruit_CC3000::connectToAP(const char *ssid, const char *key, uint8_t sec
       /* Connect to a secure network using WPA2, etc */
       if (! connectSecure(ssid, key, secmode)) {
         CHECK_PRINTER {
-			    CC3KPrinter->println(F("Failed!"));
-		    }
+          CC3KPrinter->println(F("Failed!"));
+        }
         continue;
       }
 #endif
     }
-	  
+    
     timer = WLAN_CONNECT_TIMEOUT;
 
     /* Wait around a bit for the async connected signal to arrive or timeout */
     CHECK_PRINTER {
-		  CC3KPrinter->print(F("Waiting to connect..."));
-	  }
+      CC3KPrinter->print(F("Waiting to connect..."));
+    }
     while ((timer > 0) && !checkConnected())
     {
       cc3k_int_poll();
@@ -1144,8 +1139,8 @@ bool Adafruit_CC3000::connectToAP(const char *ssid, const char *key, uint8_t sec
     }
     if (timer <= 0) {
       CHECK_PRINTER {
-		    CC3KPrinter->println(F("Timed out!"));
-	    }
+        CC3KPrinter->println(F("Timed out!"));
+      }
     }
   } while (!checkConnected());
 
@@ -1226,6 +1221,17 @@ bool Adafruit_CC3000::checkConnected(void)
 /**************************************************************************/
 bool Adafruit_CC3000::checkDHCP(void)
 {
+  // Ugly hack to fix UDP issues with the 1.13 firmware by calling
+  // gethostbyname on localhost.  The output is completely ignored
+  // but for some reason this call is necessary or else UDP won't 
+  // work.  See this thread from TI for more details and the genesis
+  // of the workaround: http://e2e.ti.com/support/wireless_connectivity/f/851/t/342177.aspx
+  // Putting this in checkDHCP is a nice way to make it just work
+  // for people without any need to add to their sketch.
+  if (cc3000Bitset.test(CC3000BitSet::HasDHCP)) {
+    uint32_t output;
+    gethostbyname("localhost", 9, &output);
+  }
   return cc3000Bitset.test(CC3000BitSet::HasDHCP);
 }
 
@@ -1277,8 +1283,8 @@ Adafruit_CC3000_Client Adafruit_CC3000::connectTCP(uint32_t destIP, uint16_t des
   if (-1 == tcp_socket)
   {
     CHECK_PRINTER {
-		CC3KPrinter->println(F("Failed to open socket"));
-	}
+      CC3KPrinter->println(F("Failed to open socket"));
+    }
     return Adafruit_CC3000_Client();
   }
   //CC3KPrinter->print(F("DONE (socket ")); CC3KPrinter->print(tcp_socket); CC3KPrinter->println(F(")"));
@@ -1304,11 +1310,11 @@ Adafruit_CC3000_Client Adafruit_CC3000::connectTCP(uint32_t destIP, uint16_t des
 
   //printHex((byte *)&socketAddress, sizeof(socketAddress));
   //if (CC3KPrinter != 0) CC3KPrinter->print(F("Connecting socket ... "));
-  if (-1 == connect(tcp_socket, &socketAddress, sizeof(socketAddress)))
+  if (-1 == ::connect(tcp_socket, &socketAddress, sizeof(socketAddress)))
   {
     CHECK_PRINTER {
-		CC3KPrinter->println(F("Connection error"));
-	}
+      CC3KPrinter->println(F("Connection error"));
+    }
     closesocket(tcp_socket);
     return Adafruit_CC3000_Client();
   }
@@ -1330,8 +1336,8 @@ Adafruit_CC3000_Client Adafruit_CC3000::connectUDP(uint32_t destIP, uint16_t des
   if (-1 == udp_socket)
   {
     CHECK_PRINTER {
-		CC3KPrinter->println(F("Failed to open socket"));
-	}
+      CC3KPrinter->println(F("Failed to open socket"));
+    }
     return Adafruit_CC3000_Client();
   }
   //if (CC3KPrinter != 0) { CC3KPrinter->print(F("DONE (socket ")); CC3KPrinter->print(udp_socket); CC3KPrinter->println(F(")")); }
@@ -1354,11 +1360,11 @@ Adafruit_CC3000_Client Adafruit_CC3000::connectUDP(uint32_t destIP, uint16_t des
   }
 
   //printHex((byte *)&socketAddress, sizeof(socketAddress));
-  if (-1 == connect(udp_socket, &socketAddress, sizeof(socketAddress)))
+  if (-1 == ::connect(udp_socket, &socketAddress, sizeof(socketAddress)))
   {
     CHECK_PRINTER {
-		CC3KPrinter->println(F("Connection error"));
-	}
+      CC3KPrinter->println(F("Connection error"));
+    }
     closesocket(udp_socket);
     return Adafruit_CC3000_Client();
   }
@@ -1394,7 +1400,80 @@ void Adafruit_CC3000_Client::operator=(const Adafruit_CC3000_Client& other) {
   memcpy(_rx_buf, other._rx_buf, RXBUFFERSIZE);
 }
 
-bool Adafruit_CC3000_Client::connected(void) { 
+Adafruit_CC3000_Client::operator bool()
+{
+  return connected();
+}
+
+int Adafruit_CC3000_Client::connect(const char *host, uint16_t port){
+  
+  // if (!_initialised) return 0;
+  // if (!ulCC3000Connected) return 0;
+  // if (!ulCC3000DHCP) return 0;
+
+  uint32_t ip = 0;
+
+  int16_t r = gethostbyname(host, strlen(host), &ip);
+
+  if (ip!=0 && r!=0)
+    return connect(ip, port);
+  else 
+    return 0;
+}
+
+int Adafruit_CC3000_Client::connect(IPAddress destIP, uint16_t destPort)
+{
+  bufsiz = 0;
+  _rx_buf_idx = 0;
+  sockaddr      socketAddress;
+  int32_t       tcp_socket;
+
+  // Create the socket(s)
+  //if (CC3KPrinter != 0) CC3KPrinter->print(F("Creating socket ... "));
+  tcp_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  if (-1 == tcp_socket)
+  {
+    CHECK_PRINTER {
+      CC3KPrinter->println(F("Failed to open socket"));
+    }
+    return 0;
+  }
+  //CC3KPrinter->print(F("DONE (socket ")); CC3KPrinter->print(tcp_socket); CC3KPrinter->println(F(")"));
+
+  // Try to open the socket
+  memset(&socketAddress, 0x00, sizeof(socketAddress));
+  socketAddress.sa_family = AF_INET;
+  socketAddress.sa_data[0] = (destPort & 0xFF00) >> 8;  // Set the Port Number
+  socketAddress.sa_data[1] = (destPort & 0x00FF);
+  socketAddress.sa_data[2] = destIP >> 24;
+  socketAddress.sa_data[3] = destIP >> 16;
+  socketAddress.sa_data[4] = destIP >> 8;
+  socketAddress.sa_data[5] = destIP;
+
+  CHECK_PRINTER {
+    CC3KPrinter->print(F("\n\rConnect to "));
+    CC3KPrinter->print(destIP);
+    CC3KPrinter->print(':');
+    CC3KPrinter->println(destPort);
+  }
+
+  //printHex((byte *)&socketAddress, sizeof(socketAddress));
+  //if (CC3KPrinter != 0) CC3KPrinter->print(F("Connecting socket ... "));
+  if (-1 == ::connect(tcp_socket, &socketAddress, sizeof(socketAddress)))
+  {
+    CHECK_PRINTER {
+      CC3KPrinter->println(F("Connection error"));
+    }
+    closesocket(tcp_socket);
+    return 0;
+  }
+  // if (CC3KPrinter != 0) CC3KPrinter->println(F("DONE"));
+
+  _socket = tcp_socket;
+  return 1;
+}
+
+uint8_t Adafruit_CC3000_Client::connected(void) { 
   if (_socket < 0) return false;
 
   if (! available() && closed_sockets[_socket] == true) {
@@ -1408,11 +1487,15 @@ bool Adafruit_CC3000_Client::connected(void) {
   else return true;  
 }
 
-int16_t Adafruit_CC3000_Client::write(const void *buf, uint16_t len, uint32_t flags)
+size_t Adafruit_CC3000_Client::write(const void *buf, uint16_t len, uint32_t flags)
 {
   return send(_socket, buf, len, flags);
 }
 
+size_t Adafruit_CC3000_Client::write(const uint8_t *buf, size_t len)
+{
+  return write(buf, len, 0);
+}
 
 size_t Adafruit_CC3000_Client::write(uint8_t c)
 {
@@ -1496,10 +1579,15 @@ size_t Adafruit_CC3000_Client::fastrprintln(char *str) {
   return r;
 }
 
-int16_t Adafruit_CC3000_Client::read(void *buf, uint16_t len, uint32_t flags) 
+int Adafruit_CC3000_Client::read(void *buf, uint16_t len, uint32_t flags) 
 {
   return recv(_socket, buf, len, flags);
 
+}
+
+int Adafruit_CC3000_Client::read(uint8_t *buf, size_t len) 
+{
+  return read(buf, len, 0);
 }
 
 int32_t Adafruit_CC3000_Client::close(void) {
@@ -1508,7 +1596,11 @@ int32_t Adafruit_CC3000_Client::close(void) {
   return x;
 }
 
-uint8_t Adafruit_CC3000_Client::read(void) 
+void Adafruit_CC3000_Client::stop(){
+  close();
+}
+
+int Adafruit_CC3000_Client::read(void) 
 {
   while ((bufsiz <= 0) || (bufsiz == _rx_buf_idx)) {
     cc3k_int_poll();
@@ -1527,7 +1619,7 @@ uint8_t Adafruit_CC3000_Client::read(void)
   return ret;
 }
 
-uint8_t Adafruit_CC3000_Client::available(void) {
+int Adafruit_CC3000_Client::available(void) {
   // not open!
   if (_socket < 0) return 0;
 
@@ -1550,6 +1642,28 @@ uint8_t Adafruit_CC3000_Client::available(void) {
   //if (CC3KPrinter != 0) } CC3KPrinter->print(F("Select: ")); CC3KPrinter->println(s); }
   if (s == 1) return 1;  // some data is available to read
   else return 0;  // no data is available
+}
+
+void Adafruit_CC3000_Client::flush(){
+  // No flush implementation, unclear if necessary.
+}
+
+int Adafruit_CC3000_Client::peek(){
+  while ((bufsiz <= 0) || (bufsiz == _rx_buf_idx)) {
+    cc3k_int_poll();
+    // buffer in some more data
+    bufsiz = recv(_socket, _rx_buf, sizeof(_rx_buf), 0);
+    if (bufsiz == -57) {
+      close();
+      return 0;
+    }
+    //if (CC3KPrinter != 0) { CC3KPrinter->println("Read "); CC3KPrinter->print(bufsiz); CC3KPrinter->println(" bytes"); }
+    _rx_buf_idx = 0;
+  }
+  uint8_t ret = _rx_buf[_rx_buf_idx];
+
+  //if (CC3KPrinter != 0) { CC3KPrinter->print("("); CC3KPrinter->write(ret); CC3KPrinter->print(")"); }
+  return ret;
 }
 
 void Adafruit_CC3000::setPrinter(Print* p) {
