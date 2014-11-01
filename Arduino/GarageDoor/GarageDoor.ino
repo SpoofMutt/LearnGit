@@ -10,13 +10,13 @@
 //#include "crc.h";
 
 //#define ENABLE_NTP    1
-//#define EMULATOR_MODE 1
+#define EMULATOR_MODE 1
 #define ENABLE_DEBUG_LEVEL  1 
-#define ENABLE_DEVUG_LEVEL_1 1
-#define ENABLE_DEVUG_LEVEL_2 1
-#define ENABLE_DEVUG_LEVEL_3 1
-//#define ENABLE_DEVUG_LEVEL_4 1
-//#define ENABLE_DEVUG_LEVEL_5 1
+#define ENABLE_DEBUG_LEVEL_1 1
+#define ENABLE_DEBUG_LEVEL_2 1
+#define ENABLE_DEBUG_LEVEL_3 1
+//#define ENABLE_DEBUG_LEVEL_4 1
+//#define ENABLE_DEBUG_LEVEL_5 1
 
 int lightPin = 0;  //define a pin for Photo resistor
 
@@ -157,22 +157,11 @@ void setup(void)
   Serial.begin(9600);
   Serial.println(F("Garage Here!"));
   Serial.println(F("Configuring pinouts."));
-
-  // Get firmware version
-  if(!cc3000.getFirmwareVersion(&major, &minor))
-  {
-    Serial.println(F("Unable to retrieve the firmware version!\r\n"));
-  }
-  else
-  {
-    Serial.print(F("Firmware V. : "));
-    Serial.print(major); Serial.print(F(".")); Serial.println(minor);
-  }
 #endif
 
   SetupDoorControl();
 
-#if defined (ENABLE_DEBUG_LEVEL) && defined (ENABLE_DEBUG_LEVEL_4)
+#if defined (ENABLE_DEBUG_LEVEL) && defined (ENABLE_DEBUG_LEVEL_2)
   Serial.println(F("\nInitialising the CC3000 ..."));
 #endif
 
@@ -185,12 +174,14 @@ void setup(void)
 
   displayMACAddress();
 
-#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
+  for(;;);
+
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
   Serial.println(F("\nDeleting old connection profiles"));
 #endif
 
   if (!cc3000.deleteProfiles()) {
-#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
     Serial.println(F("Failed!"));
 #endif
 
@@ -236,7 +227,7 @@ void setup(void)
     while(1);
   }
 
-#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
+#if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_2
   Serial.println(F("Connected!"));
   Serial.println(F("Request DHCP"));
 #endif
@@ -272,11 +263,11 @@ void setup(void)
 #if defined ENABLE_DEBUG_LEVEL
   Serial.println(F("Listening..."));
 #endif
-
 }
 
 void loop(void) {
-  // Try to get a HgdoClient which is connected.
+/*
+// Try to get a HgdoClient which is connected.
 #if defined ENABLE_DEBUG_LEVEL && defined ENABLE_DEBUG_LEVEL_4
   Serial.println(":  Looking for HgdoClients.");
 #endif
@@ -444,6 +435,7 @@ void loop(void) {
   if(toggle > 4) {
     toggle = 0;
   }
+*/
   delay(1000);
 }
 
