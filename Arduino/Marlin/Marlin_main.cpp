@@ -1795,6 +1795,22 @@ void process_commands()
 #ifdef ENABLE_AUTO_BED_LEVELING
     case 29: // G29 Detailed Z-Probe, probes the bed at 3 or more points.
         {
+		  if (code_seen('D'))
+			{
+			SERIAL_ECHOLN("Current bed level array values:");
+			SERIAL_ECHOLN("");
+			for (int y = 0; y < 7; y++)
+			  {
+			  for (int x = 0; x < 7; x++)
+				{
+				SERIAL_PROTOCOL_F(bed_level[x][y], 3);
+				SERIAL_PROTOCOLPGM(" ");
+				}
+			  SERIAL_ECHOLN("");
+			  }
+			break;
+			}
+			
             #if Z_MIN_PIN == -1
             #error "You must have a Z_MIN endstop in order to enable Auto Bed Leveling feature!!! Z_MIN_PIN must point to a valid hardware pin."
             #endif
@@ -1976,10 +1992,38 @@ void process_commands()
 #ifndef Z_PROBE_SLED
     case 30: // G30 Single Z Probe
         {
+		  if (code_seen('D'))
+			{
+			SERIAL_ECHOLN("Current bed level array values:");
+			SERIAL_ECHOLN("");
+			for (int y = 0; y < 7; y++)
+			  {
+			  for (int x = 0; x < 7; x++)
+				{
+				SERIAL_PROTOCOL_F(bed_level[x][y], 3);
+				SERIAL_PROTOCOLPGM(" ");
+				}
+			  SERIAL_ECHOLN("");
+			  }
+			break;
+			}
+			float now_pos[NUM_AXIS];
+			for(int8_t i=0; i < NUM_AXIS; i++) {
+			  now_pos[i] = current_position[i];
+			}
+			if(! code_seen('L')) {
+				engage_z_probe(); // Engage Z Servo endstop if available
+				st_synchronize();
+			}
+			for(int8_t i=0; i < NUM_AXIS; i++) {
+			  destination[i] = now_pos[i];
+			}
+			matrix_3x3 temp = plan_bed_level_matrix;
+			plan_bed_level_matrix.set_to_identity();
 			
-            engage_z_probe(); // Engage Z Servo endstop if available
+			prepare_move_raw();
             st_synchronize();
-            // TODO: make sure the bed_level_rotation_matrix is identity or the planner will get set incorectly
+
             setup_for_endstop_move();
 
             feedrate = homing_feedrate[Z_AXIS];
@@ -1995,7 +2039,10 @@ void process_commands()
             SERIAL_PROTOCOLPGM("\n");
 
             clean_up_after_endstop_move();
-            retract_z_probe(); // Retract Z Servo endstop if available
+			plan_bed_level_matrix = temp;
+			if(! code_seen('R')) {
+				retract_z_probe(); // Retract Z Servo endstop if available
+			}
         }
         break;
 #else
@@ -4232,33 +4279,33 @@ void prepare_move_raw()
 
 void prepare_move()
 {
+
   clamp_to_software_endstops(destination);
   previous_millis_cmd = millis();
   
   #ifdef SCARA //for now same as delta-code
 
-float difference[NUM_AXIS];
-for (int8_t i=0; i < NUM_AXIS; i++) {
-	difference[i] = destination[i] - current_position[i];
-}
-
-float cartesian_mm = sqrt(	sq(difference[X_AXIS]) +
-							sq(difference[Y_AXIS]) +
-							sq(difference[Z_AXIS]));
-if (cartesian_mm < 0.000001) { cartesian_mm = abs(difference[E_AXIS]); }
-if (cartesian_mm < 0.000001) { return; }
-float seconds = 6000 * cartesian_mm / feedrate / feedmultiply;
-int steps = max(1, int(scara_segments_per_second * seconds));
- //SERIAL_ECHOPGM("mm="); SERIAL_ECHO(cartesian_mm);
- //SERIAL_ECHOPGM(" seconds="); SERIAL_ECHO(seconds);
- //SERIAL_ECHOPGM(" steps="); SERIAL_ECHOLN(steps);
-for (int s = 1; s <= steps; s++) {
-	float fraction = float(s) / float(steps);
-	for(int8_t i=0; i < NUM_AXIS; i++) {
-		destination[i] = current_position[i] + difference[i] * fraction;
+	float difference[NUM_AXIS];
+	for (int8_t i=0; i < NUM_AXIS; i++) {
+		difference[i] = destination[i] - current_position[i];
 	}
 
-	
+	float cartesian_mm = sqrt(	sq(difference[X_AXIS]) +
+								sq(difference[Y_AXIS]) +
+								sq(difference[Z_AXIS]));
+	if (cartesian_mm < 0.000001) { cartesian_mm = abs(difference[E_AXIS]); }
+	if (cartesian_mm < 0.000001) { return; }
+	float seconds = 6000 * cartesian_mm / feedrate / feedmultiply;
+	int steps = max(1, int(scara_segments_per_second * seconds));
+	 //SERIAL_ECHOPGM("mm="); SERIAL_ECHO(cartesian_mm);
+	 //SERIAL_ECHOPGM(" seconds="); SERIAL_ECHO(seconds);
+	 //SERIAL_ECHOPGM(" steps="); SERIAL_ECHOLN(steps);
+	for (int s = 1; s <= steps; s++) {
+		float fraction = float(s) / float(steps);
+		for(int8_t i=0; i < NUM_AXIS; i++) {
+			destination[i] = current_position[i] + difference[i] * fraction;
+		}
+
 	calculate_delta(destination);
          //SERIAL_ECHOPGM("destination[X_AXIS]="); SERIAL_ECHOLN(destination[X_AXIS]);
          //SERIAL_ECHOPGM("destination[Y_AXIS]="); SERIAL_ECHOLN(destination[Y_AXIS]);
@@ -4270,7 +4317,7 @@ for (int s = 1; s <= steps; s++) {
 	plan_buffer_line(delta[X_AXIS], delta[Y_AXIS], delta[Z_AXIS],
 	destination[E_AXIS], feedrate*feedmultiply/60/100.0,
 	active_extruder);
-}
+	}
 #endif // SCARA
   
 #ifdef DELTA
