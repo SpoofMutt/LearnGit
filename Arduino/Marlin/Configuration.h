@@ -75,7 +75,8 @@
 #define DELTA_SEGMENTS_PER_SECOND 160
 
 // Center-to-center distance of the holes in the diagonal push rods.
-#define DELTA_DIAGONAL_ROD 300.0 // mm
+// #define DELTA_DIAGONAL_ROD 300.0 // mm Original
+#define DELTA_DIAGONAL_ROD 304.57 // mm Calculated
 
 // Horizontal offset from middle of printer to smooth rod center.
 #define DELTA_SMOOTH_ROD_OFFSET 212.357 // mm
@@ -143,7 +144,7 @@
 // 147 is Pt100 with 4k7 pullup
 // 110 is Pt100 with 1k pullup (non standard)
 
-#define TEMP_SENSOR_0 5
+#define TEMP_SENSOR_0 11
 #define TEMP_SENSOR_1 0
 #define TEMP_SENSOR_2 0
 #define TEMP_SENSOR_BED 5
@@ -215,9 +216,9 @@
 //    #define  DEFAULT_Kd 69.98
 
 // My Kossel Pro @ 245 C 
-    #define  DEFAULT_Kp 32.33
-    #define  DEFAULT_Ki 4.70
-    #define  DEFAULT_Kd 55.61
+    #define  DEFAULT_Kp 20.61
+    #define  DEFAULT_Ki 2.68
+    #define  DEFAULT_Kd 39.69
 
 // MakerGear
 //    #define  DEFAULT_Kp 7.0
@@ -558,7 +559,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
   // Kossel Pro note: The correct value is likely -17.45 but I'd rather err on the side of
   // not giving someone a head crash. Use something like G29 Z-0.2 to adjust as needed.
 //  #define Z_PROBE_OFFSET_FROM_EXTRUDER -17.25  // Increase this if the first layer is too thin (remember: it's a negative number so increase means closer to zero).
-  #define Z_PROBE_OFFSET_FROM_EXTRUDER -6.77  // Increase this if the first layer is too thin (remember: it's a negative number so increase means closer to zero).
+  #define Z_PROBE_OFFSET_FROM_EXTRUDER -7.07  // Increase this if the first layer is too thin (remember: it's a negative number so increase means closer to zero).
   // Now reading 6.35.
   // PROBE READING AT TOUCH 15.83. EXTRUDER READING AT TOUCH 8.87 - Kent
 
