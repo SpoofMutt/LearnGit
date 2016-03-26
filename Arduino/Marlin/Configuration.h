@@ -66,26 +66,45 @@
 //===========================================================================
 //============================== Delta Settings =============================
 //===========================================================================
+//           C, Y-Axis
+//           |                        |___| CARRIAGE_HORIZONTAL_OFFSET
+//           |                        |   \
+//           |_________ X-axis        |    \
+//          / \                       |     \  DELTA_DIAGONAL_ROD
+//         /   \                             \
+//        /     \                             \    Carriage is at printer center!
+//        A      B                             \_____/
+//                                             |--| END_EFFECTOR_HORIZONTAL_OFFSET
+//                                        |----| DELTA_RADIUS
+//                                    |-----------| PRINTER_RADIUS
+//
+//   Column angles are measured from X-axis counterclockwise
+//   "Standard" positions: alpha_A = 210, alpha_B = 330, alpha_C = 90
+// The basic relationships are:
+//
+//   Increasing DELTA_DIAGONAL_ROD with constant PRINTER_RADIUS will decrease the scale of the print produced.
+//   Increasing PRINTER_RADIUS with constant DELTA_DIAGONAL_ROD will increase the scale of the print produced.
+	
 // Enable DELTA kinematics
 #define DELTA
 
 // Make delta curves from many straight lines (linear interpolation).
 // This is a trade-off between visible corners (not enough segments)
 // and processor overload (too many expensive sqrt calls).
+#define ADJUSTED                   9 /* mm for glide rail */
 #define DELTA_SEGMENTS_PER_SECOND 160
 
 // Center-to-center distance of the holes in the diagonal push rods.
-// #define DELTA_DIAGONAL_ROD 300.0 // mm Original
-#define DELTA_DIAGONAL_ROD 304.57 // mm Calculated
+#define DELTA_DIAGONAL_ROD 300.0 /* mm Original */
 
 // Horizontal offset from middle of printer to smooth rod center.
-#define DELTA_SMOOTH_ROD_OFFSET 212.357 // mm
+#define DELTA_SMOOTH_ROD_OFFSET (212.357 - ADJUSTED) /* mm Original */
 
 // Horizontal offset of the universal joints on the end effector.
-#define DELTA_EFFECTOR_OFFSET 30.0 // mm
+#define DELTA_EFFECTOR_OFFSET 30.0 /* mm */
 
 // Horizontal offset of the universal joints on the carriages.
-#define DELTA_CARRIAGE_OFFSET 30.0 // mm
+#define DELTA_CARRIAGE_OFFSET (30.0 - ADJUSTED) /* mm Original */
 
 // Horizontal distance bridged by diagonal push rods when effector is centered.
 #define DELTA_RADIUS (DELTA_SMOOTH_ROD_OFFSET-DELTA_EFFECTOR_OFFSET-DELTA_CARRIAGE_OFFSET)
@@ -514,7 +533,7 @@ const bool Z_MAX_ENDSTOP_INVERTING = false; // set to true to invert the logic o
     #define TOUCH_PROBE_RETRACT_1_X -140.00 // Line up with Probe Block
     #define TOUCH_PROBE_RETRACT_1_Y -28.00
     #define TOUCH_PROBE_RETRACT_1_Z 100.0
-    #define TOUCH_PROBE_RETRACT_1_FEEDRATE HOMING_FEEDRATE_X
+    #define TOUCH_PROBE_RETRACT_1_FEEDRATE (HOMING_FEEDRATE_X/2)
     #define TOUCH_PROBE_RETRACT_2_X -140.00 // move down to retract probe
     #define TOUCH_PROBE_RETRACT_2_Y -28.00
     #define TOUCH_PROBE_RETRACT_2_Z 25.0
